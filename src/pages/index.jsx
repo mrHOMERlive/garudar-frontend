@@ -6,6 +6,8 @@ import OrderHistory from "./OrderHistory";
 
 import StaffDashboard from "./StaffDashboard";
 
+import StaffKYC from "./StaffKYC";
+
 import StaffClients from "./StaffClients";
 
 import StaffActiveOrders from "./StaffActiveOrders";
@@ -41,6 +43,7 @@ import GTransECommerceCollectSettle from "./GTransECommerceCollectSettle";
 import GTransMerchantPay from "./GTransMerchantPay";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
 
 const PAGES = {
     
@@ -51,6 +54,8 @@ const PAGES = {
     StaffDashboard: StaffDashboard,
     
     StaffClients: StaffClients,
+
+    StaffKYC: StaffKYC,
     
     StaffActiveOrders: StaffActiveOrders,
     
@@ -111,19 +116,21 @@ function PagesContent() {
                     <Route path="/" element={<GTrans />} />
                 
                 
-                <Route path="/createorder" element={<CreateOrder />} />
+                <Route path="/createorder" element={<RequireAuth><CreateOrder /></RequireAuth>} />
                 
-                <Route path="/orderhistory" element={<OrderHistory />} />
+                <Route path="/orderhistory" element={<RequireAuth><OrderHistory /></RequireAuth>} />
                 
-                <Route path="/staffdashboard" element={<StaffDashboard />} />
+                <Route path="/staffdashboard" element={<RequireAdmin><StaffDashboard /></RequireAdmin>} />
                 
-                <Route path="/staffclients" element={<StaffClients />} />
+                <Route path="/staffclients" element={<RequireAdmin><StaffClients /></RequireAdmin>} />
                 
-                <Route path="/staffactiveorders" element={<StaffActiveOrders />} />
+                <Route path="/staffkyc" element={<RequireAdmin><StaffKYC /></RequireAdmin>} />
                 
-                <Route path="/staffexecutedorders" element={<StaffExecutedOrders />} />
+                <Route path="/staffactiveorders" element={<RequireAdmin><StaffActiveOrders /></RequireAdmin>} />
                 
-                <Route path="/staffpayeeraccounts" element={<StaffPayeerAccounts />} />
+                <Route path="/staffexecutedorders" element={<RequireAdmin><StaffExecutedOrders /></RequireAdmin>} />
+                
+                <Route path="/staffpayeeraccounts" element={<RequireAdmin><StaffPayeerAccounts /></RequireAdmin>} />
                 
                 <Route path="/gtrans" element={<GTrans />} />
                 
@@ -139,7 +146,7 @@ function PagesContent() {
                 
                 <Route path="/gtranspresentation" element={<GTransPresentation />} />
                 
-                <Route path="/userdashboard" element={<UserDashboard />} />
+                <Route path="/userdashboard" element={<RequireAuth><UserDashboard /></RequireAuth>} />
                 
                 <Route path="/gtransapiintegration" element={<GTransAPIIntegration />} />
                 
@@ -159,7 +166,9 @@ function PagesContent() {
 export default function Pages() {
     return (
         <Router>
-            <PagesContent />
+            <AuthProvider>
+                <PagesContent />
+            </AuthProvider>
         </Router>
     );
 }

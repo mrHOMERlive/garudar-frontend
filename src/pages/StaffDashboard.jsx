@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, CheckCircle, Database, Globe, LogOut } from 'lucide-react';
+import { Users, FileText, CheckCircle, Database, Globe, LogOut, User } from 'lucide-react';
 
 const modules = [
   {
@@ -28,6 +29,13 @@ const modules = [
     color: 'bg-emerald-600'
   },
   {
+    title: 'KYC Database',
+    description: 'Know Your Customer verification',
+    icon: Users,
+    page: 'StaffKYC',
+    color: 'bg-[#f5a623]'
+  },
+  {
     title: 'Payeer Accounts',
     description: 'Manage payer accounts by currency',
     icon: Database,
@@ -37,36 +45,59 @@ const modules = [
 ];
 
 export default function StaffDashboard() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate(createPageUrl('GTransLogin'));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-[#1e3a5f] border-b border-[#1e3a5f]/20 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                  <div className="flex items-center justify-between">
-                    <Link to={createPageUrl('StaffDashboard')} className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
-                        <img 
-                          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                          alt="Logo" 
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                          <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">STAFF</span>
-                        </div>
-                        <p className="text-slate-300 text-sm">Manage orders, clients, and operations</p>
-                      </div>
-                    </Link>
-                    <Link to={createPageUrl('GTrans')}>
-                      <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                        <Globe className="w-4 h-4 mr-2" />
-                        Public Site
-                      </Button>
-                    </Link>
-                  </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <Link to={createPageUrl('StaffDashboard')} className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
+                  alt="Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-white">GTrans</h1>
+                  <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">STAFF</span>
                 </div>
-              </header>
+                <p className="text-slate-300 text-sm">Manage orders, clients, and operations</p>
+              </div>
+            </Link>
+            <div className="flex items-center gap-4">
+              {user && (
+                <div className="flex items-center gap-2 text-white">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">{user.username}</span>
+                </div>
+              )}
+              <Link to={createPageUrl('GTrans')}>
+                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-2" />
+                  Public Site
+                </Button>
+              </Link>
+              <Button 
+                onClick={handleLogout}
+                className="bg-white text-[#1e3a5f] hover:bg-slate-100"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -81,7 +81,7 @@ export default function StaffExecutedOrders() {
               </div>
             </div>
             <Link to={createPageUrl('GTrans')}>
-              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                 <Globe className="w-4 h-4 mr-1" />
                 Public Site
               </Button>

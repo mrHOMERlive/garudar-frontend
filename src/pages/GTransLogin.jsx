@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,13 +13,25 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 export default function GTransLogin() {
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('gtrans_language') || 'en';
   });
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const savedUser = localStorage.getItem('gtrans_user');
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        const targetPage = userData.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
+        navigate(createPageUrl(targetPage), { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     localStorage.setItem('gtrans_language', language);
@@ -28,7 +40,7 @@ export default function GTransLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!username || !password) {
       toast.error(language === 'en' ? 'Please fill all fields' : 'Harap isi semua field');
       return;
     }
@@ -36,9 +48,12 @@ export default function GTransLogin() {
     setLoading(true);
     
     try {
-      localStorage.setItem('gtrans_client_logged_in', 'true');
-      navigate(createPageUrl('UserDashboard'));
+      const userData = await login(username, password);
+      toast.success(language === 'en' ? 'Login successful!' : 'Login berhasil!');
+      const targetPage = userData.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
+      navigate(createPageUrl(targetPage));
     } catch (error) {
+      console.error('Login error:', error);
       toast.error(language === 'en' 
         ? 'Invalid credentials. Please try again.' 
         : 'Kredensial tidak valid. Silakan coba lagi.'
@@ -76,12 +91,12 @@ export default function GTransLogin() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Email</Label>
+                <Label className="text-slate-700">{language === 'en' ? 'Username' : 'Nama Pengguna'}</Label>
                 <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@company.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="username"
                   className="border-slate-300"
                   required
                 />

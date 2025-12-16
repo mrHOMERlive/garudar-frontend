@@ -14,7 +14,7 @@ import moment from 'moment';
 import OrderStatusBadge, { STATUS_CONFIG } from './OrderStatusBadge';
 import { generateCSVData, downloadCSV } from '../remittance/utils/csvGenerator';
 
-const STATUS_ORDER = ['created', 'check', 'pending_payment', 'on_execution', 'released'];
+const STATUS_ORDER = ['SUBMITTED', 'PENDING', 'IN_PROGRESS', 'COMPLETED'];
 
 function maskAccount(account) {
   if (!account || account.length < 8) return account;
@@ -31,8 +31,8 @@ function DetailRow({ label, value, mono = false }) {
 }
 
 function StatusTimeline({ order }) {
-  const statusHistory = order.status_history || [
-    { status: order.status, timestamp: order.created_date }
+  const statusHistory = [
+    { status: order.status, timestamp: order.createdAt }
   ];
   
   const currentStatusIndex = STATUS_ORDER.indexOf(order.status);
@@ -43,7 +43,7 @@ function StatusTimeline({ order }) {
       <div className="space-y-2">
         {STATUS_ORDER.map((status, index) => {
           const historyEntry = statusHistory.find(h => h.status === status);
-          const isCompleted = index <= currentStatusIndex && order.status !== 'rejected';
+          const isCompleted = index <= currentStatusIndex && order.status !== 'REJECTED';
           const isCurrent = status === order.status;
           const config = STATUS_CONFIG[status];
           
@@ -68,10 +68,16 @@ function StatusTimeline({ order }) {
           );
         })}
         
-        {order.status === 'rejected' && (
+        {order.status === 'REJECTED' && (
           <div className="flex items-center gap-3">
             <Circle className="w-5 h-5 text-red-500" />
             <span className="text-sm font-semibold text-red-600">Rejected</span>
+          </div>
+        )}
+        {order.status === 'CANCELLED' && (
+          <div className="flex items-center gap-3">
+            <Circle className="w-5 h-5 text-slate-500" />
+            <span className="text-sm font-semibold text-slate-600">Cancelled</span>
           </div>
         )}
       </div>
@@ -84,12 +90,12 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
 
   const handleDownloadCSV = () => {
     const csvData = generateCSVData(order);
-    downloadCSV(csvData, `order_${order.order_number}.csv`);
+    downloadCSV(csvData, `order_${order.orderId}.csv`);
     toast.success('CSV downloaded');
   };
 
   const handleCopyOrderId = () => {
-    navigator.clipboard.writeText(order.order_number);
+    navigator.clipboard.writeText(order.orderId);
     toast.success('Order ID copied');
   };
 
@@ -99,7 +105,7 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
-              Order #{order.order_number}
+              Order #{order.orderId}
               <button onClick={handleCopyOrderId} className="text-slate-400 hover:text-slate-600">
                 <Copy className="w-4 h-4" />
               </button>
@@ -107,7 +113,7 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
             <OrderStatusBadge status={order.status} />
           </div>
           <SheetDescription>
-            Created {moment(order.created_date).format('DD MMM YYYY, HH:mm')}
+            Created {order.createdAt ? moment(order.createdAt).format('DD MMM YYYY, HH:mm') : '-'}
           </SheetDescription>
         </SheetHeader>
 
@@ -117,7 +123,6 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
             <h4 className="font-medium text-slate-800 mb-2">Payment Details</h4>
             <div className="bg-slate-50 rounded-lg p-4">
               <DetailRow label="Amount" value={`${order.amount?.toLocaleString()} ${order.currency}`} />
-              <DetailRow label="Debit Account" value={order.debit_account_no} mono />
             </div>
           </div>
 
@@ -127,9 +132,9 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
           <div>
             <h4 className="font-medium text-slate-800 mb-2">Beneficiary</h4>
             <div className="bg-slate-50 rounded-lg p-4">
-              <DetailRow label="Name" value={order.beneficiary_name} />
-              <DetailRow label="Address" value={order.beneficiary_address} />
-              <DetailRow label="Account" value={maskAccount(order.destination_account)} mono />
+              <DetailRow label="Name" value={order.beneficiaryName} />
+              <DetailRow label="Address" value={order.beneficiaryAddress} />
+              <DetailRow label="Account" value={maskAccount(order.destinationAccountNumber)} mono />
             </div>
           </div>
 
@@ -139,10 +144,10 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
           <div>
             <h4 className="font-medium text-slate-800 mb-2">Bank Details</h4>
             <div className="bg-slate-50 rounded-lg p-4">
-              <DetailRow label="Bank Name" value={order.bank_name} />
+              <DetailRow label="Bank Name" value={order.bankName} />
               <DetailRow label="BIC/SWIFT" value={order.bic} mono />
-              <DetailRow label="Country" value={order.country_bank} />
-              <DetailRow label="Address" value={order.bank_address} />
+              <DetailRow label="Country" value={order.countryBank} />
+              <DetailRow label="Address" value={order.bankAddress} />
             </div>
           </div>
 
@@ -152,45 +157,9 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
           <div>
             <h4 className="font-medium text-slate-800 mb-2">Transaction Remark</h4>
             <div className="bg-slate-50 rounded-lg p-4">
-              <p className="text-sm text-slate-700">{order.transaction_remark}</p>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap">{order.transactionRemark || '-'}</p>
             </div>
           </div>
-
-          <Separator />
-
-          {/* Status Indicators */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className={`p-3 rounded-lg border ${order.invoice_received ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="text-xs text-slate-500">Invoice Received</div>
-              <div className={`font-medium ${order.invoice_received ? 'text-green-700' : 'text-slate-600'}`}>
-                {order.invoice_received ? 'Yes' : 'No'}
-              </div>
-            </div>
-            <div className={`p-3 rounded-lg border ${order.payment_proof ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="text-xs text-slate-500">Payment Proof</div>
-              <div className={`font-medium ${order.payment_proof ? 'text-green-700' : 'text-slate-600'}`}>
-                {order.payment_proof ? 'Yes' : 'No'}
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Info */}
-          {(order.remuneration_percent || order.sum_to_be_paid) && (
-            <>
-              <Separator />
-              <div>
-                <h4 className="font-medium text-slate-800 mb-2">Payment Info</h4>
-                <div className="bg-teal-50 rounded-lg p-4 border border-teal-200">
-                  {order.remuneration_percent && (
-                    <DetailRow label="Remuneration" value={`${order.remuneration_percent}%`} />
-                  )}
-                  {order.sum_to_be_paid && (
-                    <DetailRow label="Sum to be Paid" value={`${order.sum_to_be_paid.toLocaleString()} ${order.currency_to_be_paid || order.currency}`} />
-                  )}
-                </div>
-              </div>
-            </>
-          )}
 
           <Separator />
 

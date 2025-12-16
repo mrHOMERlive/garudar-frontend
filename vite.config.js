@@ -6,7 +6,15 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: true
+    allowedHosts: true,
+
+    proxy: {
+      '/api': {
+        target: 'http://194.67.84.157:8070',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   resolve: {
     alias: {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -10,7 +10,6 @@ import OrderFilters from '@/components/orders/OrderFilters';
 import OrdersTable from '@/components/orders/OrdersTable';
 import OrderDetailsDrawer from '@/components/orders/OrderDetailsDrawer';
 import { exportOrdersToCSV } from '@/components/remittance/utils/csvGenerator';
-import { addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import {
   Pagination,
   PaginationContent,
@@ -37,8 +36,8 @@ export default function OrderHistory() {
   const queryClient = useQueryClient();
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ['remittance-orders'],
-    queryFn: () => base44.entities.RemittanceOrder.list('-created_date'),
+    queryKey: ['orders'],
+    queryFn: () => apiClient.getOrders(),
   });
 
   const filteredOrders = useMemo(() => {
@@ -47,10 +46,10 @@ export default function OrderHistory() {
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         const matchesSearch = 
-          order.order_number?.toLowerCase().includes(searchLower) ||
-          order.beneficiary_name?.toLowerCase().includes(searchLower) ||
+          order.orderId?.toLowerCase().includes(searchLower) ||
+          order.beneficiaryName?.toLowerCase().includes(searchLower) ||
           order.bic?.toLowerCase().includes(searchLower) ||
-          order.bank_name?.toLowerCase().includes(searchLower);
+          order.bankName?.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
 
@@ -66,13 +65,13 @@ export default function OrderHistory() {
 
       // Date filters
       if (filters.dateFrom) {
-        const orderDate = new Date(order.created_date);
+        const orderDate = new Date(order.createdAt);
         const fromDate = new Date(filters.dateFrom);
         if (orderDate < fromDate) return false;
       }
 
       if (filters.dateTo) {
-        const orderDate = new Date(order.created_date);
+        const orderDate = new Date(order.createdAt);
         const toDate = new Date(filters.dateTo);
         toDate.setHours(23, 59, 59, 999);
         if (orderDate > toDate) return false;
@@ -116,20 +115,20 @@ export default function OrderHistory() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (order) => base44.entities.RemittanceOrder.delete(order.id),
+    mutationFn: (order) => apiClient.deleteOrder(order.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['remittance-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order deleted successfully');
     },
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (order) => base44.entities.RemittanceOrder.update(order.id, {
-      status: 'cancelled',
-      status_history: addStatusEntry(order.status_history, 'cancelled')
+    mutationFn: (order) => apiClient.updateOrder(order.id, {
+      ...order,
+      status: 'cancelled'
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['remittance-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order cancelled');
     },
   });

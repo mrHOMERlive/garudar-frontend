@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, History, Globe } from 'lucide-react';
+import { PlusCircle, FileText, History, Globe, LogOut, User } from 'lucide-react';
 
 const modules = [
   {
@@ -30,6 +31,14 @@ const modules = [
 ];
 
 export default function UserDashboard() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate(createPageUrl('GTransLogin'));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-[#1e3a5f] border-b border-[#1e3a5f]/20 shadow-lg">
@@ -51,12 +60,28 @@ export default function UserDashboard() {
                 <p className="text-slate-300 text-sm">Manage your fund transfers</p>
               </div>
             </Link>
-            <Link to={createPageUrl('GTrans')}>
-              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-2" />
-                Public Site
+            <div className="flex items-center gap-4">
+              {user && (
+                <div className="flex items-center gap-2 text-white">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">{user.username}</span>
+                </div>
+              )}
+              <Link to={createPageUrl('GTrans')}>
+                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-2" />
+                  Public Site
+                </Button>
+              </Link>
+              <Button 
+                onClick={handleLogout}
+                variant="outline" 
+                className="bg-white text-[#1e3a5f] hover:bg-slate-100"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </header>

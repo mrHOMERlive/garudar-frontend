@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Pencil, Trash2, UserX, UserCheck, Search, Eye, EyeOff, Key, Globe } from 'lucide-react';
-import moment from 'moment';
 
 export default function StaffClients() {
   const [search, setSearch] = useState('');
@@ -31,71 +29,78 @@ export default function StaffClients() {
   const [editingClient, setEditingClient] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    client_id: '',
-    name: '',
-    description: '',
-    email: '',
-    login: '',
+    username: '',
     password: '',
-    active: true
+    status: true,
+    role: 'USER'
   });
 
   const queryClient = useQueryClient();
 
-  const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-created_date'),
+  const { data: allUsers = [], isLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiClient.getUsers(),
   });
+
+  const clients = allUsers.filter(u => u.role === 'USER');
 
   const saveMutation = useMutation({
     mutationFn: (data) => {
       if (editingClient) {
-        return base44.entities.Client.update(editingClient.id, data);
+        return apiClient.updateUser(editingClient.id, data);
       }
-      return base44.entities.Client.create(data);
+      return apiClient.createUser({ ...data, role: 'USER' });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success(editingClient ? 'Client updated' : 'Client created');
       closeDialog();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to save client');
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Client.delete(id),
+    mutationFn: (id) => apiClient.deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Client deleted');
       setDeleteDialogOpen(false);
       setClientToDelete(null);
     },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete client');
+    },
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: (client) => base44.entities.Client.update(client.id, { active: !client.active }),
+    mutationFn: (client) => apiClient.updateUser(client.id, { ...client, status: !client.status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Client status updated');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update client status');
     },
   });
 
   const openCreateDialog = () => {
+    setSearch('');
     setEditingClient(null);
-    setFormData({ client_id: '', name: '', description: '', email: '', login: '', password: '', active: true });
+    setFormData({ username: '', password: '', status: true, role: 'USER' });
     setShowPassword(false);
     setDialogOpen(true);
   };
 
   const openEditDialog = (client) => {
+    setSearch('');
     setEditingClient(client);
     setFormData({
-      client_id: client.client_id,
-      name: client.name,
-      description: client.description || '',
-      email: client.email,
-      login: client.login || '',
-      password: client.password || '',
-      active: client.active
+      username: client.username,
+      password: '',
+      status: client.status,
+      role: client.role
     });
     setShowPassword(false);
     setDialogOpen(true);
@@ -107,11 +112,15 @@ export default function StaffClients() {
   };
 
   const handleSubmit = () => {
-    if (!formData.client_id || !formData.name || !formData.email || !formData.login || !formData.password) {
+    if (!formData.username || (!editingClient && !formData.password)) {
       toast.error('Please fill all required fields');
       return;
     }
-    saveMutation.mutate(formData);
+    const dataToSend = { ...formData };
+    if (editingClient && !dataToSend.password) {
+      delete dataToSend.password;
+    }
+    saveMutation.mutate(dataToSend);
   };
 
   const openDeleteDialog = (client) => {
@@ -130,10 +139,7 @@ export default function StaffClients() {
   };
 
   const filteredClients = clients.filter(c => 
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.login?.toLowerCase().includes(search.toLowerCase())
+    c.username?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -161,7 +167,7 @@ export default function StaffClients() {
             </div>
             <div className="flex items-center gap-3">
               <Link to={createPageUrl('GTrans')}>
-                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+                <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-1" />
                   Public Site
                 </Button>
@@ -180,10 +186,14 @@ export default function StaffClients() {
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
+              id="client-search"
+              name="client-search-field"
+              type="search"
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white border-slate-300 text-slate-800 placeholder:text-slate-400"
+              autoComplete="off"
             />
           </div>
         </div>
@@ -192,11 +202,8 @@ export default function StaffClients() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold">Client ID</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Name</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Email</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Login</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Last Login</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">ID</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">Username</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Status</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
               </TableRow>
@@ -204,24 +211,19 @@ export default function StaffClients() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-slate-500 py-8">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">Loading...</TableCell>
                 </TableRow>
               ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-slate-500 py-8">No clients found</TableCell>
+                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">No clients found</TableCell>
                 </TableRow>
               ) : filteredClients.map((client) => (
                 <TableRow key={client.id} className="border-slate-200 hover:bg-slate-50">
-                  <TableCell className="text-[#1e3a5f] font-mono">{client.client_id}</TableCell>
-                  <TableCell className="text-[#1e3a5f] font-medium">{client.name}</TableCell>
-                  <TableCell className="text-slate-700">{client.email}</TableCell>
-                  <TableCell className="text-slate-700 font-mono">{client.login || '-'}</TableCell>
-                  <TableCell className="text-slate-500 text-sm">
-                    {client.last_login ? moment(client.last_login).format('DD/MM/YY HH:mm') : 'Never'}
-                  </TableCell>
+                  <TableCell className="text-[#1e3a5f] font-mono">{client.id}</TableCell>
+                  <TableCell className="text-[#1e3a5f] font-medium">{client.username}</TableCell>
                   <TableCell>
-                    <Badge className={client.active ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
-                      {client.active ? 'Active' : 'Inactive'}
+                    <Badge className={client.status ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
+                      {client.status ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -239,10 +241,10 @@ export default function StaffClients() {
                         variant="ghost"
                         size="icon"
                         onClick={() => toggleActiveMutation.mutate(client)}
-                        className={client.active ? 'text-[#f5a623] hover:text-[#e09000] hover:bg-slate-100' : 'text-emerald-600 hover:text-emerald-700 hover:bg-slate-100'}
-                        title={client.active ? 'Deactivate' : 'Activate'}
+                        className={client.status ? 'text-[#f5a623] hover:text-[#e09000] hover:bg-slate-100' : 'text-emerald-600 hover:text-emerald-700 hover:bg-slate-100'}
+                        title={client.status ? 'Deactivate' : 'Activate'}
                       >
-                        {client.active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                        {client.status ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </Button>
                       <Button
                         variant="ghost"
@@ -269,77 +271,47 @@ export default function StaffClients() {
             <DialogTitle className="text-[#1e3a5f]">{editingClient ? 'Edit Client' : 'Add New Client'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-slate-700">Client ID *</Label>
-                <Input
-                  value={formData.client_id}
-                  onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                  placeholder="e.g., CLT-001"
-                  className="bg-white border-slate-300"
-                  disabled={!!editingClient}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700">Name *</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Client name"
-                  className="bg-white border-slate-300"
-                />
-              </div>
-            </div>
-            
             <div className="space-y-2">
-              <Label className="text-slate-700">Email *</Label>
+              <Label className="text-slate-700">Username *</Label>
               <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="client@example.com"
+                id="client-username"
+                name="client-username-field"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                placeholder="username"
                 className="bg-white border-slate-300"
+                disabled={!!editingClient}
+                autoComplete="nope"
+                data-lpignore="true"
+                data-form-type="other"
               />
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
-              <div className="flex items-center gap-2 text-[#1e3a5f] text-sm font-medium">
-                <Key className="w-4 h-4" />
-                Authorization Credentials
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-700">Login *</Label>
-                  <Input
-                    value={formData.login}
-                    onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    placeholder="username"
-                    className="bg-white border-slate-300"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-700">Password *</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
-                      className="bg-white border-slate-300 pr-20"
-                    />
-                    <div className="absolute right-1 top-1 flex gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-slate-500 hover:text-slate-800"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </Button>
-                    </div>
-                  </div>
+            <div className="space-y-2">
+              <Label className="text-slate-700">{editingClient ? 'New Password (leave empty to keep current)' : 'Password *'}</Label>
+              <div className="relative">
+                <Input
+                  id="client-password"
+                  name="client-password-field"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="bg-white border-slate-300 pr-20"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
+                />
+                <div className="absolute right-1 top-1 flex gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-slate-500 hover:text-slate-800"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </Button>
                 </div>
               </div>
               <Button
@@ -347,26 +319,17 @@ export default function StaffClients() {
                 variant="outline"
                 size="sm"
                 onClick={generatePassword}
-                className="border-[#1e3a5f] text-[#1e3a5f] hover:bg-slate-100"
+                className="border-[#1e3a5f] text-[#1e3a5f] hover:bg-slate-100 mt-2"
               >
                 <Key className="w-3.5 h-3.5 mr-2" />
                 Generate Password
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-slate-700">Description</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Optional description"
-                className="bg-white border-slate-300"
-              />
-            </div>
             <div className="flex items-center gap-3">
               <Switch
-                checked={formData.active}
-                onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                checked={formData.status}
+                onCheckedChange={(checked) => setFormData({ ...formData, status: checked })}
               />
               <Label className="text-slate-700">Active</Label>
             </div>
@@ -388,7 +351,7 @@ export default function StaffClients() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[#1e3a5f]">Delete Client</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500">
-              Are you sure you want to delete client "{clientToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete client "{clientToDelete?.username}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -51,8 +51,6 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
               <TableHead className="font-semibold">Account</TableHead>
               <TableHead className="font-semibold">Bank/BIC</TableHead>
               <TableHead className="font-semibold">Remark</TableHead>
-              <TableHead className="font-semibold text-center">Invoice</TableHead>
-              <TableHead className="font-semibold text-center">Payment</TableHead>
               <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold">Updated</TableHead>
               <TableHead className="font-semibold text-right">Actions</TableHead>
@@ -66,46 +64,32 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                 onClick={() => onViewDetails(order)}
               >
                 <TableCell className="font-mono text-sm font-medium">
-                  {order.order_number}
+                  {order.orderId}
                 </TableCell>
                 <TableCell className="text-sm text-slate-600">
-                  {moment(order.created_date).format('DD/MM/YY')}
+                  {order.createdAt ? moment(order.createdAt).format('DD/MM/YY') : '-'}
                 </TableCell>
                 <TableCell className="font-medium">
                   {order.amount?.toLocaleString()} {order.currency}
                 </TableCell>
                 <TableCell className="text-sm">
-                  {truncateText(order.beneficiary_name, 20)}
+                  {truncateText(order.beneficiaryName, 20)}
                 </TableCell>
                 <TableCell className="font-mono text-sm text-slate-600">
-                  {maskAccount(order.destination_account)}
+                  {maskAccount(order.destinationAccountNumber)}
                 </TableCell>
                 <TableCell className="text-sm">
-                  <div>{truncateText(order.bank_name, 15)}</div>
+                  <div>{truncateText(order.bankName, 15)}</div>
                   <div className="text-xs text-slate-500 font-mono">{order.bic}</div>
                 </TableCell>
                 <TableCell className="text-sm text-slate-600 max-w-[150px]">
-                  {truncateText(order.transaction_remark, 25)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className={`inline-block w-6 h-6 rounded-full text-xs font-medium leading-6 ${
-                    order.invoice_received ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                  }`}>
-                    {order.invoice_received ? 'Y' : 'N'}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className={`inline-block w-6 h-6 rounded-full text-xs font-medium leading-6 ${
-                    order.payment_sent ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                  }`}>
-                    {order.payment_sent ? 'Y' : 'N'}
-                  </span>
+                  {truncateText(order.transactionRemark, 25)}
                 </TableCell>
                 <TableCell>
                   <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="text-sm text-slate-600">
-                  {moment(order.updated_date).format('DD/MM/YY')}
+                  {order.updatedAt ? moment(order.updatedAt).format('DD/MM/YY') : '-'}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
@@ -121,7 +105,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                       <Eye className="w-4 h-4" />
                     </Button>
 
-                    {order.status !== 'cancelled' && order.status !== 'released' && (
+                    {order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -137,7 +121,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                           <AlertDialogHeader>
                             <AlertDialogTitle>Cancel Order</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to cancel order #{order.order_number}? This action can be undone by admin.
+                              Are you sure you want to cancel order #{order.orderId}? This action can be undone by admin.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -167,7 +151,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Order</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete order #{order.order_number}? This action cannot be undone.
+                            Are you sure you want to delete order #{order.orderId}? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
