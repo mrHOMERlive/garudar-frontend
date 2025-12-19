@@ -133,6 +133,10 @@ class ApiClient {
     return this.request('/orders/countries');
   }
 
+  async getCurrencies() {
+    return this.request('/orders/currency');
+  }
+
   async getBicByCountry(country) {
     return this.request(`/orders/bic?country=${encodeURIComponent(country)}`);
   }

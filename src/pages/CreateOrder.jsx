@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -89,25 +89,37 @@ export default function CreateOrder() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData) => {
-      const user = await base44.auth.me();
-      const orderNumber = `${user.id.slice(0, 4).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const user = await apiClient.getCurrentUser();
+      const orderNumber = `${String(user.id).slice(0, 4).toUpperCase()}-${Date.now().toString().slice(-6)}`;
       
       // Generate CSV data
       const csvData = generateCSVData(orderData);
       
-      return await base44.entities.RemittanceOrder.create({
-        ...orderData,
-        order_number: orderNumber,
-        status: 'created',
-        csv_data: JSON.stringify(csvData),
-        status_history: [{ status: 'created', timestamp: new Date().toISOString() }]
-      });
+      // Преобразуем данные формы в формат API (PaymentOrderDto-Input)
+      const apiOrderData = {
+        order_id: orderNumber,
+        client_id: user.id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        beneficiary_name: orderData.beneficiary_name,
+        beneficiary_address: orderData.beneficiary_address,
+        destination_account: orderData.destination_account,
+        country_bank: orderData.country_bank,
+        bic: orderData.bic,
+        bank_name: orderData.bank_name,
+        bank_address: orderData.bank_address,
+        remark_mode: orderData.transaction_remark_mode,
+        transaction_remark: orderData.transaction_remark,
+        status: 'DRAFT'
+      };
+      
+      return await apiClient.createOrder(apiOrderData);
     },
     onSuccess: (data) => {
       setCreatedOrder(data);
       setShowInvoiceModal(true);
       toast.success('Order created successfully!', {
-        description: `Order #${data.order_number}`
+        description: `Order #${data.orderId}`
       });
     },
     onError: (error) => {
@@ -127,7 +139,7 @@ export default function CreateOrder() {
 
   const exportToCSV = () => {
     const csvData = generateCSVData(createdOrder || formData);
-    downloadCSV(csvData, `order_${createdOrder?.order_number || 'draft'}.csv`);
+    downloadCSV(csvData, `order_${createdOrder?.orderId || 'draft'}.csv`);
     toast.success('Order exported to CSV');
   };
 
@@ -267,7 +279,7 @@ export default function CreateOrder() {
         <InvoiceInfoModal
           open={showInvoiceModal}
           onClose={() => setShowInvoiceModal(false)}
-          orderNumber={createdOrder.order_number}
+          orderNumber={createdOrder.orderId}
           invoiceNumber={formData.remark_inv_no}
         />
       )}

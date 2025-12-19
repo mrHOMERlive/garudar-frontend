@@ -18,7 +18,7 @@ const modules = [
     title: 'Current Orders',
     description: 'View active orders in progress',
     icon: FileText,
-    page: 'CreateOrder',
+    page: 'CurrentOrders',
     color: 'bg-[#f5a623]'
   },
   {

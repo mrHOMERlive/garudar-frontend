@@ -4,6 +4,8 @@ import CreateOrder from "./CreateOrder";
 
 import OrderHistory from "./OrderHistory";
 
+import CurrentOrders from "./CurrentOrders";
+
 import StaffDashboard from "./StaffDashboard";
 
 import StaffKYC from "./StaffKYC";
@@ -50,6 +52,8 @@ const PAGES = {
     CreateOrder: CreateOrder,
     
     OrderHistory: OrderHistory,
+    
+    CurrentOrders: CurrentOrders,
     
     StaffDashboard: StaffDashboard,
     
@@ -119,6 +123,8 @@ function PagesContent() {
                 <Route path="/createorder" element={<RequireAuth><CreateOrder /></RequireAuth>} />
                 
                 <Route path="/orderhistory" element={<RequireAuth><OrderHistory /></RequireAuth>} />
+                
+                <Route path="/currentorders" element={<RequireAuth><CurrentOrders /></RequireAuth>} />
                 
                 <Route path="/staffdashboard" element={<RequireAdmin><StaffDashboard /></RequireAdmin>} />
                 

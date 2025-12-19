@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -24,11 +24,11 @@ export default function StaffExecutedOrders() {
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['staff-executed-orders'],
-    queryFn: () => base44.entities.RemittanceOrder.list('-updated_date'),
+    queryFn: () => apiClient.getOrders(),
   });
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.status === 'released' || o.executed);
+    return orders.filter(o => o.status === 'RELEASED' || o.status === 'REJECTED');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -36,16 +36,16 @@ export default function StaffExecutedOrders() {
       if (settledFilter !== 'all' && order.settled !== settledFilter) return false;
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
-               order.client_name?.toLowerCase().includes(s) ||
-               order.beneficiary_name?.toLowerCase().includes(s);
+        return order.orderId?.toLowerCase().includes(s) ||
+               order.clientId?.toString().includes(s) ||
+               order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
   }, [executedOrders, settledFilter, search]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.RemittanceOrder.update(id, data),
+    mutationFn: ({ id, data }) => apiClient.updateOrder(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-executed-orders'] });
       toast.success('Order updated');
@@ -136,14 +136,14 @@ export default function StaffExecutedOrders() {
                 <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8">No executed orders</TableCell></TableRow>
               ) : filteredOrders.map((order) => (
                 <TableRow key={order.id} className="border-slate-200 hover:bg-slate-50">
-                  <TableCell className="text-[#1e3a5f] font-mono text-sm">{order.order_number}</TableCell>
-                  <TableCell className="text-slate-700">{order.client_name || '-'}</TableCell>
+                  <TableCell className="text-[#1e3a5f] font-mono text-sm">{order.orderId}</TableCell>
+                  <TableCell className="text-slate-700">{order.clientId || '-'}</TableCell>
                   <TableCell className="text-[#1e3a5f] font-medium">
-                    {order.amount?.toLocaleString()} {order.currency}
+                    {parseFloat(order.amount)?.toLocaleString()} {order.currency}
                   </TableCell>
-                  <TableCell className="text-slate-700 max-w-[150px] truncate">{order.beneficiary_name}</TableCell>
+                  <TableCell className="text-slate-700 max-w-[150px] truncate">{order.beneficiaryName}</TableCell>
                   <TableCell className="text-slate-600 text-sm">
-                    <div>{order.bank_name?.slice(0, 20)}</div>
+                    <div>{order.bankName?.slice(0, 20)}</div>
                     <div className="font-mono text-xs">{order.bic}</div>
                   </TableCell>
                   <TableCell>

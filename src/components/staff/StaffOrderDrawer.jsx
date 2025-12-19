@@ -189,7 +189,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             type="button"
             variant="outline" 
             onClick={onClose} 
-            className="flex-1 border-slate-600"
+            className="flex-1 bg-slate-600 border-slate-500 text-white hover:bg-slate-500"
           >
             Cancel
           </Button>

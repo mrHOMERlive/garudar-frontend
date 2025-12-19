@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Globe } from 'lucide-react';
@@ -28,8 +28,8 @@ import { generateTxtInstruction } from '@/components/staff/utils/instructionGene
 import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import moment from 'moment';
 
-const ACTIVE_STATUSES = ['created', 'draft', 'check', 'pending_payment', 'on_execution'];
-const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
+const ACTIVE_STATUSES = ['DRAFT', 'CHECK', 'ON_EXECUTION'];
+const ALL_STATUSES = ['DRAFT', 'CHECK', 'REJECTED', 'ON_EXECUTION', 'RELEASED', 'CANCELLED'];
 
 export default function StaffActiveOrders() {
   const [search, setSearch] = useState('');
@@ -44,11 +44,22 @@ export default function StaffActiveOrders() {
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['staff-active-orders'],
-    queryFn: () => base44.entities.RemittanceOrder.list('-created_date'),
+    queryFn: () => apiClient.getOrders(),
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiClient.getUsers(),
+  });
+
+  const usersMap = useMemo(() => {
+    const map = {};
+    users.forEach(u => { map[u.id] = u.username; });
+    return map;
+  }, [users]);
+
   const activeOrders = useMemo(() => {
-    return orders.filter(o => ACTIVE_STATUSES.includes(o.status) && !o.closed && !o.executed);
+    return orders.filter(o => ACTIVE_STATUSES.includes(o.status));
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -57,10 +68,9 @@ export default function StaffActiveOrders() {
       if (currencyFilter !== 'all' && order.currency !== currencyFilter) return false;
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
-               order.client_name?.toLowerCase().includes(s) ||
-               order.client_id?.toLowerCase().includes(s) ||
-               order.beneficiary_name?.toLowerCase().includes(s) ||
+        return order.orderId?.toLowerCase().includes(s) ||
+               order.clientId?.toString().includes(s) ||
+               order.beneficiaryName?.toLowerCase().includes(s) ||
                order.bic?.toLowerCase().includes(s);
       }
       return true;
@@ -68,12 +78,12 @@ export default function StaffActiveOrders() {
   }, [activeOrders, statusFilter, currencyFilter, search]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.RemittanceOrder.update(id, data),
+    mutationFn: ({ id, data }) => apiClient.updateOrder(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (ids) => Promise.all(ids.map(id => base44.entities.RemittanceOrder.delete(id))),
+    mutationFn: (ids) => Promise.all(ids.map(id => apiClient.deleteOrder(id))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
       toast.success('Orders deleted');
@@ -196,7 +206,7 @@ export default function StaffActiveOrders() {
   };
 
   const handleDrawerSave = async (data) => {
-    await base44.entities.RemittanceOrder.update(selectedOrder.id, data);
+    await apiClient.updateOrder(selectedOrder.id, data);
     toast.success('Order updated');
     setDrawerOpen(false);
     queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
@@ -344,38 +354,38 @@ export default function StaffActiveOrders() {
                   </TableCell>
                   <TableCell className="text-[#1e3a5f] font-mono text-sm">
                     <div className="flex items-center gap-2">
-                      {order.order_number}
-                      {order.invoice_flag && <AlertTriangle className="w-3.5 h-3.5 text-[#f5a623]" />}
+                      {order.orderId}
+                      {order.invoiceFlag && <AlertTriangle className="w-3.5 h-3.5 text-[#f5a623]" />}
                       {order.non_mandiri_execution && <Badge className="bg-slate-400 text-xs">Non-M</Badge>}
                     </div>
                   </TableCell>
                   <TableCell className="text-slate-700">
-                    <div className="text-sm">{order.client_name || '-'}</div>
-                    <div className="text-xs text-slate-500 font-mono">{order.client_id}</div>
+                    <div className="text-sm font-medium">{usersMap[order.clientId] || '-'}</div>
+                    <div className="text-xs text-slate-500 font-mono">{order.clientId}</div>
                   </TableCell>
                   <TableCell className="text-[#1e3a5f] font-medium">
-                    {order.amount?.toLocaleString()} {order.currency}
+                    {parseFloat(order.amount)?.toLocaleString()} {order.currency}
                   </TableCell>
                   <TableCell className="text-slate-700 max-w-[120px]">
-                    <div className="truncate text-sm">{order.beneficiary_name}</div>
-                    <div className="text-xs text-slate-500 truncate">{order.beneficiary_address?.slice(0, 30)}</div>
+                    <div className="truncate text-sm">{order.beneficiaryName}</div>
+                    <div className="text-xs text-slate-500 truncate">{order.beneficiaryAddress?.slice(0, 30)}</div>
                   </TableCell>
                   <TableCell className="text-slate-600 font-mono text-xs max-w-[100px] truncate">
-                    {order.destination_account}
+                    {order.destinationAccountNumber}
                   </TableCell>
                   <TableCell className="text-slate-600 text-sm">
-                    <div className="truncate max-w-[100px]">{order.bank_name}</div>
+                    <div className="truncate max-w-[100px]">{order.bankName}</div>
                     <div className="font-mono text-xs">{order.bic}</div>
                   </TableCell>
                   <TableCell className="text-slate-600 text-xs max-w-[120px] truncate">
-                    {order.transaction_remark?.slice(0, 40)}
+                    {order.transactionRemark?.slice(0, 40)}
                   </TableCell>
                   <TableCell>
                     <Badge 
-                      className={`cursor-pointer hover:opacity-80 ${order.invoice_received ? 'bg-emerald-600' : 'bg-slate-400'}`}
+                      className={`cursor-pointer hover:opacity-80 ${order.invoiceReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}
                       onClick={() => handleToggleInvoice(order)}
                     >
-                      {order.invoice_received ? 'Y' : 'N'}
+                      -
                     </Badge>
                   </TableCell>
                   <TableCell>

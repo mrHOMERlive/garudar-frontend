@@ -6,12 +6,11 @@ import { Search, X, Filter } from 'lucide-react';
 
 const STATUSES = [
   { value: 'all', label: 'All Statuses' },
-  { value: 'SUBMITTED', label: 'Submitted' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: 'REJECTED', label: 'Rejected' }
+  { value: 'DRAFT', label: 'Draft' },
+  { value: 'CHECK', label: 'Check' },
+  { value: 'REJECTED', label: 'Rejected' },
+  { value: 'ON_EXECUTION', label: 'On Execution' },
+  { value: 'RELEASED', label: 'Released' }
 ];
 
 const CURRENCIES = [
