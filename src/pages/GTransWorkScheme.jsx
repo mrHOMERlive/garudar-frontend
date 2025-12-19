@@ -11,6 +11,7 @@ import {
 
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
+import { InboundTransferDiagram, OutboundTransferDiagram } from '@/components/public/TransferTypesDiagram';
 
 export default function GTransWorkScheme() {
   const [language, setLanguage] = useState(() => {
@@ -274,6 +275,44 @@ export default function GTransWorkScheme() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+
+          {/* Transfer Flow Diagrams */}
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-[#1e3a5f] mb-4 text-center">
+              {language === 'en' ? 'Transfer Flow Diagrams' : 'Diagram Alur Transfer'}
+            </h2>
+            <p className="text-slate-600 text-center mb-8">
+              {language === 'en' 
+                ? 'Visual representation of inbound and outbound transfer flows with and without FX conversion'
+                : 'Representasi visual alur transfer masuk dan keluar dengan dan tanpa konversi FX'
+              }
+            </p>
+            <div className="grid lg:grid-cols-2 gap-8">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                  <ArrowRight className="w-5 h-5 text-emerald-600" />
+                  {language === 'en' ? 'Inbound Transfers' : 'Transfer Masuk'}
+                </h3>
+                <InboundTransferDiagram language={language} />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
+                  <ArrowRight className="w-5 h-5 rotate-180 text-blue-600" />
+                  {language === 'en' ? 'Outbound Transfers' : 'Transfer Keluar'}
+                </h3>
+                <OutboundTransferDiagram language={language} />
+              </motion.div>
+            </div>
           </div>
 
           <Card className="border-slate-200 mb-16">

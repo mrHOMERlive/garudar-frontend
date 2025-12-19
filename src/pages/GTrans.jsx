@@ -12,6 +12,7 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 import HeroSection from '@/components/public/HeroSection';
+import { CreateOrderAnimation, OrderMonitoringAnimation } from '@/components/public/PlatformAnimations';
 
 export default function GTrans() {
   const [language, setLanguage] = useState(() => {
@@ -328,17 +329,77 @@ export default function GTrans() {
         </div>
       </section>
 
-      {/* Platform Screenshots */}
-      <section className="py-20 bg-white" id="platform">
+      {/* Platform Interface - Animated Demos */}
+      <section className="py-20 bg-gradient-to-br from-slate-900 via-[#1e3a5f] to-slate-900" id="platform">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               {language === 'en' ? 'Intuitive Platform Interface' : 'Antarmuka Platform yang Intuitif'}
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
               {language === 'en'
                 ? 'Create orders and track transfers with ease through our user-friendly dashboard.'
                 : 'Buat pesanan dan lacak transfer dengan mudah melalui dashboard yang ramah pengguna.'
+              }
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Creating Order Animation */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {language === 'en' ? 'Creating Order' : 'Membuat Pesanan'}
+                </h3>
+                <p className="text-slate-400">
+                  {language === 'en'
+                    ? 'Simple, comprehensive form to create cross-border payment orders.'
+                    : 'Formulir sederhana dan komprehensif untuk membuat pesanan pembayaran lintas batas.'
+                  }
+                </p>
+              </div>
+              <CreateOrderAnimation />
+            </motion.div>
+
+            {/* Monitoring Order Animation */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {language === 'en' ? 'Monitoring Orders' : 'Memantau Pesanan'}
+                </h3>
+                <p className="text-slate-400">
+                  {language === 'en'
+                    ? 'Track all orders in real-time with full visibility.'
+                    : 'Lacak semua pesanan secara real-time dengan visibilitas penuh.'
+                  }
+                </p>
+              </div>
+              <OrderMonitoringAnimation />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Screenshots */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
+              {language === 'en' ? 'Real Platform Screenshots' : 'Screenshot Platform Nyata'}
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              {language === 'en'
+                ? 'See the actual interface our clients use every day.'
+                : 'Lihat antarmuka nyata yang digunakan klien kami setiap hari.'
               }
             </p>
           </div>
@@ -353,12 +414,12 @@ export default function GTrans() {
             >
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                  {language === 'en' ? 'Creating Order' : 'Membuat Pesanan'}
+                  {language === 'en' ? 'Order Creation Form' : 'Formulir Pembuatan Pesanan'}
                 </h3>
                 <p className="text-slate-600">
                   {language === 'en'
-                    ? 'Simple, comprehensive form to create cross-border payment orders with all required details.'
-                    : 'Formulir sederhana dan komprehensif untuk membuat pesanan pembayaran lintas batas dengan semua detail yang diperlukan.'
+                    ? 'Complete form with all required fields for cross-border transfers.'
+                    : 'Formulir lengkap dengan semua field yang diperlukan untuk transfer lintas batas.'
                   }
                 </p>
               </div>
@@ -390,7 +451,7 @@ export default function GTrans() {
             >
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                  {language === 'en' ? 'Monitoring Order' : 'Memantau Pesanan'}
+                  {language === 'en' ? 'Order Dashboard' : 'Dashboard Pesanan'}
                 </h3>
                 <p className="text-slate-600">
                   {language === 'en'
