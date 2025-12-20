@@ -87,14 +87,14 @@ export function validateIBAN(iban, country) {
 export function validateAccountNumber(account, country) {
   if (!account) return { valid: false, error: 'Account number is required' };
   
-  const cleanAccount = account.replace(/\s/g, '');
+  const cleanAccount = account.replace(/\s/g, '').toUpperCase();
   
-  // Check if country uses IBAN
-  if (IBAN_COUNTRIES.includes(country)) {
-    return validateIBAN(account, country);
-  }
+  // IBAN validation disabled - using simple validation for all countries
+  // if (IBAN_COUNTRIES.includes(country)) {
+  //   return validateIBAN(account, country);
+  // }
   
-  // For non-IBAN countries
+  // Simple validation: A-Z, 0-9, length 5-35
   const accountPattern = /^[A-Z0-9]+$/;
   if (!accountPattern.test(cleanAccount)) {
     return { valid: false, error: 'Only letters A-Z and digits 0-9 allowed' };
