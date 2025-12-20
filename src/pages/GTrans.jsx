@@ -389,7 +389,7 @@ export default function GTrans() {
         </div>
       </section>
 
-      {/* Platform Screenshots */}
+      {/* Platform Screenshots 
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -405,7 +405,7 @@ export default function GTrans() {
           </div>
 
           <div className="space-y-12">
-            {/* Creating Order - Two Screenshots */}
+            {/* Creating Order - Two Screenshots 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -441,7 +441,7 @@ export default function GTrans() {
               </div>
             </motion.div>
 
-            {/* Monitoring Order */}
+              {/* Monitoring Order 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -470,7 +470,7 @@ export default function GTrans() {
             </motion.div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Client Journey */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-slate-50" id="journey">
