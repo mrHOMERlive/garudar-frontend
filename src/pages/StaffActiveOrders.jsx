@@ -234,14 +234,14 @@ export default function StaffActiveOrders() {
                 </div>
                 <Badge className="bg-[#f5a623] text-white">{activeOrders.length} orders</Badge>
               </div>
-              <Link to={createPageUrl('GTrans')} className="ml-auto">
+            </div>
+            <div className="flex items-center gap-3">
+              <Link to={createPageUrl('GTrans')}>
                 <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-1" />
                   Public Site
                 </Button>
               </Link>
-            </div>
-            <div className="flex items-center gap-3">
               {selectedIds.size > 0 && (
                 <>
                   <span className="text-slate-400 text-sm">{selectedIds.size} selected</span>

@@ -39,8 +39,13 @@ export default function StaffKYC() {
         <header className="bg-[#1e3a5f] border-b shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
-              <Link to={createPageUrl('StaffDashboard')} className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
+              <div className="flex items-center gap-4">
+                <Link to={createPageUrl('StaffDashboard')}>
+                  <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
                   <img 
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
                     alt="Logo" 
@@ -54,7 +59,7 @@ export default function StaffKYC() {
                   </div>
                   <p className="text-slate-300 text-sm">Know Your Customer Verification</p>
                 </div>
-              </Link>
+              </div>
               <Link to={createPageUrl('StaffDashboard')}>
                 <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-2" />
@@ -206,8 +211,13 @@ export default function StaffKYC() {
       <header className="bg-[#1e3a5f] border-b shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <Link to={createPageUrl('StaffDashboard')} className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
+            <div className="flex items-center gap-4">
+              <Link to={createPageUrl('StaffDashboard')}>
+                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
                   alt="Logo" 
@@ -221,7 +231,7 @@ export default function StaffKYC() {
                 </div>
                 <p className="text-slate-300 text-sm">Know Your Customer Verification</p>
               </div>
-            </Link>
+            </div>
             <Link to={createPageUrl('StaffDashboard')}>
               <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                 <Globe className="w-4 h-4 mr-2" />

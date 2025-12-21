@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Plus, FileDown, FileText, Home } from 'lucide-react';
+import { Plus, FileDown, FileText, Home, ArrowLeft } from 'lucide-react';
 import OrderFilters from '@/components/orders/OrderFilters';
 import OrdersTable from '@/components/orders/OrdersTable';
 import OrderDetailsDrawer from '@/components/orders/OrderDetailsDrawer';
@@ -147,7 +147,12 @@ export default function OrderHistory() {
       <header className="bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 sticky top-0 z-10 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <Link to={createPageUrl('UserDashboard')}>
+                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
               <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2.5 shadow-lg">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
@@ -162,7 +167,7 @@ export default function OrderHistory() {
                 </div>
                 <p className="text-sm text-teal-300">Order History</p>
               </div>
-            </Link>
+            </div>
             <div className="flex items-center gap-3">
               <Link to={createPageUrl('UserDashboard')}>
                 <Button

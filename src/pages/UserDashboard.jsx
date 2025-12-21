@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, History, Globe, LogOut, User } from 'lucide-react';
+import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 
 const modules = [
   {
@@ -22,11 +22,32 @@ const modules = [
     color: 'bg-[#f5a623]'
   },
   {
+    title: 'Executed Orders',
+    description: 'View completed orders',
+    icon: CheckCircle,
+    page: 'ExecutedOrders',
+    color: 'bg-emerald-600'
+  },
+  {
+    title: 'Cancelled Orders',
+    description: 'View cancelled orders',
+    icon: XCircle,
+    page: 'CancelledOrders',
+    color: 'bg-red-600'
+  },
+  {
+    title: 'Deleted Orders',
+    description: 'View deleted orders',
+    icon: Trash2,
+    page: 'DeletedOrders',
+    color: 'bg-slate-600'
+  },
+  {
     title: 'Order History',
-    description: 'View completed and past orders',
+    description: 'View all past orders',
     icon: History,
     page: 'OrderHistory',
-    color: 'bg-emerald-600'
+    color: 'bg-purple-600'
   }
 ];
 

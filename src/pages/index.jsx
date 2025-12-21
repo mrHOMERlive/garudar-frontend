@@ -6,6 +6,12 @@ import OrderHistory from "./OrderHistory";
 
 import CurrentOrders from "./CurrentOrders";
 
+import ExecutedOrders from "./ExecutedOrders";
+
+import CancelledOrders from "./CancelledOrders";
+
+import DeletedOrders from "./DeletedOrders";
+
 import StaffDashboard from "./StaffDashboard";
 
 import StaffKYC from "./StaffKYC";
@@ -54,6 +60,12 @@ const PAGES = {
     OrderHistory: OrderHistory,
     
     CurrentOrders: CurrentOrders,
+    
+    ExecutedOrders: ExecutedOrders,
+    
+    CancelledOrders: CancelledOrders,
+    
+    DeletedOrders: DeletedOrders,
     
     StaffDashboard: StaffDashboard,
     
@@ -125,6 +137,12 @@ function PagesContent() {
                 <Route path="/orderhistory" element={<RequireAuth><OrderHistory /></RequireAuth>} />
                 
                 <Route path="/currentorders" element={<RequireAuth><CurrentOrders /></RequireAuth>} />
+                
+                <Route path="/executedorders" element={<RequireAuth><ExecutedOrders /></RequireAuth>} />
+                
+                <Route path="/cancelledorders" element={<RequireAuth><CancelledOrders /></RequireAuth>} />
+                
+                <Route path="/deletedorders" element={<RequireAuth><DeletedOrders /></RequireAuth>} />
                 
                 <Route path="/staffdashboard" element={<RequireAdmin><StaffDashboard /></RequireAdmin>} />
                 

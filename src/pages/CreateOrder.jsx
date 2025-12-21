@@ -4,7 +4,8 @@ import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Send, Download, Copy, Mail, History } from 'lucide-react';
+import { Send, Download, Copy, Mail, History, Upload } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import AmountCurrencySection from '../components/remittance/AmountCurrencySection';
 import BeneficiaryInfoSection from '../components/remittance/BeneficiaryInfoSection';
@@ -39,6 +40,12 @@ export default function CreateOrder() {
   const [errors, setErrors] = useState({});
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
+  const [uploadingSalesContract, setUploadingSalesContract] = useState(false);
+  const [uploadingInvoice, setUploadingInvoice] = useState(false);
+  const [uploadingOther, setUploadingOther] = useState(false);
+  const [salesContractUrl, setSalesContractUrl] = useState('');
+  const [invoiceUrl, setInvoiceUrl] = useState('');
+  const [otherDocsUrl, setOtherDocsUrl] = useState('');
 
   const handleFormChange = (updates) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -148,6 +155,33 @@ export default function CreateOrder() {
     toast.success('Email copied to clipboard');
   };
 
+  const handleFileUpload = async (file, type) => {
+    if (!file) return;
+    
+    const setUploading = {
+      salesContract: setUploadingSalesContract,
+      invoice: setUploadingInvoice,
+      other: setUploadingOther
+    }[type];
+    
+    const setUrl = {
+      salesContract: setSalesContractUrl,
+      invoice: setInvoiceUrl,
+      other: setOtherDocsUrl
+    }[type];
+    
+    setUploading(true);
+    try {
+      const fileUrl = await apiClient.uploadFile(file);
+      setUrl(fileUrl);
+      toast.success('Document uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload document');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header */}
@@ -224,6 +258,96 @@ export default function CreateOrder() {
             errors={errors}
             setErrors={setErrors}
           />
+
+          {/* Document Upload Section */}
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Upload Documents</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Sales Contract */}
+              <div className="space-y-2">
+                <Label className="text-sm text-slate-600">Sales Contract</Label>
+                <label className="block">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'salesContract')}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`w-full ${salesContractUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                    disabled={uploadingSalesContract}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingSalesContract ? 'Uploading...' : salesContractUrl ? 'Uploaded ✓' : 'Upload'}
+                  </Button>
+                </label>
+                {salesContractUrl && (
+                  <a href={salesContractUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
+                    View document
+                  </a>
+                )}
+              </div>
+
+              {/* Invoice */}
+              <div className="space-y-2">
+                <Label className="text-sm text-slate-600">Invoice</Label>
+                <label className="block">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'invoice')}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`w-full ${invoiceUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                    disabled={uploadingInvoice}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingInvoice ? 'Uploading...' : invoiceUrl ? 'Uploaded ✓' : 'Upload'}
+                  </Button>
+                </label>
+                {invoiceUrl && (
+                  <a href={invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
+                    View document
+                  </a>
+                )}
+              </div>
+
+              {/* Other Documents */}
+              <div className="space-y-2">
+                <Label className="text-sm text-slate-600">Other Documents</Label>
+                <label className="block">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'other')}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`w-full ${otherDocsUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                    disabled={uploadingOther}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingOther ? 'Uploading...' : otherDocsUrl ? 'Uploaded ✓' : 'Upload'}
+                  </Button>
+                </label>
+                {otherDocsUrl && (
+                  <a href={otherDocsUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
+                    View document
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Invoice Info Block */}
           <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
