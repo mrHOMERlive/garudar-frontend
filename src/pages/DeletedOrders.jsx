@@ -15,7 +15,7 @@ export default function DeletedOrders() {
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['deleted-orders'],
-    queryFn: () => apiClient.getOrders(),
+    queryFn: () => apiClient.getOrders({ include_deleted: true }),
   });
 
   const deletedOrders = useMemo(() => {
@@ -26,8 +26,8 @@ export default function DeletedOrders() {
     return deletedOrders.filter(order => {
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
-               order.beneficiary_name?.toLowerCase().includes(s);
+        return order.orderId?.toLowerCase().includes(s) ||
+               order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -103,16 +103,16 @@ export default function DeletedOrders() {
                   <TableCell colSpan={5} className="text-center py-8 text-slate-500">No deleted orders</TableCell>
                 </TableRow>
               ) : filteredOrders.map((order) => (
-                <TableRow key={order.id} className="opacity-60">
-                  <TableCell className="font-mono text-sm text-slate-600">{order.order_number}</TableCell>
+                <TableRow key={order.orderId} className="opacity-60">
+                  <TableCell className="font-mono text-sm text-slate-600">{order.orderId}</TableCell>
                   <TableCell className="text-sm text-slate-600">
-                    {moment(order.created_date).format('DD/MM/YYYY')}
+                    {moment(order.createdAt).format('DD/MM/YYYY')}
                   </TableCell>
                   <TableCell className="font-medium text-slate-600">
                     {order.amount?.toLocaleString()} {order.currency}
                   </TableCell>
                   <TableCell className="text-slate-600 max-w-[200px] truncate">
-                    {order.beneficiary_name}
+                    {order.beneficiaryName}
                   </TableCell>
                   <TableCell>
                     <OrderStatusBadge status={order.status} />

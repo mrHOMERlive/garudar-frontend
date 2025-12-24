@@ -9,6 +9,7 @@ const STATUSES = [
   { value: 'DRAFT', label: 'Draft' },
   { value: 'CHECK', label: 'Check' },
   { value: 'REJECTED', label: 'Rejected' },
+  { value: 'CLIENT_CANCELED', label: 'Client Canceled' },
   { value: 'ON_EXECUTION', label: 'On Execution' },
   { value: 'RELEASED', label: 'Released' }
 ];

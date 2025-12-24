@@ -21,7 +21,7 @@ import {
 
 const ITEMS_PER_PAGE = 25;
 
-const ACTIVE_STATUSES = ['DRAFT', 'CHECK', 'ON_EXECUTION'];
+const ACTIVE_STATUSES = ['created', 'DRAFT', 'CHECK', 'ON_EXECUTION'];
 
 export default function CurrentOrders() {
   const [filters, setFilters] = useState({
@@ -37,6 +37,11 @@ export default function CurrentOrders() {
 
   const queryClient = useQueryClient();
 
+  const { data: myClient } = useQuery({
+    queryKey: ['my-client'],
+    queryFn: () => apiClient.getMyClient(),
+  });
+
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: () => apiClient.getOrders(),
@@ -44,7 +49,12 @@ export default function CurrentOrders() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
-      // Only show active orders (DRAFT, CHECK, ON_EXECUTION)
+      // Only show orders for current client
+      if (myClient && order.clientId !== myClient.client_id) {
+        return false;
+      }
+
+      // Only show active orders (created, DRAFT, CHECK, ON_EXECUTION)
       if (!ACTIVE_STATUSES.includes(order.status)) {
         return false;
       }
@@ -55,7 +65,7 @@ export default function CurrentOrders() {
         const matchesSearch = 
           order.orderId?.toLowerCase().includes(searchLower) ||
           order.beneficiaryName?.toLowerCase().includes(searchLower) ||
-          order.bic?.toLowerCase().includes(searchLower) ||
+          order.bankBic?.toLowerCase().includes(searchLower) ||
           order.bankName?.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
@@ -86,7 +96,7 @@ export default function CurrentOrders() {
 
       return true;
     });
-  }, [orders, filters]);
+  }, [orders, filters, myClient]);
 
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const paginatedOrders = filteredOrders.slice(
@@ -122,7 +132,7 @@ export default function CurrentOrders() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (order) => apiClient.deleteOrder(order.id),
+    mutationFn: (order) => apiClient.deleteOrder(order.orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order deleted successfully');
@@ -130,9 +140,8 @@ export default function CurrentOrders() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (order) => apiClient.updateOrder(order.id, {
-      ...order,
-      status: 'REJECTED'
+    mutationFn: (order) => apiClient.updateOrder(order.orderId, {
+      status: 'canceled'
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -185,15 +194,6 @@ export default function CurrentOrders() {
                   Dashboard
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                onClick={handleExportAll}
-                disabled={filteredOrders.length === 0}
-                className="border-teal-400 text-teal-100 hover:bg-teal-800/50 bg-transparent"
-              >
-                <FileDown className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
               <Link to={createPageUrl('CreateOrder')}>
                 <Button className="bg-teal-700 hover:bg-teal-600">
                   <Plus className="w-4 h-4 mr-2" />
@@ -261,7 +261,6 @@ export default function CurrentOrders() {
             <OrdersTable 
               orders={paginatedOrders} 
               onViewDetails={handleViewDetails}
-              onDelete={handleDelete}
               onCancel={handleCancel}
             />
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiClient } from '@/api/apiClient';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
@@ -46,6 +46,12 @@ export default function CreateOrder() {
   const [salesContractUrl, setSalesContractUrl] = useState('');
   const [invoiceUrl, setInvoiceUrl] = useState('');
   const [otherDocsUrl, setOtherDocsUrl] = useState('');
+
+  // Загрузка справочника стран (API возвращает {code, name})
+  const { data: countries = [] } = useQuery({
+    queryKey: ['countries'],
+    queryFn: () => apiClient.getCountries(),
+  });
 
   const handleFormChange = (updates) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -97,27 +103,27 @@ export default function CreateOrder() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData) => {
       const user = await apiClient.getCurrentUser();
-      const orderNumber = `${String(user.id).slice(0, 4).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const orderNumber = `PO-${new Date().toISOString().slice(0, 10)}-${Date.now().toString().slice(-6)}`;
       
       // Generate CSV data
       const csvData = generateCSVData(orderData);
       
-      // Преобразуем данные формы в формат API (PaymentOrderDto-Input)
+      // Преобразуем данные формы в формат API (OrderPoboDto-Input)
       const apiOrderData = {
         order_id: orderNumber,
-        client_id: user.id,
-        amount: orderData.amount,
+        amount: parseFloat(orderData.amount),
         currency: orderData.currency,
         beneficiary_name: orderData.beneficiary_name,
-        beneficiary_address: orderData.beneficiary_address,
+        beneficiary_adress: orderData.beneficiary_address,
         destination_account: orderData.destination_account,
-        country_bank: orderData.country_bank,
-        bic: orderData.bic,
+        bank_country: orderData.country_bank,
+        bank_bic: orderData.bic,
         bank_name: orderData.bank_name,
         bank_address: orderData.bank_address,
-        remark_mode: orderData.transaction_remark_mode,
-        transaction_remark: orderData.transaction_remark,
-        status: 'DRAFT'
+        remark: orderData.transaction_remark,
+        invocie_required: true,
+        invocie_received: false,
+        payment_proof: false,
       };
       
       return await apiClient.createOrder(apiOrderData);
@@ -250,6 +256,7 @@ export default function CreateOrder() {
             onChange={handleFormChange}
             errors={errors}
             setErrors={setErrors}
+            countries={countries}
           />
 
           <TransactionRemarkSection

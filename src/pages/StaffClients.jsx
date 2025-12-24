@@ -32,7 +32,10 @@ export default function StaffClients() {
     username: '',
     password: '',
     status: true,
-    role: 'USER'
+    role: 'USER',
+    client_name: '',
+    client_reg_country: '',
+    client_mail: ''
   });
 
   const queryClient = useQueryClient();
@@ -47,9 +50,18 @@ export default function StaffClients() {
   const saveMutation = useMutation({
     mutationFn: (data) => {
       if (editingClient) {
-        return apiClient.updateUser(editingClient.id, data);
+        return apiClient.updateUser(editingClient.user_id, data);
       }
-      return apiClient.createUser({ ...data, role: 'USER' });
+      // Используем новый эндпоинт /api/v1/clients для создания
+      const clientData = {
+        username: data.username,
+        password: data.password,
+        is_active: data.status,
+        client_name: data.client_name || null,
+        client_reg_country: data.client_reg_country || null,
+        client_mail: data.client_mail || null
+      };
+      return apiClient.createClient(clientData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -57,7 +69,7 @@ export default function StaffClients() {
       closeDialog();
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to save client');
+      toast.error(error.message || 'Failed to update client status');
     },
   });
 
@@ -75,7 +87,7 @@ export default function StaffClients() {
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: (client) => apiClient.updateUser(client.id, { ...client, status: !client.status }),
+    mutationFn: (client) => apiClient.updateUser(client.user_id, { ...client, status: !client.status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('Client status updated');
@@ -88,7 +100,15 @@ export default function StaffClients() {
   const openCreateDialog = () => {
     setSearch('');
     setEditingClient(null);
-    setFormData({ username: '', password: '', status: true, role: 'USER' });
+    setFormData({ 
+      username: '', 
+      password: '', 
+      status: true, 
+      role: 'USER',
+      client_name: '',
+      client_reg_country: '',
+      client_mail: ''
+    });
     setShowPassword(false);
     setDialogOpen(true);
   };
@@ -100,7 +120,10 @@ export default function StaffClients() {
       username: client.username,
       password: '',
       status: client.status,
-      role: client.role
+      role: client.role,
+      client_name: '',
+      client_reg_country: '',
+      client_mail: ''
     });
     setShowPassword(false);
     setDialogOpen(true);
@@ -218,8 +241,8 @@ export default function StaffClients() {
                   <TableCell colSpan={4} className="text-center text-slate-500 py-8">No clients found</TableCell>
                 </TableRow>
               ) : filteredClients.map((client) => (
-                <TableRow key={client.id} className="border-slate-200 hover:bg-slate-50">
-                  <TableCell className="text-[#1e3a5f] font-mono">{client.id}</TableCell>
+                <TableRow key={client.user_id} className="border-slate-200 hover:bg-slate-50">
+                  <TableCell className="text-[#1e3a5f] font-mono">{client.user_id}</TableCell>
                   <TableCell className="text-[#1e3a5f] font-medium">{client.username}</TableCell>
                   <TableCell>
                     <Badge className={client.status ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
@@ -326,6 +349,50 @@ export default function StaffClients() {
               </Button>
             </div>
 
+            {!editingClient && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-slate-700">Client Name</Label>
+                  <Input
+                    id="client-name"
+                    name="client-name-field"
+                    value={formData.client_name}
+                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                    placeholder="Jack"
+                    className="bg-white border-slate-300"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-slate-700">Registration Country</Label>
+                  <Input
+                    id="client-reg-country"
+                    name="client-reg-country-field"
+                    value={formData.client_reg_country}
+                    onChange={(e) => setFormData({ ...formData, client_reg_country: e.target.value })}
+                    placeholder="ID"
+                    className="bg-white border-slate-300"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-slate-700">Email</Label>
+                  <Input
+                    id="client-mail"
+                    name="client-mail-field"
+                    type="email"
+                    value={formData.client_mail}
+                    onChange={(e) => setFormData({ ...formData, client_mail: e.target.value })}
+                    placeholder="u@m.com"
+                    className="bg-white border-slate-300"
+                    autoComplete="off"
+                  />
+                </div>
+              </>
+            )}
+
             <div className="flex items-center gap-3">
               <Switch
                 checked={formData.status}
@@ -357,7 +424,7 @@ export default function StaffClients() {
           <AlertDialogFooter>
             <AlertDialogCancel className="border-slate-300 text-slate-600 hover:bg-slate-100">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMutation.mutate(clientToDelete?.id)}
+              onClick={() => deleteMutation.mutate(clientToDelete?.user_id)}
               className="bg-red-600 hover:bg-red-700"
             >
               Delete

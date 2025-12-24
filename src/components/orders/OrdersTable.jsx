@@ -59,7 +59,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
           <TableBody>
             {orders.map((order) => (
               <TableRow 
-                key={order.id} 
+                key={order.orderId} 
                 className="hover:bg-slate-50 cursor-pointer"
                 onClick={() => onViewDetails(order)}
               >
@@ -76,14 +76,14 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                   {truncateText(order.beneficiaryName, 20)}
                 </TableCell>
                 <TableCell className="font-mono text-sm text-slate-600">
-                  {maskAccount(order.destinationAccountNumber)}
+                  {maskAccount(order.destinationAccount)}
                 </TableCell>
                 <TableCell className="text-sm">
                   <div>{truncateText(order.bankName, 15)}</div>
-                  <div className="text-xs text-slate-500 font-mono">{order.bic}</div>
+                  <div className="text-xs text-slate-500 font-mono">{order.bankBic}</div>
                 </TableCell>
                 <TableCell className="text-sm text-slate-600 max-w-[150px]">
-                  {truncateText(order.transactionRemark, 25)}
+                  {truncateText(order.remark, 25)}
                 </TableCell>
                 <TableCell>
                   <OrderStatusBadge status={order.status} />
@@ -105,7 +105,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                       <Eye className="w-4 h-4" />
                     </Button>
 
-                    {order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && (
+                    {onCancel && order.status !== 'canceled' && order.status !== 'COMPLETED' && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -136,35 +136,37 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                         </AlertDialogContent>
                       </AlertDialog>
                     )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => e.stopPropagation()}
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Order</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete order #{order.orderId}? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => onDelete(order)}
-                            className="bg-red-600 hover:bg-red-700"
+                    {onDelete && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete order #{order.orderId}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => onDelete(order)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

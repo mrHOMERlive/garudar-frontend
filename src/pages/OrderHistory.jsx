@@ -48,7 +48,7 @@ export default function OrderHistory() {
         const matchesSearch = 
           order.orderId?.toLowerCase().includes(searchLower) ||
           order.beneficiaryName?.toLowerCase().includes(searchLower) ||
-          order.bic?.toLowerCase().includes(searchLower) ||
+          order.bankBic?.toLowerCase().includes(searchLower) ||
           order.bankName?.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
@@ -115,31 +115,20 @@ export default function OrderHistory() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (order) => apiClient.deleteOrder(order.id),
+    mutationFn: (order) => apiClient.updateOrder(order.orderId, {
+      deleted: true
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order deleted successfully');
     },
   });
 
-  const cancelMutation = useMutation({
-    mutationFn: (order) => apiClient.updateOrder(order.id, {
-      ...order,
-      status: 'cancelled'
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      toast.success('Order cancelled');
-    },
-  });
 
   const handleDelete = (order) => {
     deleteMutation.mutate(order);
   };
 
-  const handleCancel = (order) => {
-    cancelMutation.mutate(order);
-  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -178,15 +167,6 @@ export default function OrderHistory() {
                   Dashboard
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                onClick={handleExportAll}
-                disabled={filteredOrders.length === 0}
-                className="border-teal-400 text-teal-100 hover:bg-teal-800/50 bg-transparent"
-              >
-                <FileDown className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
               <Link to={createPageUrl('CreateOrder')}>
                 <Button className="bg-teal-700 hover:bg-teal-600">
                   <Plus className="w-4 h-4 mr-2" />
@@ -255,7 +235,6 @@ export default function OrderHistory() {
               orders={paginatedOrders} 
               onViewDetails={handleViewDetails}
               onDelete={handleDelete}
-              onCancel={handleCancel}
             />
 
             {/* Pagination */}

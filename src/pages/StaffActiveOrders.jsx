@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -28,8 +28,8 @@ import { generateTxtInstruction } from '@/components/staff/utils/instructionGene
 import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import moment from 'moment';
 
-const ACTIVE_STATUSES = ['DRAFT', 'CHECK', 'ON_EXECUTION'];
-const ALL_STATUSES = ['DRAFT', 'CHECK', 'REJECTED', 'ON_EXECUTION', 'RELEASED', 'CANCELLED'];
+const ACTIVE_STATUSES = ['created', 'DRAFT', 'CHECK', 'ON_EXECUTION'];
+const ALL_STATUSES = ['DRAFT', 'CHECK', 'REJECTED', 'ON_EXECUTION', 'RELEASED', 'canceled'];
 
 export default function StaffActiveOrders() {
   const [search, setSearch] = useState('');
@@ -57,6 +57,49 @@ export default function StaffActiveOrders() {
     users.forEach(u => { map[u.id] = u.username; });
     return map;
   }, [users]);
+
+  // Состояние для хранения данных клиентов
+  const [clientsMap, setClientsMap] = useState({});
+
+  // Получить уникальные client_id из заказов
+  const uniqueClientIds = useMemo(() => {
+    return [...new Set(orders.map(o => o.clientId).filter(Boolean))];
+  }, [orders]);
+
+  // Загрузить данные клиентов при изменении списка
+  useEffect(() => {
+    const loadClients = async () => {
+      const newClientsMap = {};
+      
+      for (const clientId of uniqueClientIds) {
+        try {
+          const clientData = await apiClient.getClientById(clientId);
+          newClientsMap[clientId] = {
+            name: clientData.client_name || clientId,
+            clientId: clientId,
+            country: clientData.client_reg_country || '',
+            email: clientData.client_mail || '',
+            status: clientData.status_sign || ''
+          };
+        } catch (error) {
+          console.error(`Failed to load client ${clientId}:`, error);
+          newClientsMap[clientId] = {
+            name: clientId,
+            clientId: clientId,
+            country: '',
+            email: '',
+            status: ''
+          };
+        }
+      }
+      
+      setClientsMap(newClientsMap);
+    };
+
+    if (uniqueClientIds.length > 0) {
+      loadClients();
+    }
+  }, [uniqueClientIds]);
 
   const activeOrders = useMemo(() => {
     return orders.filter(o => ACTIVE_STATUSES.includes(o.status));
@@ -94,7 +137,7 @@ export default function StaffActiveOrders() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedIds(new Set(filteredOrders.map(o => o.id)));
+      setSelectedIds(new Set(filteredOrders.map(o => o.orderId)));
     } else {
       setSelectedIds(new Set());
     }
@@ -112,7 +155,7 @@ export default function StaffActiveOrders() {
 
   const handleStatusChange = (order, newStatus) => {
     updateMutation.mutate({
-      id: order.id,
+      id: order.orderId,
       data: { 
         status: newStatus, 
         status_history: addStatusEntry(order.status_history, newStatus)
@@ -122,15 +165,16 @@ export default function StaffActiveOrders() {
   };
 
   const handleToggleInvoice = (order) => {
+    const newInvoice = !order.invocieReceived;
     updateMutation.mutate({ 
-      id: order.id, 
-      data: { invoice_received: !order.invoice_received } 
+      id: order.orderId, 
+      data: { invocie_received: newInvoice } 
     });
-    toast.success(`Invoice ${!order.invoice_received ? 'received' : 'pending'}`);
+    toast.success(`Invoice ${newInvoice ? 'received' : 'pending'}`);
   };
 
   const handleTogglePaymentProof = (order) => {
-    const newProof = !order.payment_proof;
+    const newProof = !order.paymentProof;
     const data = { 
       payment_proof: newProof,
       date_payment_proof: newProof ? new Date().toISOString().split('T')[0] : ''
@@ -142,12 +186,12 @@ export default function StaffActiveOrders() {
       data.status_history = addStatusEntry(order.status_history, 'on_execution');
     }
     
-    updateMutation.mutate({ id: order.id, data });
+    updateMutation.mutate({ id: order.orderId, data });
     toast.success(`Payment proof ${newProof ? 'confirmed' : 'removed'}`);
   };
 
   const handleCreateInstruction = () => {
-    const selectedOrders = filteredOrders.filter(o => selectedIds.has(o.id) && !o.non_mandiri_execution);
+    const selectedOrders = filteredOrders.filter(o => selectedIds.has(o.orderId) && !o.nonMandiriExecution);
     if (selectedOrders.length === 0) {
       toast.error('No valid orders selected (non-Mandiri orders excluded)');
       return;
@@ -166,7 +210,7 @@ export default function StaffActiveOrders() {
 
     selectedOrders.forEach(order => {
       updateMutation.mutate({
-        id: order.id,
+        id: order.orderId,
         data: { 
           last_download: new Date().toISOString(),
           status_history: addStatusEntry(order.status_history, 'instruction_exported')
@@ -179,7 +223,7 @@ export default function StaffActiveOrders() {
   };
 
   const handleMarkAsExecuted = () => {
-    const selectedOrders = filteredOrders.filter(o => selectedIds.has(o.id));
+    const selectedOrders = filteredOrders.filter(o => selectedIds.has(o.orderId));
     if (selectedOrders.length === 0) {
       toast.error('No orders selected');
       return;
@@ -187,7 +231,7 @@ export default function StaffActiveOrders() {
 
     selectedOrders.forEach(order => {
       updateMutation.mutate({
-        id: order.id,
+        id: order.orderId,
         data: { 
           status: 'released',
           executed: true,
@@ -206,7 +250,7 @@ export default function StaffActiveOrders() {
   };
 
   const handleDrawerSave = async (data) => {
-    await apiClient.updateOrder(selectedOrder.id, data);
+    await apiClient.updateOrder(selectedOrder.orderId, data);
     toast.success('Order updated');
     setDrawerOpen(false);
     queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
@@ -343,24 +387,24 @@ export default function StaffActiveOrders() {
                 <TableRow><TableCell colSpan={15} className="text-center text-slate-500 py-8">No active orders</TableCell></TableRow>
               ) : filteredOrders.map((order) => (
                 <TableRow 
-                  key={order.id} 
-                  className={`border-slate-200 hover:bg-slate-50 ${order.non_mandiri_execution ? 'opacity-60' : ''}`}
+                  key={order.orderId} 
+                  className={`border-slate-200 hover:bg-slate-50 ${order.nonMandiriExecution ? 'opacity-60' : ''}`}
                 >
                   <TableCell>
                     <Checkbox
-                      checked={selectedIds.has(order.id)}
-                      onCheckedChange={(checked) => handleSelectOne(order.id, checked)}
+                      checked={selectedIds.has(order.orderId)}
+                      onCheckedChange={(checked) => handleSelectOne(order.orderId, checked)}
                     />
                   </TableCell>
                   <TableCell className="text-[#1e3a5f] font-mono text-sm">
                     <div className="flex items-center gap-2">
                       {order.orderId}
                       {order.invoiceFlag && <AlertTriangle className="w-3.5 h-3.5 text-[#f5a623]" />}
-                      {order.non_mandiri_execution && <Badge className="bg-slate-400 text-xs">Non-M</Badge>}
+                      {order.nonMandiriExecution && <Badge className="bg-slate-400 text-xs">Non-M</Badge>}
                     </div>
                   </TableCell>
                   <TableCell className="text-slate-700">
-                    <div className="text-sm font-medium">{usersMap[order.clientId] || '-'}</div>
+                    <div className="text-sm font-medium">{clientsMap[order.clientId]?.name || order.clientId}</div>
                     <div className="text-xs text-slate-500 font-mono">{order.clientId}</div>
                   </TableCell>
                   <TableCell className="text-[#1e3a5f] font-medium">
@@ -368,32 +412,32 @@ export default function StaffActiveOrders() {
                   </TableCell>
                   <TableCell className="text-slate-700 max-w-[120px]">
                     <div className="truncate text-sm">{order.beneficiaryName}</div>
-                    <div className="text-xs text-slate-500 truncate">{order.beneficiaryAddress?.slice(0, 30)}</div>
+                    <div className="text-xs text-slate-500 truncate">{order.beneficiaryAdress?.slice(0, 30)}</div>
                   </TableCell>
                   <TableCell className="text-slate-600 font-mono text-xs max-w-[100px] truncate">
-                    {order.destinationAccountNumber}
+                    {order.destinationAccount}
                   </TableCell>
                   <TableCell className="text-slate-600 text-sm">
                     <div className="truncate max-w-[100px]">{order.bankName}</div>
-                    <div className="font-mono text-xs">{order.bic}</div>
+                    <div className="font-mono text-xs">{order.bankBic}</div>
                   </TableCell>
                   <TableCell className="text-slate-600 text-xs max-w-[120px] truncate">
-                    {order.transactionRemark?.slice(0, 40)}
+                    {order.remark?.slice(0, 40)}
                   </TableCell>
                   <TableCell>
                     <Badge 
-                      className={`cursor-pointer hover:opacity-80 ${order.invoiceReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}
+                      className={`cursor-pointer hover:opacity-80 ${order.invocieReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}
                       onClick={() => handleToggleInvoice(order)}
                     >
-                      -
+                      {order.invocieReceived ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge 
-                      className={`cursor-pointer hover:opacity-80 ${order.payment_proof ? 'bg-emerald-600' : 'bg-slate-400'}`}
+                      className={`cursor-pointer hover:opacity-80 ${order.paymentProof ? 'bg-emerald-600' : 'bg-slate-400'}`}
                       onClick={() => handleTogglePaymentProof(order)}
                     >
-                      {order.payment_proof ? 'Y' : 'N'}
+                      {order.paymentProof ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-700 text-sm">

@@ -74,7 +74,7 @@ function StatusTimeline({ order }) {
             <span className="text-sm font-semibold text-red-600">Rejected</span>
           </div>
         )}
-        {order.status === 'CANCELLED' && (
+        {order.status === 'canceled' && (
           <div className="flex items-center gap-3">
             <Circle className="w-5 h-5 text-slate-500" />
             <span className="text-sm font-semibold text-slate-600">Cancelled</span>
@@ -134,7 +134,7 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
             <div className="bg-slate-50 rounded-lg p-4">
               <DetailRow label="Name" value={order.beneficiaryName} />
               <DetailRow label="Address" value={order.beneficiaryAddress} />
-              <DetailRow label="Account" value={maskAccount(order.destinationAccountNumber)} mono />
+              <DetailRow label="Account" value={maskAccount(order.destinationAccount)} mono />
             </div>
           </div>
 
@@ -145,8 +145,8 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
             <h4 className="font-medium text-slate-800 mb-2">Bank Details</h4>
             <div className="bg-slate-50 rounded-lg p-4">
               <DetailRow label="Bank Name" value={order.bankName} />
-              <DetailRow label="BIC/SWIFT" value={order.bic} mono />
-              <DetailRow label="Country" value={order.countryBank} />
+              <DetailRow label="BIC/SWIFT" value={order.bankBic} mono />
+              <DetailRow label="Country" value={order.bankCountry} />
               <DetailRow label="Address" value={order.bankAddress} />
             </div>
           </div>
@@ -157,7 +157,7 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
           <div>
             <h4 className="font-medium text-slate-800 mb-2">Transaction Remark</h4>
             <div className="bg-slate-50 rounded-lg p-4">
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{order.transactionRemark || '-'}</p>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap">{order.remark || '-'}</p>
             </div>
           </div>
 

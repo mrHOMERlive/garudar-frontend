@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/api/apiClient';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Building, AlertCircle, Search } from 'lucide-react';
+import { Building, AlertCircle, Search, Loader2 } from 'lucide-react';
 import { validateAccountNumber, validateBIC, IBAN_COUNTRIES } from './utils/validators';
-import { COUNTRIES, searchBIC, getBICData } from './utils/countries';
 import {
   Command,
   CommandEmpty,
@@ -21,10 +22,33 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
-export default function BankDetailsSection({ formData, onChange, errors, setErrors }) {
+export default function BankDetailsSection({ formData, onChange, errors, setErrors, countries = [] }) {
   const [bicSearchOpen, setBicSearchOpen] = useState(false);
-  const [bicSearchResults, setBicSearchResults] = useState([]);
+  const [bicSearchQuery, setBicSearchQuery] = useState('');
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+
+  // Загрузка BIC по выбранной стране
+  const { data: bicData = [], isLoading: bicLoading } = useQuery({
+    queryKey: ['bic', formData.country_bank],
+    queryFn: () => apiClient.getBicByCountry(formData.country_bank),
+    enabled: !!formData.country_bank,
+  });
+
+  // Фильтрация активных BIC (isDelete=false, isInactive=false)
+  const activeBics = useMemo(() => 
+    bicData.filter(bic => !bic.isDelete && !bic.isInactive),
+    [bicData]
+  );
+
+  // Поиск BIC по запросу
+  const bicSearchResults = useMemo(() => {
+    if (!bicSearchQuery || bicSearchQuery.length < 2) return [];
+    const query = bicSearchQuery.toUpperCase();
+    return activeBics.filter(bic => 
+      bic.bicSwiftCd?.includes(query) || 
+      bic.nm?.toUpperCase().includes(query)
+    ).slice(0, 20);
+  }, [activeBics, bicSearchQuery]);
 
   const handleAccountChange = (value) => {
     onChange({ destination_account: value });
@@ -61,34 +85,30 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   };
 
   const handleBICSearch = (query) => {
-    if (query.length >= 2) {
-      const results = searchBIC(query, formData.country_bank);
-      setBicSearchResults(results);
-    } else {
-      setBicSearchResults([]);
-    }
+    setBicSearchQuery(query);
   };
 
-  const handleBICSelect = (bic) => {
-    const bicData = getBICData(bic);
+  const handleBICSelect = (bicItem) => {
+    const address = [bicItem.addr1, bicItem.addr2, bicItem.addr3, bicItem.cityNm]
+      .filter(Boolean)
+      .join(', ');
     
-    if (bicData) {
-      onChange({
-        bic,
-        bank_name: bicData.name,
-        bank_address: bicData.address,
-        bank_manual_override: false
-      });
-      
-      // Validate BIC
-      const validation = validateBIC(bic, formData.country_bank);
-      setErrors(prev => ({
-        ...prev,
-        bic: validation.valid ? null : validation.error
-      }));
-    }
+    onChange({
+      bic: bicItem.bicSwiftCd,
+      bank_name: bicItem.nm,
+      bank_address: address,
+      bank_manual_override: false
+    });
+    
+    // Validate BIC
+    const validation = validateBIC(bicItem.bicSwiftCd, formData.country_bank);
+    setErrors(prev => ({
+      ...prev,
+      bic: validation.valid ? null : validation.error
+    }));
     
     setBicSearchOpen(false);
+    setBicSearchQuery('');
   };
 
   const handleBICManualEntry = (value) => {
@@ -101,13 +121,16 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         bic: validation.valid ? null : validation.error
       }));
       
-      // Try to auto-fill bank details
-      const bicData = getBICData(value.toUpperCase());
-      if (bicData) {
+      // Try to auto-fill bank details from API data
+      const foundBic = activeBics.find(b => b.bicSwiftCd === value.toUpperCase());
+      if (foundBic) {
+        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm]
+          .filter(Boolean)
+          .join(', ');
         onChange({
           bic: value,
-          bank_name: bicData.name,
-          bank_address: bicData.address,
+          bank_name: foundBic.nm,
+          bank_address: address,
           bank_manual_override: false
         });
       }
@@ -117,18 +140,21 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const handleManualOverride = (checked) => {
     onChange({ bank_manual_override: checked });
     if (!checked && formData.bic) {
-      const bicData = getBICData(formData.bic);
-      if (bicData) {
+      const foundBic = activeBics.find(b => b.bicSwiftCd === formData.bic.toUpperCase());
+      if (foundBic) {
+        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm]
+          .filter(Boolean)
+          .join(', ');
         onChange({
-          bank_name: bicData.name,
-          bank_address: bicData.address
+          bank_name: foundBic.nm,
+          bank_address: address
         });
       }
     }
   };
 
   const isIBANCountry = IBAN_COUNTRIES.includes(formData.country_bank);
-  const selectedCountry = COUNTRIES.find(c => c.code === formData.country_bank);
+  const selectedCountry = countries.find(c => c.code === formData.country_bank);
 
   return (
     <Card className="border-slate-200 shadow-sm">
@@ -186,7 +212,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 <CommandInput placeholder="Search country..." />
                 <CommandEmpty>No country found.</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
-                  {COUNTRIES.map((country) => (
+                  {countries.map((country) => (
                     <CommandItem
                       key={country.code}
                       value={country.name}
@@ -244,15 +270,21 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                   </div>
                 </CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
+                  {bicLoading && (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <span className="text-sm text-slate-500">Loading...</span>
+                    </div>
+                  )}
                   {bicSearchResults.map((result) => (
                     <CommandItem
-                      key={result.bic}
-                      value={result.bic}
-                      onSelect={() => handleBICSelect(result.bic)}
+                      key={result.id}
+                      value={`${result.bicSwiftCd} ${result.nm}`}
+                      onSelect={() => handleBICSelect(result)}
                     >
                       <div>
-                        <div className="font-mono font-semibold">{result.bic}</div>
-                        <div className="text-xs text-slate-500">{result.name}</div>
+                        <div className="font-mono font-semibold">{result.bicSwiftCd}</div>
+                        <div className="text-xs text-slate-500">{result.nm}</div>
                       </div>
                     </CommandItem>
                   ))}

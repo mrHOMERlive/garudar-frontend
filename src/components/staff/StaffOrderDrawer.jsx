@@ -45,21 +45,21 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   useEffect(() => {
     if (order && open) {
       setStatus(order.status || 'created');
-      setDatePaid(order.date_paid || '');
-      setDataFixing(order.data_fixing || '');
-      setRemunerationType(order.remuneration_type || 'PERCENT');
-      setRemunerationPercentage(order.remuneration_percentage ?? '');
-      setRemunerationFixed(order.remuneration_fixed ?? '');
-      setClientPaymentCurrency(order.client_payment_currency || 'RUB');
-      setExchangeRate(order.exchange_rate ?? '');
-      setExchangeRateMode(order.exchange_rate_mode || 'manual');
-      setInvoiceNumber(order.invoice_number || '');
-      setStaffDescription(order.staff_description || '');
-      setInvoiceReceived(order.invoice_received || false);
-      setPaymentProof(order.payment_proof || false);
-      setDatePaymentProof(order.date_payment_proof || '');
-      setAttachmentTransactionStatus(order.attachment_transaction_status || '');
-      setNonMandiriExecution(order.non_mandiri_execution || false);
+      setDatePaid(order.datePaid || '');
+      setDataFixing(order.dataFixing || '');
+      setRemunerationType(order.remunerationType || 'PERCENT');
+      setRemunerationPercentage(order.remunerationPercentage ?? '');
+      setRemunerationFixed(order.remunerationFixed ?? '');
+      setClientPaymentCurrency(order.clientPaymentCurrency || 'RUB');
+      setExchangeRate(order.exchangeRate ?? '');
+      setExchangeRateMode(order.exchangeRateMode || 'manual');
+      setInvoiceNumber(order.invoiceNumber || '');
+      setStaffDescription(order.staffDescription || '');
+      setInvoiceReceived(order.invoiceReceived || false);
+      setPaymentProof(order.paymentProof || false);
+      setDatePaymentProof(order.datePaymentProof || '');
+      setAttachmentTransactionStatus(order.attachmentTransactionStatus || '');
+      setNonMandiriExecution(order.nonMandiriExecution || false);
     }
   }, [order, open]);
 
@@ -98,25 +98,25 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       const updates = {
         status,
-        date_paid: datePaid,
-        data_fixing: dataFixing,
-        remuneration_type: remunerationType,
-        remuneration_percentage: remunerationPercentage !== '' ? parseFloat(remunerationPercentage) : null,
-        remuneration_fixed: remunerationFixed !== '' ? parseFloat(remunerationFixed) : null,
-        amount_remuneration: amountRemuneration,
-        client_payment_currency: clientPaymentCurrency,
-        exchange_rate: exchangeRate !== '' ? parseFloat(exchangeRate) : null,
-        exchange_rate_mode: exchangeRateMode,
-        sum_to_be_paid: amountTotalInClientCurrency,
-        currency_to_be_paid: clientPaymentCurrency,
-        invoice_number: invoiceNumber,
-        staff_description: staffDescription,
-        invoice_received: invoiceReceived,
-        payment_proof: paymentProof,
-        date_payment_proof: datePaymentProof,
-        attachment_transaction_status: attachmentTransactionStatus,
-        non_mandiri_execution: nonMandiriExecution,
-        status_history: order.status !== status ? addStatusEntry(order.status_history, status) : order.status_history
+        datePaid,
+        dataFixing,
+        remunerationType,
+        remunerationPercentage: remunerationPercentage !== '' ? parseFloat(remunerationPercentage) : null,
+        remunerationFixed: remunerationFixed !== '' ? parseFloat(remunerationFixed) : null,
+        amountRemuneration: amountRemuneration,
+        clientPaymentCurrency,
+        exchangeRate: exchangeRate !== '' ? parseFloat(exchangeRate) : null,
+        exchangeRateMode,
+        sumToBePaid: amountTotalInClientCurrency,
+        currencyToBePaid: clientPaymentCurrency,
+        invoiceNumber,
+        staffDescription,
+        invoiceReceived,
+        paymentProof,
+        datePaymentProof,
+        attachmentTransactionStatus,
+        nonMandiriExecution,
+        statusHistory: order.status !== status ? addStatusEntry(order.statusHistory, status) : order.statusHistory
       };
 
       await onSave(updates);
@@ -125,7 +125,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     }
   };
 
-  const historyEntries = parseStatusHistory(order.status_history);
+  const historyEntries = parseStatusHistory(order.statusHistory);
 
   const handleProofUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -133,8 +133,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
     setUploadingProof(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setAttachmentTransactionStatus(file_url);
+      const { fileUrl } = await base44.integrations.Core.UploadFile({ file });
+      setAttachmentTransactionStatus(fileUrl);
       toast.success('Payment proof uploaded successfully');
     } catch (error) {
       toast.error('Failed to upload payment proof');
@@ -153,12 +153,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
     setLoading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const field = type === 'sales_contract' ? 'attachment_sales_contract' :
-                  type === 'invoice' ? 'attachment_invoice' :
-                  type === 'word_order' ? 'attachment_word_order' : 'attachment_other';
+      const { fileUrl } = await base44.integrations.Core.UploadFile({ file });
+      const field = type === 'sales_contract' ? 'attachmentSalesContract' :
+                  type === 'invoice' ? 'attachmentInvoice' :
+                  type === 'word_order' ? 'attachmentWordOrder' : 'attachmentOther';
 
-      await base44.entities.RemittanceOrder.update(order.id, { [field]: file_url });
+      await base44.entities.RemittanceOrder.update(order.id, { [field]: fileUrl });
       toast.success('Document uploaded successfully');
 
       const updatedOrder = await base44.entities.RemittanceOrder.filter({ id: order.id });
@@ -177,7 +177,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       <SheetContent className="w-full sm:max-w-2xl bg-white border-slate-200 text-slate-900 flex flex-col overflow-hidden">
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            #{order.order_number}
+            #{order.orderId}
             <OrderStatusBadge status={status} />
           </SheetTitle>
         </SheetHeader>
@@ -186,10 +186,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
           <div className="space-y-6">
             {/* Order Info */}
             <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2">
-              <div><span className="text-slate-500 font-medium">Client:</span> {order.client_name || order.client_id}</div>
+              <div><span className="text-slate-500 font-medium">Client:</span> {order.clientId}</div>
               <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{order.amount?.toLocaleString()} {order.currency}</span></div>
-              <div><span className="text-slate-500 font-medium">Beneficiary:</span> {order.beneficiary_name}</div>
-              <div><span className="text-slate-500 font-medium">Bank:</span> {order.bank_name} ({order.bic})</div>
+              <div><span className="text-slate-500 font-medium">Beneficiary:</span> {order.beneficiaryName}</div>
+              <div><span className="text-slate-500 font-medium">Bank:</span> {order.bankName} ({order.bankBic})</div>
             </div>
 
             <Separator className="bg-slate-200" />
@@ -360,10 +360,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </SelectContent>
                 </Select>
               </div>
-              {order.csv_data && (
+              {order.csvData && (
                 <a
-                  href={`data:text/csv;charset=utf-8,${encodeURIComponent(order.csv_data)}`}
-                  download={`invoice_${order.order_number}.csv`}
+                  href={`data:text/csv;charset=utf-8,${encodeURIComponent(order.csvData)}`}
+                  download={`invoice_${order.orderId}.csv`}
                   className="inline-flex items-center gap-2 text-xs text-[#1e3a5f] hover:underline"
                 >
                   <Download className="w-3 h-3" />
@@ -465,8 +465,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       {uploadingSalesContract ? 'Uploading...' : 'Upload'}
                     </Button>
                   </label>
-                  {order.attachment_sales_contract && (
-                    <a href={order.attachment_sales_contract} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentSalesContract && (
+                    <a href={order.attachmentSalesContract} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-slate-300">
                         <Download className="w-3 h-3" />
                       </Button>
@@ -498,8 +498,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       {uploadingInvoice ? 'Uploading...' : 'Upload'}
                     </Button>
                   </label>
-                  {order.attachment_invoice && (
-                    <a href={order.attachment_invoice} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentInvoice && (
+                    <a href={order.attachmentInvoice} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-slate-300">
                         <Download className="w-3 h-3" />
                       </Button>
@@ -531,8 +531,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       {uploadingOther ? 'Uploading...' : 'Upload'}
                     </Button>
                   </label>
-                  {order.attachment_other && (
-                    <a href={order.attachment_other} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentOther && (
+                    <a href={order.attachmentOther} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-slate-300">
                         <Download className="w-3 h-3" />
                       </Button>
@@ -575,8 +575,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Client'}
                       </Button>
                     </label>
-                    {order.attachment_word_order_signed && (
-                      <a href={order.attachment_word_order_signed} target="_blank" rel="noopener noreferrer">
+                    {order.attachmentWordOrderSigned && (
+                      <a href={order.attachmentWordOrderSigned} target="_blank" rel="noopener noreferrer">
                         <Button size="sm" variant="outline" className="border-blue-300">
                           <Download className="w-3 h-3" />
                         </Button>
@@ -612,7 +612,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             <div>
               <Label className="text-xs text-slate-600">Last Instruction Export</Label>
               <div className="mt-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded p-2">
-                {order.last_download ? moment(order.last_download).format('DD/MM/YYYY HH:mm') : 'Not exported yet'}
+                {order.lastDownload ? moment(order.lastDownload).format('DD/MM/YYYY HH:mm') : 'Not exported yet'}
               </div>
             </div>
 
@@ -648,7 +648,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
                   {historyEntries.slice().reverse().map((h, i) => (
                     <div key={i} className="flex justify-between text-xs bg-slate-50 rounded p-2 border border-slate-200">
-                      <span className="font-medium text-slate-700">{h.status?.replace('_', ' ').toUpperCase()}</span>
+                      <span className="font-medium text-slate-700">{h.status?.replace(/_/g, ' ').toUpperCase()}</span>
                       <span className="text-slate-500">{moment(h.timestamp).format('DD/MM/YY HH:mm')}</span>
                     </div>
                   ))}

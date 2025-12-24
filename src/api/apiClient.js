@@ -62,7 +62,7 @@ class ApiClient {
     const data = await this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
-    }, true); // skipAuthRedirect = true для логина
+    }, true);
     
     if (data.token) {
       this.setToken(data.token);
@@ -100,45 +100,79 @@ class ApiClient {
     return this.request(`/users/${id}`);
   }
 
-  // Orders
-  async getOrders() {
-    return this.request('/orders');
+  // Clients
+  async getClientById(clientId) {
+    return this.request(`/clients/${clientId}`);
   }
 
-  async getOrderById(id) {
-    return this.request(`/orders/${id}`);
+  async createClient(clientData) {
+    return this.request('/clients', {
+      method: 'POST',
+      body: JSON.stringify(clientData),
+    });
+  }
+
+  async getMyClient() {
+    return this.request('/clients/me');
+  }
+
+  // Orders POBO
+  async getOrders(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.include_deleted) {
+      queryParams.append('include_deleted', 'true');
+    }
+    const queryString = queryParams.toString();
+    return this.request(`/orders/pobo${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getOrderById(orderId) {
+    return this.request(`/orders/pobo/${orderId}`);
   }
 
   async createOrder(orderData) {
-    return this.request('/orders', {
+    return this.request('/orders/pobo', {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
   }
 
-  async updateOrder(id, orderData) {
-    return this.request(`/orders/${id}`, {
+  async updateOrder(orderId, orderData) {
+    return this.request(`/orders/pobo/${orderId}`, {
       method: 'PUT',
       body: JSON.stringify(orderData),
     });
   }
 
-  async deleteOrder(id) {
-    return this.request(`/orders/${id}`, {
+  async deleteOrder(orderId) {
+    return this.request(`/orders/pobo/${orderId}`, {
       method: 'DELETE',
     });
   }
 
+  // Dictionaries
   async getCountries() {
-    return this.request('/orders/countries');
+    return this.request('/dicts/countries');
   }
 
   async getCurrencies() {
-    return this.request('/orders/currency');
+    return this.request('/dicts/currencies');
   }
 
   async getBicByCountry(country) {
-    return this.request(`/orders/bic?country=${encodeURIComponent(country)}`);
+    return this.request(`/dicts/bic?country=${encodeURIComponent(country)}`);
+  }
+
+  // Settings
+  async getSettings() {
+    return this.request('/settings');
+  }
+
+  async updateSetting(key, value) {
+    return this.request(`/settings/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    });
   }
 
   // Entries
@@ -158,7 +192,7 @@ class ApiClient {
     return this.request(`/entries/${id}`);
   }
 
-  // Users (для работы с клиентами - users с role: USER)
+  // Users management (для работы с клиентами - users с role: USER)
   async createUser(userData) {
     return this.request('/users', {
       method: 'POST',
