@@ -102,6 +102,11 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
     const newDocs = [...documents];
     newDocs[index][field] = value;
     setDocuments(newDocs);
+    
+    // Sync first document number with formData.remark_inv_no
+    if (index === 0 && field === 'number') {
+      onChange({ remark_inv_no: value });
+    }
   };
 
   return (

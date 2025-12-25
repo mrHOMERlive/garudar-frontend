@@ -6,15 +6,44 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, CheckCircle, X, Trash2 } from 'lucide-react';
 
-export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
+export default function ClientTermsDrawer({ order, client, open, onClose, onUpdate }) {
   const [uploadingWordOrder, setUploadingWordOrder] = useState(false);
   const [uploadingPaymentProof, setUploadingPaymentProof] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const cancelMutation = useMutation({
+    mutationFn: () => apiClient.cancelOrder(order?.orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-orders'] });
+      toast.success('Order cancelled');
+      onUpdate?.();
+      onClose();
+    },
+    onError: () => {
+      toast.error('Failed to cancel order');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiClient.deleteOrder(order?.orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-orders'] });
+      toast.success('Order deleted');
+      onUpdate?.();
+      onClose();
+    },
+    onError: () => {
+      toast.error('Failed to delete order');
+    },
+  });
 
   if (!order) return null;
 
@@ -24,12 +53,12 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
 
     setUploadingWordOrder(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.RemittanceOrder.update(order.id, { 
-        attachment_word_order_signed: file_url 
+      const { file_url } = await apiClient.uploadFile(file);
+      await apiClient.updateOrder(order.orderId, { 
+        attachmentWordOrderSigned: file_url 
       });
       toast.success('Signed order uploaded successfully');
-      if (order) order.attachment_word_order_signed = file_url;
+      onUpdate?.();
     } catch (error) {
       toast.error('Failed to upload signed order');
     } finally {
@@ -43,17 +72,14 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
 
     setUploadingPaymentProof(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.RemittanceOrder.update(order.id, {
-        attachment_transaction_status: file_url,
-        payment_proof: true,
-        date_payment_proof: new Date().toISOString().split('T')[0]
+      const { file_url } = await apiClient.uploadFile(file);
+      await apiClient.updateOrder(order.orderId, {
+        attachmentTransactionStatus: file_url,
+        paymentProof: true,
+        datePaymentProof: new Date().toISOString().split('T')[0]
       });
       toast.success('Payment proof uploaded successfully');
-      if (order) {
-        order.attachment_transaction_status = file_url;
-        order.payment_proof = true;
-      }
+      onUpdate?.();
     } catch (error) {
       toast.error('Failed to upload payment proof');
     } finally {
@@ -66,7 +92,7 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
       <SheetContent className="w-full sm:max-w-2xl bg-white border-slate-200 text-slate-900 flex flex-col overflow-hidden">
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            Order #{order.order_number}
+            Order #{order.orderId}
           </SheetTitle>
         </SheetHeader>
 
@@ -74,10 +100,10 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
           <div className="space-y-6">
             {/* Order Info */}
             <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-200">
-              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{order.client_name || order.client_id}</span></div>
+              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{client?.client_name || order.clientId}</span></div>
               <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{order.amount?.toLocaleString()} {order.currency}</span></div>
-              <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiary_name}</span></div>
-              <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bank_name} ({order.bic})</span></div>
+              <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiaryName}</span></div>
+              <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bankName} ({order.bankBic})</span></div>
             </div>
 
             <Separator className="bg-slate-200" />
@@ -89,7 +115,7 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
               {/* Payment Proof Status */}
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
-                  {order.payment_proof ? (
+                  {order.paymentProof ? (
                     <CheckCircle className="w-4 h-4 text-emerald-600" />
                   ) : (
                     <div className="w-4 h-4 rounded-full border-2 border-slate-400" />
@@ -97,7 +123,7 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
                   <Label className="text-xs text-slate-700 font-medium">Payment Proof</Label>
                 </div>
                 <div className="text-xs text-slate-600">
-                  {order.payment_proof ? 'Submitted' : 'Not submitted'}
+                  {order.paymentProof ? 'Submitted' : 'Not submitted'}
                 </div>
               </div>
 
@@ -106,82 +132,82 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div className="text-xs text-slate-500 mb-1">Remuneration Type</div>
-                    <div className="font-medium text-slate-900">{order.remuneration_type || '-'}</div>
+                    <div className="font-medium text-slate-900">{order.remunerationType || '-'}</div>
                   </div>
-                  {order.remuneration_type === 'PERCENT' && order.remuneration_percentage && (
+                  {order.remunerationType === 'PERCENT' && order.remunerationPercentage && (
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Remuneration %</div>
-                      <div className="font-medium text-slate-900">{order.remuneration_percentage}%</div>
+                      <div className="font-medium text-slate-900">{order.remunerationPercentage}%</div>
                     </div>
                   )}
-                  {order.remuneration_type === 'FIXED' && order.remuneration_fixed && (
+                  {order.remunerationType === 'FIXED' && order.remunerationFixed && (
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Remuneration Fixed</div>
-                      <div className="font-medium text-slate-900">{order.remuneration_fixed?.toLocaleString()} {order.currency}</div>
+                      <div className="font-medium text-slate-900">{order.remunerationFixed?.toLocaleString()} {order.currency}</div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {order.amount_remuneration && (
+              {order.amountRemuneration && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="text-xs text-slate-600 mb-1">Amount Remuneration</div>
                   <div className="text-lg font-bold text-[#1e3a5f]">
-                    {order.amount_remuneration.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
+                    {order.amountRemuneration.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
                   </div>
                 </div>
               )}
 
-              {order.exchange_rate && (
+              {order.exchangeRate && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Client Payment Currency</div>
-                      <div className="font-medium text-slate-900">{order.client_payment_currency || 'RUB'}</div>
+                      <div className="font-medium text-slate-900">{order.clientPaymentCurrency || 'RUB'}</div>
                     </div>
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Exchange Rate</div>
-                      <div className="font-medium text-slate-900">{order.exchange_rate}</div>
+                      <div className="font-medium text-slate-900">{order.exchangeRate}</div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {order.exchange_rate && order.amount && (
+              {order.exchangeRate && order.amount && (
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">Remuneration in {order.client_payment_currency || 'RUB'}</div>
+                    <div className="text-xs text-slate-600 mb-1">Remuneration in {order.clientPaymentCurrency || 'RUB'}</div>
                     <div className="text-sm font-bold text-[#1e3a5f]">
-                      {((order.amount_remuneration || 0) * (order.exchange_rate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {((order.amountRemuneration || 0) * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   </div>
                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">FV in {order.client_payment_currency || 'RUB'}</div>
+                    <div className="text-xs text-slate-600 mb-1">FV in {order.clientPaymentCurrency || 'RUB'}</div>
                     <div className="text-sm font-bold text-purple-700">
-                      {(order.amount * (order.exchange_rate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {(order.amount * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   </div>
                   <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">Total in {order.client_payment_currency || 'RUB'}</div>
+                    <div className="text-xs text-slate-600 mb-1">Total in {order.clientPaymentCurrency || 'RUB'}</div>
                     <div className="text-sm font-bold text-emerald-700">
-                      {order.sum_to_be_paid?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 
-                       ((order.amount_remuneration || 0) * (order.exchange_rate || 1) + order.amount * (order.exchange_rate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {order.sumToBePaid?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 
+                       ((order.amountRemuneration || 0) * (order.exchangeRate || 1) + order.amount * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                {order.data_fixing && (
+                {order.dataFixing && (
                   <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
                     <div className="text-xs text-slate-600 mb-1">Data Fixing</div>
-                    <div className="text-sm text-slate-900">{order.data_fixing}</div>
+                    <div className="text-sm text-slate-900">{order.dataFixing}</div>
                   </div>
                 )}
-                {order.date_paid && (
+                {order.datePaid && (
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                     <div className="text-xs text-slate-600 mb-1">Date Paid</div>
-                    <div className="text-sm text-slate-900">{new Date(order.date_paid).toLocaleDateString()}</div>
+                    <div className="text-sm text-slate-900">{new Date(order.datePaid).toLocaleDateString()}</div>
                   </div>
                 )}
               </div>
@@ -195,8 +221,8 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
               
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <Label className="text-xs text-slate-700 mb-2 block font-medium">WORD Order (from Staff)</Label>
-                {order.attachment_word_order ? (
-                  <a href={order.attachment_word_order} target="_blank" rel="noopener noreferrer">
+                {order.attachmentWordOrder ? (
+                  <a href={order.attachmentWordOrder} target="_blank" rel="noopener noreferrer">
                     <Button
                       type="button"
                       size="sm"
@@ -234,8 +260,8 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
                       {uploadingWordOrder ? 'Uploading...' : 'Upload Signed Order'}
                     </Button>
                   </label>
-                  {order.attachment_word_order_signed && (
-                    <a href={order.attachment_word_order_signed} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentWordOrderSigned && (
+                    <a href={order.attachmentWordOrderSigned} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-green-300">
                         <Download className="w-3 h-3" />
                       </Button>
@@ -273,17 +299,17 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
                       {uploadingPaymentProof ? 'Uploading...' : 'Upload Payment Proof'}
                     </Button>
                   </label>
-                  {order.attachment_transaction_status && (
-                    <a href={order.attachment_transaction_status} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentTransactionStatus && (
+                    <a href={order.attachmentTransactionStatus} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-blue-300">
                         <Download className="w-3 h-3" />
                       </Button>
                     </a>
                   )}
                 </div>
-                {order.date_payment_proof && (
+                {order.datePaymentProof && (
                   <div className="mt-2 text-xs text-slate-500">
-                    Uploaded: {new Date(order.date_payment_proof).toLocaleDateString()}
+                    Uploaded: {new Date(order.datePaymentProof).toLocaleDateString()}
                   </div>
                 )}
               </div>
@@ -334,18 +360,7 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No, Keep It</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  await base44.entities.RemittanceOrder.update(order.id, { status: 'cancelled' });
-                  toast.success('Order cancelled');
-                  onUpdate?.();
-                  onClose();
-                } catch (error) {
-                  toast.error('Failed to cancel order');
-                }
-              }}
-            >
+            <AlertDialogAction onClick={() => cancelMutation.mutate()}>
               Yes, Cancel Order
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -362,18 +377,7 @@ export default function ClientTermsDrawer({ order, open, onClose, onUpdate }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No, Keep It</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  await base44.entities.RemittanceOrder.update(order.id, { deleted: true });
-                  toast.success('Order deleted');
-                  onUpdate?.();
-                  onClose();
-                } catch (error) {
-                  toast.error('Failed to delete order');
-                }
-              }}
-            >
+            <AlertDialogAction onClick={() => deleteMutation.mutate()}>
               Yes, Delete Order
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -121,6 +121,7 @@ export default function CreateOrder() {
         bank_name: orderData.bank_name,
         bank_address: orderData.bank_address,
         remark: orderData.transaction_remark,
+        invoice_number: orderData.remark_inv_no,
         invocie_required: true,
         invocie_received: false,
         payment_proof: false,

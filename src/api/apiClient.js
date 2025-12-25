@@ -150,6 +150,34 @@ class ApiClient {
     });
   }
 
+  async cancelOrder(orderId) {
+    return this.updateOrder(orderId, { status: 'canceled' });
+  }
+
+  async uploadFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = this.getToken();
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/upload`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Upload failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
   // Dictionaries
   async getCountries() {
     return this.request('/dicts/countries');

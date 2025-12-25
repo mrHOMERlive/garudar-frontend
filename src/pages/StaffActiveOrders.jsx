@@ -18,18 +18,19 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Search, FileDown, CheckCircle, Trash2, AlertTriangle, X, Pencil } from 'lucide-react';
+import { ArrowLeft, Search, FileDown, CheckCircle, Trash2, AlertTriangle, X, Pencil, FileText, Download } from 'lucide-react';
 import {
   Popover, PopoverContent, PopoverTrigger
 } from "@/components/ui/popover";
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import StaffOrderDrawer from '@/components/staff/StaffOrderDrawer';
 import { generateTxtInstruction } from '@/components/staff/utils/instructionGenerator';
+import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import moment from 'moment';
 
-const ACTIVE_STATUSES = ['created', 'DRAFT', 'CHECK', 'ON_EXECUTION'];
-const ALL_STATUSES = ['DRAFT', 'CHECK', 'REJECTED', 'ON_EXECUTION', 'RELEASED', 'canceled'];
+const ACTIVE_STATUSES = ['created', 'draft', 'check', 'pending_payment', 'on_execution'];
+const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
 
 export default function StaffActiveOrders() {
   const [search, setSearch] = useState('');
@@ -364,89 +365,83 @@ export default function StaffActiveOrders() {
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Order ID</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Client</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Amount</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Beneficiary</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Account</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Bank/BIC</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Remark</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Inv</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Proof</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Remun%</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">To Pay</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Status</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Last Export</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Order ID</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Client</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Amount</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Beneficiary</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Account</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Bank/BIC</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Remark</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Inv Rcv</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Proof</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Non-M</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Inv#</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs">Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-xs text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={15} className="text-center text-slate-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={14} className="text-center text-slate-500 py-8 text-xs">Loading...</TableCell></TableRow>
               ) : filteredOrders.length === 0 ? (
-                <TableRow><TableCell colSpan={15} className="text-center text-slate-500 py-8">No active orders</TableCell></TableRow>
+                <TableRow><TableCell colSpan={14} className="text-center text-slate-500 py-8 text-xs">No active orders</TableCell></TableRow>
               ) : filteredOrders.map((order) => (
                 <TableRow 
                   key={order.orderId} 
                   className={`border-slate-200 hover:bg-slate-50 ${order.nonMandiriExecution ? 'opacity-60' : ''}`}
                 >
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Checkbox
                       checked={selectedIds.has(order.orderId)}
                       onCheckedChange={(checked) => handleSelectOne(order.orderId, checked)}
                     />
                   </TableCell>
-                  <TableCell className="text-[#1e3a5f] font-mono text-sm">
-                    <div className="flex items-center gap-2">
+                  <TableCell className="text-[#1e3a5f] font-mono text-xs py-2">
+                    <div className="flex items-center gap-1">
                       {order.orderId}
-                      {order.invoiceFlag && <AlertTriangle className="w-3.5 h-3.5 text-[#f5a623]" />}
-                      {order.nonMandiriExecution && <Badge className="bg-slate-400 text-xs">Non-M</Badge>}
+                      {order.invoiceFlag && <AlertTriangle className="w-3 h-3 text-[#f5a623]" />}
                     </div>
                   </TableCell>
-                  <TableCell className="text-slate-700">
-                    <div className="text-sm font-medium">{clientsMap[order.clientId]?.name || order.clientId}</div>
+                  <TableCell className="text-slate-700 py-2">
+                    <div className="text-xs">{clientsMap[order.clientId]?.name || '-'}</div>
                     <div className="text-xs text-slate-500 font-mono">{order.clientId}</div>
                   </TableCell>
-                  <TableCell className="text-[#1e3a5f] font-medium">
-                    {parseFloat(order.amount)?.toLocaleString()} {order.currency}
+                  <TableCell className="text-[#1e3a5f] font-medium text-xs py-2">
+                    {order.amount?.toLocaleString()} {order.currency}
                   </TableCell>
-                  <TableCell className="text-slate-700 max-w-[120px]">
-                    <div className="truncate text-sm">{order.beneficiaryName}</div>
+                  <TableCell className="text-slate-700 max-w-[120px] py-2">
+                    <div className="truncate text-xs">{order.beneficiaryName}</div>
                     <div className="text-xs text-slate-500 truncate">{order.beneficiaryAdress?.slice(0, 30)}</div>
                   </TableCell>
-                  <TableCell className="text-slate-600 font-mono text-xs max-w-[100px] truncate">
+                  <TableCell className="text-slate-600 font-mono text-xs max-w-[100px] truncate py-2">
                     {order.destinationAccount}
                   </TableCell>
-                  <TableCell className="text-slate-600 text-sm">
+                  <TableCell className="text-slate-600 text-xs py-2">
                     <div className="truncate max-w-[100px]">{order.bankName}</div>
                     <div className="font-mono text-xs">{order.bankBic}</div>
                   </TableCell>
-                  <TableCell className="text-slate-600 text-xs max-w-[120px] truncate">
+                  <TableCell className="text-slate-600 text-xs max-w-[120px] truncate py-2">
                     {order.remark?.slice(0, 40)}
                   </TableCell>
-                  <TableCell>
-                    <Badge 
-                      className={`cursor-pointer hover:opacity-80 ${order.invocieReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}
-                      onClick={() => handleToggleInvoice(order)}
-                    >
+                  <TableCell className="py-2">
+                    <Badge className={`text-xs ${order.invocieReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}>
                       {order.invocieReceived ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <Badge 
-                      className={`cursor-pointer hover:opacity-80 ${order.paymentProof ? 'bg-emerald-600' : 'bg-slate-400'}`}
-                      onClick={() => handleTogglePaymentProof(order)}
-                    >
+                  <TableCell className="py-2">
+                    <Badge className={`text-xs ${order.paymentProof ? 'bg-emerald-600' : 'bg-slate-400'}`}>
                       {order.paymentProof ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-slate-700 text-sm">
-                    {order.remuneration_percent ? `${order.remuneration_percent}%` : '-'}
+                  <TableCell className="py-2">
+                    <Badge className={`text-xs ${order.nonMandiriExecution ? 'bg-orange-500' : 'bg-slate-300'}`}>
+                      {order.nonMandiriExecution ? 'Y' : 'N'}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="text-[#1e3a5f] text-sm font-medium">
-                    {order.sum_to_be_paid ? `${order.sum_to_be_paid.toLocaleString()} ${order.currency_to_be_paid || order.currency}` : '-'}
+                  <TableCell className="text-slate-700 text-xs font-mono py-2">
+                    {order.invoiceNumber || '-'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Popover>
                       <PopoverTrigger>
                         <div className="cursor-pointer hover:opacity-80">
@@ -459,7 +454,7 @@ export default function StaffActiveOrders() {
                             <button
                               key={s}
                               onClick={() => handleStatusChange(order, s)}
-                              className={`w-full text-left px-3 py-1.5 text-sm rounded hover:bg-slate-100 text-slate-700 ${order.status === s ? 'bg-slate-100 font-medium' : ''}`}
+                              className={`w-full text-left px-3 py-1.5 text-xs rounded hover:bg-slate-100 text-slate-700 ${order.status === s ? 'bg-slate-100 font-medium' : ''}`}
                             >
                               {s.replace('_', ' ').toUpperCase()}
                             </button>
@@ -468,18 +463,47 @@ export default function StaffActiveOrders() {
                       </PopoverContent>
                     </Popover>
                   </TableCell>
-                  <TableCell className="text-slate-500 text-xs">
-                    {order.last_download ? moment(order.last_download).format('DD/MM/YY HH:mm') : '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      onClick={() => openDrawer(order)} 
-                      size="sm"
-                      className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
-                    >
-                      <Pencil className="w-3.5 h-3.5 mr-1" />
-                      Edit
-                    </Button>
+                  <TableCell className="text-right py-2">
+                    <div className="flex items-center gap-1 justify-end flex-wrap">
+                      {order.attachmentSalesContract && (
+                        <a href={order.attachmentSalesContract} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </a>
+                      )}
+                      {order.attachmentInvoice && (
+                        <a href={order.attachmentInvoice} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </a>
+                      )}
+                      {order.attachmentOther && (
+                        <a href={order.attachmentOther} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </a>
+                      )}
+                      <Button 
+                        onClick={() => downloadWordTemplate(order)} 
+                        size="sm"
+                        variant="outline"
+                        className="border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white h-7 px-2 text-xs"
+                      >
+                        <FileText className="w-3 h-3 mr-1" />
+                        Order
+                      </Button>
+                      <Button 
+                        onClick={() => openDrawer(order)} 
+                        size="sm"
+                        className="bg-[#1e3a5f] hover:bg-[#152a45] text-white h-7 px-2 text-xs"
+                      >
+                        <Pencil className="w-3 h-3 mr-1" />
+                        Terms
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
