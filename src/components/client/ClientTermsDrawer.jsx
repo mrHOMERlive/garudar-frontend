@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { apiClient } from '@/api/apiClient';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, CheckCircle, X, Trash2 } from 'lucide-react';
 
@@ -18,6 +18,12 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const { data: terms, isLoading: termsLoading } = useQuery({
+    queryKey: ['order-terms', order?.orderId],
+    queryFn: () => apiClient.getOrderTerms(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
 
   const cancelMutation = useMutation({
     mutationFn: () => apiClient.cancelOrder(order?.orderId),
@@ -111,7 +117,6 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
             {/* TERMS Section */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Terms</h3>
-              
               {/* Payment Proof Status */}
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
@@ -126,94 +131,93 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                   {order.paymentProof ? 'Submitted' : 'Not submitted'}
                 </div>
               </div>
-
-              {/* Remuneration Info */}
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <div className="text-xs text-slate-500 mb-1">Remuneration Type</div>
-                    <div className="font-medium text-slate-900">{order.remunerationType || '-'}</div>
-                  </div>
-                  {order.remunerationType === 'PERCENT' && order.remunerationPercentage && (
-                    <div>
-                      <div className="text-xs text-slate-500 mb-1">Remuneration %</div>
-                      <div className="font-medium text-slate-900">{order.remunerationPercentage}%</div>
-                    </div>
-                  )}
-                  {order.remunerationType === 'FIXED' && order.remunerationFixed && (
-                    <div>
-                      <div className="text-xs text-slate-500 mb-1">Remuneration Fixed</div>
-                      <div className="font-medium text-slate-900">{order.remunerationFixed?.toLocaleString()} {order.currency}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {order.amountRemuneration && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-xs text-slate-600 mb-1">Amount Remuneration</div>
-                  <div className="text-lg font-bold text-[#1e3a5f]">
-                    {order.amountRemuneration.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
-                  </div>
-                </div>
-              )}
-
-              {order.exchangeRate && (
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <div className="text-xs text-slate-500 mb-1">Client Payment Currency</div>
-                      <div className="font-medium text-slate-900">{order.clientPaymentCurrency || 'RUB'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-500 mb-1">Exchange Rate</div>
-                      <div className="font-medium text-slate-900">{order.exchangeRate}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {order.exchangeRate && order.amount && (
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">Remuneration in {order.clientPaymentCurrency || 'RUB'}</div>
-                    <div className="text-sm font-bold text-[#1e3a5f]">
-                      {((order.amountRemuneration || 0) * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">FV in {order.clientPaymentCurrency || 'RUB'}</div>
-                    <div className="text-sm font-bold text-purple-700">
-                      {(order.amount * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                    <div className="text-xs text-slate-600 mb-1">Total in {order.clientPaymentCurrency || 'RUB'}</div>
-                    <div className="text-sm font-bold text-emerald-700">
-                      {order.sumToBePaid?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 
-                       ((order.amountRemuneration || 0) * (order.exchangeRate || 1) + order.amount * (order.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                {order.dataFixing && (
-                  <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                    <div className="text-xs text-slate-600 mb-1">Data Fixing</div>
-                    <div className="text-sm text-slate-900">{order.dataFixing}</div>
-                  </div>
-                )}
-                {order.datePaid && (
-                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-600 mb-1">Date Paid</div>
-                    <div className="text-sm text-slate-900">{new Date(order.datePaid).toLocaleDateString()}</div>
-                  </div>
-                )}
-              </div>
             </div>
 
             <Separator className="bg-slate-200" />
+              {termsLoading ? (
+                <div className="text-sm text-slate-500">Loading terms...</div>
+              ) : terms ? (
+                <>
+                
+                  {/* Remuneration Info */}
+                  {terms.remunerationType && (
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <div className="text-xs text-slate-500 mb-1">Remuneration Type</div>
+                          <div className="font-medium text-slate-900">{terms.remunerationType.toUpperCase()}</div>
+                        </div>
+                        {terms.remunerationType === 'percent' && terms.remunerationPercentage && (
+                          <div>
+                            <div className="text-xs text-slate-500 mb-1">Remuneration %</div>
+                            <div className="font-medium text-slate-900">{parseFloat(terms.remunerationPercentage)}%</div>
+                          </div>
+                        )}
+                        {terms.remunerationType === 'fixed' && terms.remunerationFixed && (
+                          <div>
+                            <div className="text-xs text-slate-500 mb-1">Remuneration Fixed</div>
+                            <div className="font-medium text-slate-900">{parseFloat(terms.remunerationFixed).toLocaleString()} {terms.currency}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {terms.amountRemuneration && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-600 mb-1">Amount Remuneration</div>
+                      <div className="text-lg font-bold text-[#1e3a5f]">
+                        {parseFloat(terms.amountRemuneration).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {terms.currency}
+                      </div>
+                    </div>
+                  )}
+
+                  {terms.exchangeRate && (
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <div className="text-xs text-slate-500 mb-1">Client Payment Currency</div>
+                          <div className="font-medium text-slate-900">{terms.clientPaymentCurrency || 'RUB'}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-500 mb-1">Exchange Rate</div>
+                          <div className="font-medium text-slate-900">{parseFloat(terms.exchangeRate).toFixed(4)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {terms.amountToBePaid && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-600 mb-1">Total Amount to be Paid</div>
+                      <div className="text-lg font-bold text-emerald-700">
+                        {parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {terms.clientPaymentCurrency || 'RUB'}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {terms.dataFixing && (
+                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <div className="text-xs text-slate-600 mb-1">Data Fixing</div>
+                        <div className="text-sm text-slate-900">{terms.dataFixing}</div>
+                      </div>
+                    )}
+                    {terms.datePaid && (
+                      <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                        <div className="text-xs text-slate-600 mb-1">Date Paid</div>
+                        <div className="text-sm text-slate-900">{terms.datePaid}</div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-500 text-center">
+                  No terms information available yet. Staff will add terms details soon.
+                </div>
+              )}
+
+              
 
             {/* WORD Order Section */}
             <div className="space-y-3">

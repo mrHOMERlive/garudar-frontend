@@ -154,6 +154,17 @@ class ApiClient {
     return this.updateOrder(orderId, { status: 'canceled' });
   }
 
+  async createOrUpdateOrderTerms(orderId, termsData) {
+    return this.request(`/orders/pobo/${orderId}/terms`, {
+      method: 'POST',
+      body: JSON.stringify(termsData),
+    });
+  }
+
+  async getOrderTerms(orderId) {
+    return this.request(`/orders/pobo/${orderId}/terms`);
+  }
+
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);

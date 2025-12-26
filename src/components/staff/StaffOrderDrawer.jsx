@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import { base44 } from '@/api/base44Client';
+import apiClient from '@/api/apiClient';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
@@ -42,17 +44,17 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [uploadingOther, setUploadingOther] = useState(false);
   const [uploadingWordOrder, setUploadingWordOrder] = useState(false);
 
+  const { data: terms } = useQuery({
+    queryKey: ['order-terms', order?.orderId],
+    queryFn: () => apiClient.getOrderTerms(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
   useEffect(() => {
     if (order && open) {
       setStatus(order.status || 'created');
       setDatePaid(order.datePaid || '');
       setDataFixing(order.dataFixing || '');
-      setRemunerationType(order.remunerationType || 'PERCENT');
-      setRemunerationPercentage(order.remunerationPercentage ?? '');
-      setRemunerationFixed(order.remunerationFixed ?? '');
-      setClientPaymentCurrency(order.clientPaymentCurrency || 'RUB');
-      setExchangeRate(order.exchangeRate ?? '');
-      setExchangeRateMode(order.exchangeRateMode || 'manual');
       setInvoiceNumber(order.invoiceNumber || '');
       setStaffDescription(order.staffDescription || '');
       setInvoiceReceived(order.invoiceReceived || false);
@@ -62,6 +64,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setNonMandiriExecution(order.nonMandiriExecution || false);
     }
   }, [order, open]);
+
+  useEffect(() => {
+    if (terms && open) {
+      setRemunerationType(terms.remunerationType?.toUpperCase() || 'PERCENT');
+      setRemunerationPercentage(terms.remunerationPercentage ? parseFloat(terms.remunerationPercentage) : '');
+      setRemunerationFixed(terms.remunerationFixed ? parseFloat(terms.remunerationFixed) : '');
+      setClientPaymentCurrency(terms.clientPaymentCurrency || 'RUB');
+      setExchangeRate(terms.exchangeRate ? parseFloat(terms.exchangeRate) : '');
+      setExchangeRateMode('manual');
+      setDatePaid(terms.datePaid || '');
+      setDataFixing(terms.dataFixing || '');
+    }
+  }, [terms, open]);
 
   if (!order) return null;
 
@@ -96,19 +111,28 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       const amountRemuneration = calculateAmountRemuneration();
       const amountTotalInClientCurrency = calculateAmountTotalInClientCurrency();
 
+      // Отправляем terms через новый эндпоинт
+      if (exchangeRate && exchangeRate !== '') {
+        const termsData = {
+          remuneration_type: remunerationType.toLowerCase(),
+          exchange_rate: parseFloat(exchangeRate),
+          client_payment_currency: clientPaymentCurrency || null,
+        };
+
+        if (remunerationType === 'PERCENT' && remunerationPercentage !== '') {
+          termsData.remuneration_percentage = parseFloat(remunerationPercentage);
+        } else if (remunerationType === 'FIXED' && remunerationFixed !== '') {
+          termsData.remuneration_fixed = parseFloat(remunerationFixed);
+        }
+
+        await apiClient.createOrUpdateOrderTerms(order.orderId, termsData);
+      }
+
+      // Остальные поля отправляем через обычный update
       const updates = {
         status,
         date_paid: datePaid,
         data_fixing: dataFixing,
-        remuneration_type: remunerationType,
-        remuneration_percentage: remunerationPercentage !== '' ? parseFloat(remunerationPercentage) : null,
-        remuneration_fixed: remunerationFixed !== '' ? parseFloat(remunerationFixed) : null,
-        amount_remuneration: amountRemuneration,
-        client_payment_currency: clientPaymentCurrency,
-        exchange_rate: exchangeRate !== '' ? parseFloat(exchangeRate) : null,
-        exchange_rate_mode: exchangeRateMode,
-        sum_to_be_paid: amountTotalInClientCurrency,
-        currency_to_be_paid: clientPaymentCurrency,
         invoice_number: invoiceNumber,
         staff_description: staffDescription,
         invocie_received: invoiceReceived,
@@ -120,6 +144,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       };
 
       await onSave(updates);
+      toast.success('Order updated successfully');
+    } catch (error) {
+      toast.error('Failed to update order: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
