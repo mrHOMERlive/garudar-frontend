@@ -212,6 +212,43 @@ class ApiClient {
     return response.json();
   }
 
+  // Documents
+  async uploadOrderDocument(orderId, file, docType, replaceReason = null) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('doc_type', docType);
+    if (replaceReason) {
+      formData.append('replace_reason', replaceReason);
+    }
+
+    const token = this.getToken();
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/orders/${orderId}/documents`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Document upload failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async getOrderDocuments(orderId) {
+    return this.request(`/orders/${orderId}/documents`);
+  }
+
+  async downloadDocument(orderId, docId) {
+    return this.request(`/orders/${orderId}/documents/${docId}`);
+  }
+
   // Dictionaries
   async getCountries() {
     return this.request('/dicts/countries');

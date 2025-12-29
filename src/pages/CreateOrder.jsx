@@ -41,12 +41,10 @@ export default function CreateOrder() {
   const [errors, setErrors] = useState({});
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
-  const [uploadingSalesContract, setUploadingSalesContract] = useState(false);
-  const [uploadingInvoice, setUploadingInvoice] = useState(false);
-  const [uploadingOther, setUploadingOther] = useState(false);
-  const [salesContractUrl, setSalesContractUrl] = useState('');
-  const [invoiceUrl, setInvoiceUrl] = useState('');
-  const [otherDocsUrl, setOtherDocsUrl] = useState('');
+  const [salesContractFile, setSalesContractFile] = useState(null);
+  const [invoiceFile, setInvoiceFile] = useState(null);
+  const [otherDocsFile, setOtherDocsFile] = useState(null);
+  const [uploadingDocuments, setUploadingDocuments] = useState(false);
 
   // Загрузка справочника стран (API возвращает {code, name})
   const { data: countries = [] } = useQuery({
@@ -136,12 +134,15 @@ export default function CreateOrder() {
       
       return await apiClient.createOrder(apiOrderData);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setCreatedOrder(data);
-      setShowInvoiceModal(true);
       toast.success('Order created successfully!', {
         description: `Order #${data.orderId}`
       });
+      
+      await uploadDocumentsAfterOrder(data.orderId);
+      
+      setShowInvoiceModal(true);
     },
     onError: (error) => {
       toast.error('Failed to create order', {
@@ -169,30 +170,63 @@ export default function CreateOrder() {
     toast.success('Email copied to clipboard');
   };
 
-  const handleFileUpload = async (file, type) => {
+  const handleFileUpload = (file, type) => {
     if (!file) return;
     
-    const setUploading = {
-      salesContract: setUploadingSalesContract,
-      invoice: setUploadingInvoice,
-      other: setUploadingOther
+    const setFile = {
+      salesContract: setSalesContractFile,
+      invoice: setInvoiceFile,
+      other: setOtherDocsFile
     }[type];
     
-    const setUrl = {
-      salesContract: setSalesContractUrl,
-      invoice: setInvoiceUrl,
-      other: setOtherDocsUrl
-    }[type];
+    setFile(file);
+    toast.success('Document selected', {
+      description: file.name
+    });
+  };
+
+  const uploadDocumentsAfterOrder = async (orderId) => {
+    const uploads = [];
     
-    setUploading(true);
+    if (invoiceFile) {
+      uploads.push({
+        file: invoiceFile,
+        docType: 'invoice',
+        name: 'Invoice'
+      });
+    }
+    
+    if (salesContractFile) {
+      uploads.push({
+        file: salesContractFile,
+        docType: 'payment_proof',
+        name: 'Sales Contract (as Payment Proof)'
+      });
+    }
+    
+    if (otherDocsFile) {
+      uploads.push({
+        file: otherDocsFile,
+        docType: 'payment_proof',
+        name: 'Other Documents (as Payment Proof)'
+      });
+    }
+    
+    if (uploads.length === 0) return;
+    
+    setUploadingDocuments(true);
+    
     try {
-      const fileUrl = await apiClient.uploadFile(file);
-      setUrl(fileUrl);
-      toast.success('Document uploaded successfully');
+      for (const upload of uploads) {
+        await apiClient.uploadOrderDocument(orderId, upload.file, upload.docType);
+        toast.success(`${upload.name} uploaded successfully`);
+      }
     } catch (error) {
-      toast.error('Failed to upload document');
+      toast.error('Failed to upload some documents', {
+        description: error.message
+      });
     } finally {
-      setUploading(false);
+      setUploadingDocuments(false);
     }
   };
 
@@ -291,18 +325,18 @@ export default function CreateOrder() {
                   <Button
                     type="button"
                     variant="outline"
-                    className={`w-full ${salesContractUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    className={`w-full ${salesContractFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
                     onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingSalesContract}
+                    disabled={uploadingDocuments}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    {uploadingSalesContract ? 'Uploading...' : salesContractUrl ? 'Uploaded ✓' : 'Upload'}
+                    {salesContractFile ? 'Selected ✓' : 'Select File'}
                   </Button>
                 </label>
-                {salesContractUrl && (
-                  <a href={salesContractUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                    View document
-                  </a>
+                {salesContractFile && (
+                  <p className="text-xs text-slate-600">
+                    {salesContractFile.name} ({(salesContractFile.size / 1024).toFixed(1)} KB)
+                  </p>
                 )}
               </div>
 
@@ -319,18 +353,18 @@ export default function CreateOrder() {
                   <Button
                     type="button"
                     variant="outline"
-                    className={`w-full ${invoiceUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    className={`w-full ${invoiceFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
                     onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingInvoice}
+                    disabled={uploadingDocuments}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    {uploadingInvoice ? 'Uploading...' : invoiceUrl ? 'Uploaded ✓' : 'Upload'}
+                    {invoiceFile ? 'Selected ✓' : 'Select File'}
                   </Button>
                 </label>
-                {invoiceUrl && (
-                  <a href={invoiceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                    View document
-                  </a>
+                {invoiceFile && (
+                  <p className="text-xs text-slate-600">
+                    {invoiceFile.name} ({(invoiceFile.size / 1024).toFixed(1)} KB)
+                  </p>
                 )}
               </div>
 
@@ -347,18 +381,18 @@ export default function CreateOrder() {
                   <Button
                     type="button"
                     variant="outline"
-                    className={`w-full ${otherDocsUrl ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
+                    className={`w-full ${otherDocsFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
                     onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingOther}
+                    disabled={uploadingDocuments}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    {uploadingOther ? 'Uploading...' : otherDocsUrl ? 'Uploaded ✓' : 'Upload'}
+                    {otherDocsFile ? 'Selected ✓' : 'Select File'}
                   </Button>
                 </label>
-                {otherDocsUrl && (
-                  <a href={otherDocsUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                    View document
-                  </a>
+                {otherDocsFile && (
+                  <p className="text-xs text-slate-600">
+                    {otherDocsFile.name} ({(otherDocsFile.size / 1024).toFixed(1)} KB)
+                  </p>
                 )}
               </div>
             </div>
