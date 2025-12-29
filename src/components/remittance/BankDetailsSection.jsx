@@ -26,6 +26,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const [bicSearchOpen, setBicSearchOpen] = useState(false);
   const [bicSearchQuery, setBicSearchQuery] = useState('');
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
 
   // Загрузка BIC по выбранной стране
   const { data: bicData = [], isLoading: bicLoading } = useQuery({
@@ -42,13 +43,22 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
   // Поиск BIC по запросу
   const bicSearchResults = useMemo(() => {
-    if (!bicSearchQuery || bicSearchQuery.length < 2) return [];
+    if (!bicSearchQuery) return [];
     const query = bicSearchQuery.toUpperCase();
     return activeBics.filter(bic => 
-      bic.bicSwiftCd?.includes(query) || 
-      bic.nm?.toUpperCase().includes(query)
+      bic.bicSwiftCd?.startsWith(query)
     ).slice(0, 20);
   }, [activeBics, bicSearchQuery]);
+
+  // Поиск стран по началу названия или кода
+  const countrySearchResults = useMemo(() => {
+    if (!countrySearchQuery) return countries;
+    const query = countrySearchQuery.toUpperCase();
+    return countries.filter(country => 
+      country.name.toUpperCase().startsWith(query) || 
+      country.code.toUpperCase().startsWith(query)
+    );
+  }, [countries, countrySearchQuery]);
 
   const handleAccountChange = (value) => {
     onChange({ destination_account: value });
@@ -74,8 +84,8 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
       }));
     }
     
-    // Revalidate BIC if exists
-    if (formData.bic) {
+    // Revalidate BIC if exists (skip if manual override is enabled)
+    if (formData.bic && !formData.bank_manual_override) {
       const validation = validateBIC(formData.bic, countryCode);
       setErrors(prev => ({
         ...prev,
@@ -114,7 +124,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const handleBICManualEntry = (value) => {
     onChange({ bic: value });
     
-    if (value.length >= 8) {
+    if (value.length >= 8 && !formData.bank_manual_override) {
       const validation = validateBIC(value, formData.country_bank);
       setErrors(prev => ({
         ...prev,
@@ -208,17 +218,22 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput placeholder="Search country..." />
+              <Command shouldFilter={false}>
+                <CommandInput 
+                  placeholder="Search country..." 
+                  value={countrySearchQuery}
+                  onValueChange={setCountrySearchQuery}
+                />
                 <CommandEmpty>No country found.</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
-                  {countries.map((country) => (
+                  {countrySearchResults.map((country) => (
                     <CommandItem
                       key={country.code}
                       value={country.name}
                       onSelect={() => {
                         handleCountryChange(country.code);
                         setCountrySearchOpen(false);
+                        setCountrySearchQuery('');
                       }}
                     >
                       {country.name} ({country.code})
@@ -241,7 +256,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
               <Button
                 variant="outline"
                 role="combobox"
-                className="w-full justify-between border-slate-200"
+                className={`w-full justify-between border-slate-200 ${formData.bic && formData.bank_manual_override ? 'ring-2 ring-amber-400 border-amber-400 bg-amber-50' : ''}`}
               >
                 {formData.bic ? (
                   <span className="font-mono">{formData.bic}</span>
@@ -260,13 +275,27 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 <CommandEmpty>
                   <div className="p-4 text-sm">
                     <p>No BIC found. You can enter manually:</p>
-                    <Input
-                      value={formData.bic || ''}
-                      onChange={(e) => handleBICManualEntry(e.target.value)}
-                      placeholder="Enter BIC manually"
-                      className="mt-2"
-                      maxLength={11}
-                    />
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        value={formData.bic || ''}
+                        onChange={(e) => handleBICManualEntry(e.target.value)}
+                        placeholder="Enter BIC manually"
+                        maxLength={11}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          if (formData.bic) {
+                            onChange({ bank_manual_override: true });
+                            setBicSearchOpen(false);
+                          }
+                        }}
+                        className="bg-teal-700 hover:bg-teal-600"
+                      >
+                        Confirm
+                      </Button>
+                    </div>
                   </div>
                 </CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
@@ -292,10 +321,16 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
               </Command>
             </PopoverContent>
           </Popover>
-          {errors.bic && (
+          {errors.bic && !formData.bank_manual_override && (
             <div className="flex items-center gap-1 text-sm text-red-600">
               <AlertCircle className="w-4 h-4" />
               <span>{errors.bic}</span>
+            </div>
+          )}
+          {formData.bic && formData.bank_manual_override && (
+            <div className="flex items-center gap-1 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>Manual entry - please fill Bank Name and Address below</span>
             </div>
           )}
         </div>
@@ -304,7 +339,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-slate-700 font-medium">Bank Name *</Label>
-            {!formData.bank_name && formData.bic && (
+            {formData.bic && (
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="manual_override"
@@ -324,7 +359,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             value={formData.bank_name || ''}
             onChange={(e) => onChange({ bank_name: e.target.value })}
             placeholder="Bank name"
-            className="border-slate-200 focus:border-teal-600 focus:ring-teal-600"
+            className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 ${formData.bank_manual_override ? 'ring-2 ring-amber-400 border-amber-400' : ''}`}
             readOnly={!formData.bank_manual_override}
             disabled={!formData.bank_manual_override && !formData.bank_name}
             required
@@ -338,7 +373,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             value={formData.bank_address || ''}
             onChange={(e) => onChange({ bank_address: e.target.value })}
             placeholder="Full bank address"
-            className="border-slate-200 focus:border-teal-600 focus:ring-teal-600 min-h-[60px]"
+            className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 min-h-[60px] ${formData.bank_manual_override ? 'ring-2 ring-amber-400 border-amber-400' : ''}`}
             readOnly={!formData.bank_manual_override}
             disabled={!formData.bank_manual_override && !formData.bank_address}
             required
