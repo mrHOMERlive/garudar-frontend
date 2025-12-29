@@ -18,11 +18,11 @@ export const IBAN_COUNTRIES = Object.keys(IBAN_LENGTHS);
 
 // Validate Latin characters and allowed special chars
 export function validateLatinText(text, maxLength) {
-  const allowedPattern = /^[A-Za-z0-9 /\-?:().,'+]*$/;
+  const allowedPattern = /^[A-Za-z0-9 /\-?:().,'+&]*$/;
   
   if (!text) return { valid: false, error: 'Field is required' };
   if (!allowedPattern.test(text)) {
-    return { valid: false, error: 'Only Latin letters, digits, and symbols /-?:().,\'+ are allowed' };
+    return { valid: false, error: 'Only Latin letters, digits, and symbols /-?:().,\'+ & are allowed' };
   }
   
   // Check for leading/trailing spaces

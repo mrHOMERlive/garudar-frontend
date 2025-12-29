@@ -165,6 +165,29 @@ class ApiClient {
     return this.request(`/orders/pobo/${orderId}/terms`);
   }
 
+  async exportTxtInstructions(orderIds) {
+    const token = this.getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/orders/pobo/export-txt`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ order_ids: orderIds }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to export instructions');
+    }
+
+    return response.blob();
+  }
+
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);

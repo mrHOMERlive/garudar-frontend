@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/popover";
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import StaffOrderDrawer from '@/components/staff/StaffOrderDrawer';
-import { generateTxtInstruction } from '@/components/staff/utils/instructionGenerator';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
 import moment from 'moment';
@@ -191,36 +190,31 @@ export default function StaffActiveOrders() {
     toast.success(`Payment proof ${newProof ? 'confirmed' : 'removed'}`);
   };
 
-  const handleCreateInstruction = () => {
-    const selectedOrders = filteredOrders.filter(o => selectedIds.has(o.orderId) && !o.nonMandiriExecution);
-    if (selectedOrders.length === 0) {
-      toast.error('No valid orders selected (non-Mandiri orders excluded)');
+  const handleCreateInstruction = async () => {
+    const selectedOrderIds = Array.from(selectedIds);
+    if (selectedOrderIds.length === 0) {
+      toast.error('No orders selected');
       return;
     }
 
-    const txtContent = selectedOrders.map(o => generateTxtInstruction(o)).join('\n');
-    const filename = `${new Date().toISOString().slice(0,10).replace(/-/g,'')}_instruction.txt`;
-    
-    const blob = new Blob([txtContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = await apiClient.exportTxtInstructions(selectedOrderIds);
+      const filename = `${new Date().toISOString().slice(0,10).replace(/-/g,'')}_instruction.txt`;
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
 
-    selectedOrders.forEach(order => {
-      updateMutation.mutate({
-        id: order.orderId,
-        data: { 
-          last_download: new Date().toISOString(),
-          status_history: addStatusEntry(order.status_history, 'instruction_exported')
-        }
-      });
-    });
-
-    toast.success(`Instruction file created for ${selectedOrders.length} orders`);
-    setSelectedIds(new Set());
+      toast.success(`Instruction file created for ${selectedOrderIds.length} orders`);
+      setSelectedIds(new Set());
+      
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    } catch (error) {
+      toast.error('Failed to create instruction file: ' + (error.message || 'Unknown error'));
+    }
   };
 
   const handleMarkAsExecuted = () => {

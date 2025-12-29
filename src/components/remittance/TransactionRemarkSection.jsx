@@ -30,8 +30,13 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
       const docParts = documents
         .filter(doc => doc.number && doc.date)
         .map(doc => {
-          const parsed = parseDate(doc.date);
-          return `${doc.type} ${doc.number} dd ${parsed?.formatted || doc.date}`;
+          // Convert YYYY-MM-DD to DD.MM.YYYY
+          let formattedDate = doc.date;
+          if (doc.date.includes('-')) {
+            const [year, month, day] = doc.date.split('-');
+            formattedDate = `${day}.${month}.${year}`;
+          }
+          return `${doc.type} ${doc.number} dd ${formattedDate}`;
         });
       
       if (docParts.length > 0) {
@@ -106,6 +111,14 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
     // Sync first document number with formData.remark_inv_no
     if (index === 0 && field === 'number') {
       onChange({ remark_inv_no: value });
+    }
+    
+    // Sync first document date with formData.remark_date in DD.MM.YYYY format
+    if (index === 0 && field === 'date' && value) {
+      // Convert from YYYY-MM-DD to DD.MM.YYYY
+      const [year, month, day] = value.split('-');
+      const formattedDate = `${day}.${month}.${year}`;
+      onChange({ remark_date: formattedDate });
     }
   };
 

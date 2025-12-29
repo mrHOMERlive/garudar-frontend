@@ -13,6 +13,7 @@ import BankDetailsSection from '../components/remittance/BankDetailsSection';
 import TransactionRemarkSection from '../components/remittance/TransactionRemarkSection';
 import InvoiceInfoModal from '../components/remittance/InvoiceInfoModal';
 import { generateCSVData, downloadCSV } from '../components/remittance/utils/csvGenerator';
+import { validateLatinText } from '../components/remittance/utils/validators';
 
 const INVOICE_EMAIL = 'sales@garudar.id';
 
@@ -66,11 +67,13 @@ export default function CreateOrder() {
     if (!formData.currency) {
       newErrors.currency = 'Currency is required';
     }
-    if (!formData.beneficiary_name) {
-      newErrors.beneficiary_name = 'Beneficiary name is required';
+    const nameValidation = validateLatinText(formData.beneficiary_name, 70);
+    if (!nameValidation.valid) {
+      newErrors.beneficiary_name = nameValidation.error;
     }
-    if (!formData.beneficiary_address) {
-      newErrors.beneficiary_address = 'Beneficiary address is required';
+    const addressValidation = validateLatinText(formData.beneficiary_address, 105);
+    if (!addressValidation.valid) {
+      newErrors.beneficiary_address = addressValidation.error;
     }
     if (!formData.destination_account) {
       newErrors.destination_account = 'Account number is required';
@@ -108,6 +111,10 @@ export default function CreateOrder() {
       // Generate CSV data
       const csvData = generateCSVData(orderData);
       
+      // Найти название страны по коду
+      const selectedCountry = countries.find(c => c.code === orderData.country_bank);
+      const countryName = selectedCountry ? selectedCountry.name : orderData.country_bank;
+      
       // Преобразуем данные формы в формат API (OrderPoboDto-Input)
       const apiOrderData = {
         order_id: orderNumber,
@@ -116,7 +123,7 @@ export default function CreateOrder() {
         beneficiary_name: orderData.beneficiary_name,
         beneficiary_adress: orderData.beneficiary_address,
         destination_account: orderData.destination_account,
-        bank_country: orderData.country_bank,
+        bank_country: countryName,
         bank_bic: orderData.bic,
         bank_name: orderData.bank_name,
         bank_address: orderData.bank_address,

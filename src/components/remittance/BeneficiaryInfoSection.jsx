@@ -40,7 +40,7 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
           <Label htmlFor="beneficiary_name" className="text-slate-700 font-medium">
             Beneficiary Name *
             <span className="text-xs text-slate-500 ml-2">
-              (Max 70 chars, Latin letters, digits, and /-?:().,'+)
+              (Max 70 chars, Latin letters, digits, and /-?:().,'+&)
             </span>
           </Label>
           <div className="relative">
