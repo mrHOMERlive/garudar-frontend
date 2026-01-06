@@ -159,12 +159,6 @@ export default function CreateOrder() {
     }
   };
 
-  const exportToCSV = () => {
-    const csvData = generateCSVData(createdOrder || formData);
-    downloadCSV(csvData, `order_${createdOrder?.orderId || 'draft'}.csv`);
-    toast.success('Order exported to CSV');
-  };
-
   const copyInvoiceEmail = () => {
     navigator.clipboard.writeText(INVOICE_EMAIL);
     toast.success('Email copied to clipboard');
@@ -207,8 +201,8 @@ export default function CreateOrder() {
     if (otherDocsFile) {
       uploads.push({
         file: otherDocsFile,
-        docType: 'payment_proof',
-        name: 'Other Documents (as Payment Proof)'
+        docType: 'other',
+        name: 'Other Documents'
       });
     }
     
@@ -231,9 +225,9 @@ export default function CreateOrder() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 shadow-xl">
+      <div className="bg-[#1e3a5f] shadow-lg border-b border-[#1e3a5f]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
@@ -249,28 +243,19 @@ export default function CreateOrder() {
                   <h1 className="text-2xl md:text-3xl font-bold text-white">GTrans</h1>
                   <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
                 </div>
-                <p className="text-teal-300 text-sm">Create Payment Order</p>
+                <p className="text-slate-300 text-sm">Create Payment Order</p>
               </div>
             </Link>
             <div className="flex items-center gap-3">
               <Link to={createPageUrl('UserDashboard')}>
                 <Button
                   variant="outline"
-                  className="border-teal-400 text-teal-100 hover:bg-teal-800/50 bg-transparent"
+                  className="border-white/20 text-white hover:bg-white/10 bg-transparent"
                 >
                   <History className="w-4 h-4 mr-2" />
                   Dashboard
                 </Button>
               </Link>
-              {createdOrder && (
-                <Button
-                  onClick={exportToCSV}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </Button>
-              )}
             </div>
           </div>
         </div>
@@ -308,120 +293,132 @@ export default function CreateOrder() {
             setErrors={setErrors}
           />
 
-          {/* Document Upload Section */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Upload Documents</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Sales Contract */}
-              <div className="space-y-2">
-                <Label className="text-sm text-slate-600">Sales Contract</Label>
-                <label className="block">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'salesContract')}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={`w-full ${salesContractFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
-                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingDocuments}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {salesContractFile ? 'Selected ✓' : 'Select File'}
-                  </Button>
-                </label>
-                {salesContractFile && (
-                  <p className="text-xs text-slate-600">
-                    {salesContractFile.name} ({(salesContractFile.size / 1024).toFixed(1)} KB)
-                  </p>
-                )}
-              </div>
-
-              {/* Invoice */}
-              <div className="space-y-2">
-                <Label className="text-sm text-slate-600">Invoice</Label>
-                <label className="block">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'invoice')}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={`w-full ${invoiceFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
-                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingDocuments}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {invoiceFile ? 'Selected ✓' : 'Select File'}
-                  </Button>
-                </label>
-                {invoiceFile && (
-                  <p className="text-xs text-slate-600">
-                    {invoiceFile.name} ({(invoiceFile.size / 1024).toFixed(1)} KB)
-                  </p>
-                )}
-              </div>
-
-              {/* Other Documents */}
-              <div className="space-y-2">
-                <Label className="text-sm text-slate-600">Other Documents</Label>
-                <label className="block">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileUpload(e.target.files?.[0], 'other')}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={`w-full ${otherDocsFile ? 'border-emerald-500 text-emerald-700' : 'border-slate-300'}`}
-                    onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                    disabled={uploadingDocuments}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {otherDocsFile ? 'Selected ✓' : 'Select File'}
-                  </Button>
-                </label>
-                {otherDocsFile && (
-                  <p className="text-xs text-slate-600">
-                    {otherDocsFile.name} ({(otherDocsFile.size / 1024).toFixed(1)} KB)
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Invoice Info Block */}
+           {/* Invoice & Documents Info Block */}
           <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Mail className="w-5 h-5 text-amber-700" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-amber-900 mb-2">Invoice Required</h3>
-                <p className="text-sm text-amber-800 mb-3">
-                  To complete order processing, please send your invoice to:
-                </p>
-                <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
-                  <code className="text-sm font-mono text-slate-800 flex-1">
-                    {INVOICE_EMAIL}
-                  </code>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={copyInvoiceEmail}
-                    className="border-amber-300 hover:bg-amber-50"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy
-                  </Button>
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h3 className="font-semibold text-amber-900 mb-2">Invoice Required</h3>
+                  <p className="text-sm text-amber-800 mb-3">
+                    To complete order processing, please send your invoice to:
+                  </p>
+                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
+                    <code className="text-sm font-mono text-slate-800 flex-1">
+                      {INVOICE_EMAIL}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={copyInvoiceEmail}
+                      className="border-amber-300 hover:bg-amber-50"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-amber-200">
+                  <h4 className="font-semibold text-amber-900 mb-3">Upload Documents (Optional)</h4>
+                  <p className="text-xs text-amber-700 mb-3">You can upload documents here or send them by email</p>
+                  
+                  <div className="space-y-3">
+                    {/* Sales Contract Upload */}
+                    <div>
+                      <Label className="text-xs text-amber-800 mb-1">Sales Contract</Label>
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            onChange={(e) => handleFileUpload(e.target.files?.[0], 'salesContract')}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className={`w-full border-amber-300 hover:bg-amber-50 ${salesContractFile ? 'border-emerald-500 text-emerald-700' : ''}`}
+                            onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                            disabled={uploadingDocuments}
+                          >
+                            <Upload className="w-3 h-3 mr-2" />
+                            {salesContractFile ? 'Selected ✓' : 'Upload Sales Contract'}
+                          </Button>
+                        </label>
+                      </div>
+                      {salesContractFile && (
+                        <p className="text-xs text-amber-700 mt-1">
+                          {salesContractFile.name} ({(salesContractFile.size / 1024).toFixed(1)} KB)
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Invoice Upload */}
+                    <div>
+                      <Label className="text-xs text-amber-800 mb-1">Invoice</Label>
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            onChange={(e) => handleFileUpload(e.target.files?.[0], 'invoice')}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className={`w-full border-amber-300 hover:bg-amber-50 ${invoiceFile ? 'border-emerald-500 text-emerald-700' : ''}`}
+                            onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                            disabled={uploadingDocuments}
+                          >
+                            <Upload className="w-3 h-3 mr-2" />
+                            {invoiceFile ? 'Selected ✓' : 'Upload Invoice'}
+                          </Button>
+                        </label>
+                      </div>
+                      {invoiceFile && (
+                        <p className="text-xs text-amber-700 mt-1">
+                          {invoiceFile.name} ({(invoiceFile.size / 1024).toFixed(1)} KB)
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Other Documents Upload */}
+                    <div>
+                      <Label className="text-xs text-amber-800 mb-1">Other Documents</Label>
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            onChange={(e) => handleFileUpload(e.target.files?.[0], 'other')}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.zip"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className={`w-full border-amber-300 hover:bg-amber-50 ${otherDocsFile ? 'border-emerald-500 text-emerald-700' : ''}`}
+                            onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                            disabled={uploadingDocuments}
+                          >
+                            <Upload className="w-3 h-3 mr-2" />
+                            {otherDocsFile ? 'Selected ✓' : 'Upload Other Documents'}
+                          </Button>
+                        </label>
+                      </div>
+                      {otherDocsFile && (
+                        <p className="text-xs text-amber-700 mt-1">
+                          {otherDocsFile.name} ({(otherDocsFile.size / 1024).toFixed(1)} KB)
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -432,7 +429,7 @@ export default function CreateOrder() {
             <Button
               onClick={handleSubmit}
               disabled={createOrderMutation.isPending}
-              className="bg-gradient-to-r from-teal-700 to-cyan-800 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-8 py-6 text-base shadow-lg"
+              className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold px-8 py-6 text-base shadow-lg"
             >
               {createOrderMutation.isPending ? (
                 <>Processing...</>

@@ -41,13 +41,6 @@ const modules = [
     icon: Trash2,
     page: 'DeletedOrders',
     color: 'bg-slate-600'
-  },
-  {
-    title: 'Order History',
-    description: 'View all past orders',
-    icon: History,
-    page: 'OrderHistory',
-    color: 'bg-purple-600'
   }
 ];
 
