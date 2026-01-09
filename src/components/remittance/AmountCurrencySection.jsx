@@ -52,10 +52,10 @@ export default function AmountCurrencySection({ formData, onChange, errors, setE
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="space-y-2">
             <Label htmlFor="amount" className="text-slate-700 font-medium">
-              Amount *
+              Remittance Amount *
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
@@ -81,7 +81,7 @@ export default function AmountCurrencySection({ formData, onChange, errors, setE
 
           <div className="space-y-2">
             <Label htmlFor="currency" className="text-slate-700 font-medium">
-              Currency *
+              Remittance Currency *
             </Label>
             <Select
               value={formData.currency || ''}
@@ -91,6 +91,28 @@ export default function AmountCurrencySection({ formData, onChange, errors, setE
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
               <SelectContent>
+                {CURRENCIES.map((currency) => (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    {currency.symbol} {currency.code} - {currency.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="source_currency" className="text-slate-700 font-medium">
+              Source Currency *
+            </Label>
+            <Select
+              value={formData.client_payment_currency || 'RUB'}
+              onValueChange={(value) => onChange({ client_payment_currency: value })}
+            >
+              <SelectTrigger className="border-slate-200 focus:border-teal-600 focus:ring-teal-600">
+                <SelectValue placeholder="Select source currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="RUB">₽ RUB - Russian Ruble</SelectItem>
                 {CURRENCIES.map((currency) => (
                   <SelectItem key={currency.code} value={currency.code}>
                     {currency.symbol} {currency.code} - {currency.name}
