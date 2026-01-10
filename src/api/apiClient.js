@@ -311,6 +311,35 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Payeer Accounts
+  async getPayeerAccounts() {
+    return this.request('/payeer-accounts');
+  }
+
+  async getPayeerAccount(accountNo) {
+    return this.request(`/payeer-accounts/${accountNo}`);
+  }
+
+  async createPayeerAccount(accountData) {
+    return this.request('/payeer-accounts', {
+      method: 'POST',
+      body: JSON.stringify(accountData),
+    });
+  }
+
+  async updatePayeerAccount(accountNo, accountData) {
+    return this.request(`/payeer-accounts/${accountNo}`, {
+      method: 'PUT',
+      body: JSON.stringify(accountData),
+    });
+  }
+
+  async deletePayeerAccount(accountNo) {
+    return this.request(`/payeer-accounts/${accountNo}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

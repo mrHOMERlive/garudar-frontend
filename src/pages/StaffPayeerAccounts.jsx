@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -34,15 +34,35 @@ export default function StaffPayeerAccounts() {
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['payeer-accounts'],
-    queryFn: () => base44.entities.PayeerAccount.list('-created_date'),
+    queryFn: async () => {
+      const data = await apiClient.getPayeerAccounts();
+      return data.map(acc => ({
+        id: acc.account_no,
+        account_number: acc.account_no,
+        account_name: '',
+        id_payeer: '',
+        currency: acc.currency || 'USD',
+        active: acc.status !== 'inactive'
+      }));
+    },
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
+      const payload = {
+        currency: data.currency,
+        status: data.active ? 'active' : 'inactive'
+      };
+      
       if (editingAccount) {
-        return base44.entities.PayeerAccount.update(editingAccount.id, data);
+        return await apiClient.updatePayeerAccount(editingAccount.account_number, payload);
       }
-      return base44.entities.PayeerAccount.create(data);
+      
+      const createPayload = {
+        account_no: data.account_number,
+        ...payload
+      };
+      return await apiClient.createPayeerAccount(createPayload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
@@ -52,7 +72,10 @@ export default function StaffPayeerAccounts() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.PayeerAccount.delete(id),
+    mutationFn: (id) => {
+      const account = accounts.find(acc => acc.id === id);
+      return apiClient.deletePayeerAccount(account?.account_number || id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
       toast.success('Account deleted');
