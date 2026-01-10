@@ -25,6 +25,12 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
     enabled: !!order?.orderId && open,
   });
 
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+    queryKey: ['order-documents', order?.orderId],
+    queryFn: () => apiClient.getOrderDocuments(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
   const cancelMutation = useMutation({
     mutationFn: () => apiClient.cancelOrder(order?.orderId),
     onSuccess: () => {
@@ -59,14 +65,12 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
 
     setUploadingWordOrder(true);
     try {
-      const { file_url } = await apiClient.uploadFile(file);
-      await apiClient.updateOrder(order.orderId, { 
-        attachmentWordOrderSigned: file_url 
-      });
+      await apiClient.uploadOrderDocument(order.orderId, file, 'word_order_signed_client');
+      queryClient.invalidateQueries({ queryKey: ['order-documents', order.orderId] });
       toast.success('Signed order uploaded successfully');
       onUpdate?.();
     } catch (error) {
-      toast.error('Failed to upload signed order');
+      toast.error(error.message || 'Failed to upload signed order');
     } finally {
       setUploadingWordOrder(false);
     }
@@ -78,20 +82,33 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
 
     setUploadingPaymentProof(true);
     try {
-      const { file_url } = await apiClient.uploadFile(file);
-      await apiClient.updateOrder(order.orderId, {
-        attachmentTransactionStatus: file_url,
-        paymentProof: true,
-        datePaymentProof: new Date().toISOString().split('T')[0]
-      });
+      await apiClient.uploadOrderDocument(order.orderId, file, 'payment_proof');
+      queryClient.invalidateQueries({ queryKey: ['order-documents', order.orderId] });
       toast.success('Payment proof uploaded successfully');
       onUpdate?.();
     } catch (error) {
-      toast.error('Failed to upload payment proof');
+      toast.error(error.message || 'Failed to upload payment proof');
     } finally {
       setUploadingPaymentProof(false);
     }
   };
+
+  const handleDownloadDocument = async (docId, fileName) => {
+    try {
+      const { presigned_url } = await apiClient.downloadDocument(order.orderId, docId);
+      window.open(presigned_url, '_blank');
+    } catch (error) {
+      toast.error(error.message || 'Failed to download document');
+    }
+  };
+
+  const getDocumentByType = (docType) => {
+    return documents?.find(doc => doc.doc_type === docType);
+  };
+
+  const wordOrderUnsigned = getDocumentByType('word_order_unsigned');
+  const wordOrderSigned = getDocumentByType('word_order_signed_client');
+  const paymentProofDoc = getDocumentByType('payment_proof');
 
   return (
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
@@ -225,18 +242,17 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
               
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                 <Label className="text-xs text-slate-700 mb-2 block font-medium">WORD Order (from Staff)</Label>
-                {order.attachmentWordOrder ? (
-                  <a href={order.attachmentWordOrder} target="_blank" rel="noopener noreferrer">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-blue-300 hover:bg-blue-100"
-                    >
-                      <Download className="w-3 h-3 mr-2" />
-                      Download Unsigned Order
-                    </Button>
-                  </a>
+                {wordOrderUnsigned ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-blue-300 hover:bg-blue-100"
+                    onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download Unsigned Order
+                  </Button>
                 ) : (
                   <div className="text-xs text-slate-500">No order document available yet</div>
                 )}
@@ -264,12 +280,15 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                       {uploadingWordOrder ? 'Uploading...' : 'Upload Signed Order'}
                     </Button>
                   </label>
-                  {order.attachmentWordOrderSigned && (
-                    <a href={order.attachmentWordOrderSigned} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="outline" className="border-green-300">
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </a>
+                  {wordOrderSigned && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-green-300"
+                      onClick={() => handleDownloadDocument(wordOrderSigned.doc_id, wordOrderSigned.file_name)}
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
                   )}
                 </div>
               </div>
@@ -303,17 +322,20 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                       {uploadingPaymentProof ? 'Uploading...' : 'Upload Payment Proof'}
                     </Button>
                   </label>
-                  {order.attachmentTransactionStatus && (
-                    <a href={order.attachmentTransactionStatus} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="outline" className="border-blue-300">
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </a>
+                  {paymentProofDoc && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-blue-300"
+                      onClick={() => handleDownloadDocument(paymentProofDoc.doc_id, paymentProofDoc.file_name)}
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
                   )}
                 </div>
-                {order.datePaymentProof && (
+                {paymentProofDoc && (
                   <div className="mt-2 text-xs text-slate-500">
-                    Uploaded: {new Date(order.datePaymentProof).toLocaleDateString()}
+                    Uploaded: {new Date(paymentProofDoc.uploaded_at).toLocaleDateString()}
                   </div>
                 )}
               </div>
