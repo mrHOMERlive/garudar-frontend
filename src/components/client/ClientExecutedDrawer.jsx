@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { base44 } from '@/api/base44Client';
+import { apiClient } from '@/api/apiClient';
 import { toast } from 'sonner';
 import { Download, Upload } from 'lucide-react';
 
@@ -21,15 +21,11 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
     setUploadingActReport(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.RemittanceOrder.update(order.id, { 
-        attachment_act_report_signed: file_url 
-      });
+      await apiClient.uploadOrderDocument(order.orderId, file, 'act_report_signed_client');
       toast.success('Signed Act Report uploaded successfully');
-      if (order) order.attachment_act_report_signed = file_url;
       onUpdate?.();
     } catch (error) {
-      toast.error('Failed to upload Act Report');
+      toast.error(error.message || 'Failed to upload Act Report');
     } finally {
       setUploadingActReport(false);
     }
@@ -40,7 +36,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
       <SheetContent className="w-full sm:max-w-2xl bg-white border-slate-200 text-slate-900 flex flex-col overflow-hidden">
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            Order #{order.order_number}
+            Order #{order.orderId}
           </SheetTitle>
         </SheetHeader>
 
@@ -48,10 +44,10 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
           <div className="space-y-6">
             {/* Order Info */}
             <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-200">
-              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{order.client_name || order.client_id}</span></div>
-              <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{order.amount?.toLocaleString()} {order.currency}</span></div>
-              <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiary_name}</span></div>
-              <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bank_name} ({order.bic})</span></div>
+              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{order.clientName || order.clientId}</span></div>
+              <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{parseFloat(order.amount || 0).toLocaleString()} {order.currency}</span></div>
+              <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiaryName}</span></div>
+              <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bankName} ({order.bankBic})</span></div>
             </div>
 
             <Separator className="bg-slate-200" />
@@ -62,22 +58,22 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-xs text-slate-600">Status</Label>
-                  <Badge className={order.transaction_status_received ? 'bg-emerald-600' : 'bg-slate-400'}>
-                    {order.transaction_status_received ? 'Received' : 'Not Received'}
+                  <Badge className={order.transactionStatusReceived ? 'bg-emerald-600' : 'bg-slate-400'}>
+                    {order.transactionStatusReceived ? 'Received' : 'Not Received'}
                   </Badge>
                 </div>
-                {order.transaction_status_number && (
+                {order.transactionStatusNumber && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.transaction_status_number}
+                    <span className="text-slate-500">Number:</span> {order.transactionStatusNumber}
                   </div>
                 )}
-                {order.transaction_status_date && (
+                {order.transactionStatusDate && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span> {new Date(order.transaction_status_date).toLocaleDateString()}
+                    <span className="text-slate-500">Date:</span> {new Date(order.transactionStatusDate).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_transaction_status && (
-                  <a href={order.attachment_transaction_status} target="_blank" rel="noopener noreferrer">
+                {order.attachmentTransactionStatus && (
+                  <a href={order.attachmentTransactionStatus} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download Transaction Status
@@ -95,22 +91,22 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-xs text-slate-600">Status</Label>
-                  <Badge className={order.mt103_received ? 'bg-emerald-600' : 'bg-slate-400'}>
-                    {order.mt103_received ? 'Received' : 'Not Received'}
+                  <Badge className={order.mt103Received ? 'bg-emerald-600' : 'bg-slate-400'}>
+                    {order.mt103Received ? 'Received' : 'Not Received'}
                   </Badge>
                 </div>
-                {order.mt103_number && (
+                {order.mt103Number && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.mt103_number}
+                    <span className="text-slate-500">Number:</span> {order.mt103Number}
                   </div>
                 )}
-                {order.mt103_date && (
+                {order.mt103Date && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span> {new Date(order.mt103_date).toLocaleDateString()}
+                    <span className="text-slate-500">Date:</span> {new Date(order.mt103Date).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_mt103 && (
-                  <a href={order.attachment_mt103} target="_blank" rel="noopener noreferrer">
+                {order.attachmentMt103 && (
+                  <a href={order.attachmentMt103} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download MT103
@@ -129,25 +125,25 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-xs text-slate-600">Status</Label>
                   <Badge className={
-                    order.act_report_status === 'signed' ? 'bg-emerald-600' :
-                    order.act_report_status === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
+                    order.actReportStatus === 'signed' ? 'bg-emerald-600' :
+                    order.actReportStatus === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
                   }>
-                    {order.act_report_status === 'signed' ? 'Signed' :
-                     order.act_report_status === 'on_sign' ? 'On Sign' : 'Not Made'}
+                    {order.actReportStatus === 'signed' ? 'Signed' :
+                     order.actReportStatus === 'on_sign' ? 'On Sign' : 'Not Made'}
                   </Badge>
                 </div>
-                {order.act_report_number && (
+                {order.actReportNumber && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.act_report_number}
+                    <span className="text-slate-500">Number:</span> {order.actReportNumber}
                   </div>
                 )}
-                {order.act_report_date && (
+                {order.actReportDate && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span> {new Date(order.act_report_date).toLocaleDateString()}
+                    <span className="text-slate-500">Date:</span> {new Date(order.actReportDate).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_act_report && (
-                  <a href={order.attachment_act_report} target="_blank" rel="noopener noreferrer">
+                {order.attachmentActReport && (
+                  <a href={order.attachmentActReport} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300 mb-2">
                       <Download className="w-3 h-3 mr-2" />
                       Download Unsigned Act Report
@@ -178,8 +174,8 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                       {uploadingActReport ? 'Uploading...' : 'Upload Signed Act Report'}
                     </Button>
                   </label>
-                  {order.attachment_act_report_signed && (
-                    <a href={order.attachment_act_report_signed} target="_blank" rel="noopener noreferrer">
+                  {order.attachmentActReportSigned && (
+                    <a href={order.attachmentActReportSigned} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="border-green-300">
                         <Download className="w-3 h-3" />
                       </Button>
@@ -195,10 +191,10 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Documents</h3>
               
-              {order.attachment_sales_contract && (
+              {order.attachmentSalesContract && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Sales Contract</Label>
-                  <a href={order.attachment_sales_contract} target="_blank" rel="noopener noreferrer">
+                  <a href={order.attachmentSalesContract} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download
@@ -207,10 +203,10 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 </div>
               )}
 
-              {order.attachment_invoice && (
+              {order.attachmentInvoice && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Invoice</Label>
-                  <a href={order.attachment_invoice} target="_blank" rel="noopener noreferrer">
+                  <a href={order.attachmentInvoice} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download
@@ -219,10 +215,10 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 </div>
               )}
 
-              {order.attachment_other && (
+              {order.attachmentOther && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Other Documents</Label>
-                  <a href={order.attachment_other} target="_blank" rel="noopener noreferrer">
+                  <a href={order.attachmentOther} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download
@@ -231,10 +227,10 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 </div>
               )}
 
-              {order.attachment_word_order && (
+              {order.attachmentWordOrder && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">WORD Order</Label>
-                  <a href={order.attachment_word_order} target="_blank" rel="noopener noreferrer">
+                  <a href={order.attachmentWordOrder} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline" className="w-full border-slate-300">
                       <Download className="w-3 h-3 mr-2" />
                       Download

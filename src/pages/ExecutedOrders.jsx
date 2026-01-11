@@ -23,15 +23,15 @@ export default function ExecutedOrders() {
   });
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.executed || o.status === 'RELEASED');
+    return orders.filter(o => o.executed && o.status?.toLowerCase() === 'released');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
     return executedOrders.filter(order => {
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
-               order.beneficiary_name?.toLowerCase().includes(s);
+        return order.orderId?.toLowerCase().includes(s) ||
+               order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -104,48 +104,48 @@ export default function ExecutedOrders() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow>
+                <TableRow key="loading">
                   <TableCell colSpan={10} className="text-center py-8 text-slate-500">Loading...</TableCell>
                 </TableRow>
               ) : filteredOrders.length === 0 ? (
-                <TableRow>
+                <TableRow key="empty">
                   <TableCell colSpan={10} className="text-center py-8 text-slate-500">No executed orders</TableCell>
                 </TableRow>
               ) : filteredOrders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-blue-50">
-                  <TableCell className="font-mono text-sm text-[#1e3a5f]">{order.order_number}</TableCell>
+                <TableRow key={order.orderId || order.id} className="hover:bg-blue-50">
+                  <TableCell className="font-mono text-sm text-[#1e3a5f]">{order.orderId}</TableCell>
                   <TableCell className="text-sm text-slate-600">
-                    {moment(order.updated_date).format('DD/MM/YYYY')}
+                    {moment(order.updatedAt).format('DD/MM/YYYY')}
                   </TableCell>
                   <TableCell className="font-semibold text-blue-600">
                     {order.amount?.toLocaleString()} {order.currency}
                   </TableCell>
                   <TableCell className="text-slate-700 max-w-[200px] truncate">
-                    {order.beneficiary_name}
+                    {order.beneficiaryName}
                   </TableCell>
                   <TableCell className="text-slate-600 text-sm">
-                    {order.bank_name?.slice(0, 25)}
+                    {order.bankName?.slice(0, 25)}
                   </TableCell>
                   <TableCell>
                     <Badge className="bg-blue-600 text-white">Executed</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={order.transaction_status_received ? 'bg-blue-600' : 'bg-slate-400'}>
-                      {order.transaction_status_received ? 'Y' : 'N'}
+                    <Badge className={order.transactionStatusReceived ? 'bg-blue-600' : 'bg-slate-400'}>
+                      {order.transactionStatusReceived ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={order.mt103_received ? 'bg-blue-600' : 'bg-slate-400'}>
-                      {order.mt103_received ? 'Y' : 'N'}
+                    <Badge className={order.mt103Received ? 'bg-blue-600' : 'bg-slate-400'}>
+                      {order.mt103Received ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge className={
-                      order.act_report_status === 'signed' ? 'bg-blue-600' :
-                      order.act_report_status === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
+                      order.actReportStatus === 'signed' ? 'bg-blue-600' :
+                      order.actReportStatus === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
                     }>
-                      {order.act_report_status === 'signed' ? 'Signed' :
-                       order.act_report_status === 'on_sign' ? 'On Sign' : 'Not Made'}
+                      {order.actReportStatus === 'signed' ? 'Signed' :
+                       order.actReportStatus === 'on_sign' ? 'On Sign' : 'Not Made'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
