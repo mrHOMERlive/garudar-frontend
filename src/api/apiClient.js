@@ -101,6 +101,10 @@ class ApiClient {
   }
 
   // Clients
+  async getAllClients() {
+    return this.request('/clients');
+  }
+
   async getClientById(clientId) {
     return this.request(`/clients/${clientId}`);
   }
@@ -109,6 +113,19 @@ class ApiClient {
     return this.request('/clients', {
       method: 'POST',
       body: JSON.stringify(clientData),
+    });
+  }
+
+  async updateClient(clientId, clientData) {
+    return this.request(`/clients/${clientId}`, {
+      method: 'PUT',
+      body: JSON.stringify(clientData),
+    });
+  }
+
+  async deleteClient(userId) {
+    return this.request(`/users/${userId}`, {
+      method: 'DELETE',
     });
   }
 
