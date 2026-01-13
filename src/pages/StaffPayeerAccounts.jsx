@@ -11,22 +11,26 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from "@/components/ui/dialog";
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Pencil, Trash2, Globe } from 'lucide-react';
 
-const CURRENCIES = ['USD', 'EUR', 'CNY', 'IDR'];
+const CURRENCIES = ['USD', 'EUR', 'CNY', 'IDR', 'RUB', 'BRL', 'AED', 'INR', 'ARS', 'COP', 'PEN'];
 
 export default function StaffPayeerAccounts() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [formData, setFormData] = useState({
     currency: 'USD',
-    id_payeer: '',
     account_number: '',
-    account_name: '',
+    bank_name: '',
+    bank_address: '',
+    bank_corr_account: '',
+    bank_bic: '',
+    bank_country: '',
     active: true
   });
 
@@ -39,8 +43,11 @@ export default function StaffPayeerAccounts() {
       return data.map(acc => ({
         id: acc.account_no,
         account_number: acc.account_no,
-        account_name: '',
-        id_payeer: '',
+        bank_name: acc.bank_name || '',
+        bank_address: acc.bank_address || '',
+        bank_corr_account: acc.bank_corr_account || '',
+        bank_bic: acc.bank_bic || '',
+        bank_country: acc.bank_country || '',
         currency: acc.currency || 'USD',
         active: acc.status !== 'inactive'
       }));
@@ -51,7 +58,12 @@ export default function StaffPayeerAccounts() {
     mutationFn: async (data) => {
       const payload = {
         currency: data.currency,
-        status: data.active ? 'active' : 'inactive'
+        status: data.active ? 'active' : 'inactive',
+        bank_name: data.bank_name || null,
+        bank_address: data.bank_address || null,
+        bank_corr_account: data.bank_corr_account || null,
+        bank_bic: data.bank_bic || null,
+        bank_country: data.bank_country || null
       };
       
       if (editingAccount) {
@@ -67,7 +79,7 @@ export default function StaffPayeerAccounts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
       toast.success(editingAccount ? 'Account updated' : 'Account created');
-      closeDialog();
+      closeDrawer();
     },
   });
 
@@ -82,26 +94,38 @@ export default function StaffPayeerAccounts() {
     },
   });
 
-  const openCreateDialog = () => {
+  const openCreateDrawer = () => {
     setEditingAccount(null);
-    setFormData({ currency: 'USD', id_payeer: '', account_number: '', account_name: '', active: true });
-    setDialogOpen(true);
+    setFormData({
+      currency: 'USD',
+      account_number: '',
+      bank_name: '',
+      bank_address: '',
+      bank_corr_account: '',
+      bank_bic: '',
+      bank_country: '',
+      active: true
+    });
+    setDrawerOpen(true);
   };
 
-  const openEditDialog = (account) => {
+  const openEditDrawer = (account) => {
     setEditingAccount(account);
     setFormData({
       currency: account.currency,
-      id_payeer: account.id_payeer || '',
       account_number: account.account_number,
-      account_name: account.account_name || '',
+      bank_name: account.bank_name || '',
+      bank_address: account.bank_address || '',
+      bank_corr_account: account.bank_corr_account || '',
+      bank_bic: account.bank_bic || '',
+      bank_country: account.bank_country || '',
       active: account.active !== false
     });
-    setDialogOpen(true);
+    setDrawerOpen(true);
   };
 
-  const closeDialog = () => {
-    setDialogOpen(false);
+  const closeDrawer = () => {
+    setDrawerOpen(false);
     setEditingAccount(null);
   };
 
@@ -142,7 +166,7 @@ export default function StaffPayeerAccounts() {
                   Public Site
                 </Button>
               </Link>
-              <Button onClick={openCreateDialog} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
+              <Button onClick={openCreateDrawer} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Account
             </Button>
@@ -156,55 +180,38 @@ export default function StaffPayeerAccounts() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold">Account Name</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Currency</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Payeer ID</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">Currency</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Account Number</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Status</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">Bank Name</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">Country</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">Loading...</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">Loading...</TableCell>
                 </TableRow>
               ) : accounts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">No accounts found</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">No accounts found</TableCell>
                 </TableRow>
               ) : accounts.map((account) => (
-                <TableRow key={account.id} className="border-slate-200 hover:bg-slate-50">
-                  <TableCell className="text-[#1e3a5f] font-medium">{account.account_name || '-'}</TableCell>
+                <TableRow 
+                  key={account.id} 
+                  className="border-slate-200 hover:bg-slate-100 cursor-pointer"
+                  onClick={() => openEditDrawer(account)}
+                >
                   <TableCell>
                     <Badge className="bg-[#f5a623] text-white">{account.currency}</Badge>
                   </TableCell>
-                  <TableCell className="text-slate-600 font-mono">{account.id_payeer || '-'}</TableCell>
                   <TableCell className="text-[#1e3a5f] font-mono">{account.account_number}</TableCell>
+                  <TableCell className="text-slate-700">{account.bank_name || '-'}</TableCell>
+                  <TableCell className="text-slate-600">{account.bank_country || '-'}</TableCell>
                   <TableCell>
                     <Badge className={account.active !== false ? 'bg-emerald-600' : 'bg-slate-400'}>
                       {account.active !== false ? 'Active' : 'Inactive'}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(account)}
-                        className="text-[#1e3a5f] hover:text-[#152a45] hover:bg-slate-100"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteMutation.mutate(account.id)}
-                        className="text-red-500 hover:text-red-600 hover:bg-slate-100"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -213,42 +220,32 @@ export default function StaffPayeerAccounts() {
         </div>
       </main>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white border-slate-200 text-slate-800">
-          <DialogHeader>
-            <DialogTitle className="text-[#1e3a5f]">{editingAccount ? 'Edit Account' : 'Add Payeer Account'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label className="text-slate-700">Account Name</Label>
-              <Input
-                value={formData.account_name}
-                onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
-                placeholder="e.g. Main USD Account"
-                className="bg-white border-slate-300"
-              />
-            </div>
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
+          <SheetHeader className="border-b border-slate-200 pb-4">
+            <SheetTitle className="text-[#1e3a5f]">
+              {editingAccount ? 'Edit Account' : 'Add Payeer Account'}
+            </SheetTitle>
+          </SheetHeader>
+          
+          <div className="space-y-4 py-6">
             <div className="space-y-2">
               <Label className="text-slate-700">Currency *</Label>
-              <select
+              <Select
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full h-10 px-3 rounded bg-white border border-slate-300 text-slate-800"
+                onValueChange={(value) => setFormData({ ...formData, currency: value })}
               >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                <SelectTrigger className="bg-white border-slate-300">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
-              <Label className="text-slate-700">Payeer ID</Label>
-              <Input
-                value={formData.id_payeer}
-                onChange={(e) => setFormData({ ...formData, id_payeer: e.target.value })}
-                placeholder="Payeer ID"
-                className="bg-white border-slate-300"
-              />
-            </div>
+
             <div className="space-y-2">
               <Label className="text-slate-700">Account Number *</Label>
               <Input
@@ -258,7 +255,58 @@ export default function StaffPayeerAccounts() {
                 className="bg-white border-slate-300"
               />
             </div>
-            <div className="flex items-center justify-between">
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Bank Name</Label>
+              <Input
+                value={formData.bank_name}
+                onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                placeholder="Bank name"
+                className="bg-white border-slate-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Bank Address</Label>
+              <Input
+                value={formData.bank_address}
+                onChange={(e) => setFormData({ ...formData, bank_address: e.target.value })}
+                placeholder="Bank address"
+                className="bg-white border-slate-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Bank Correspondent Account</Label>
+              <Input
+                value={formData.bank_corr_account}
+                onChange={(e) => setFormData({ ...formData, bank_corr_account: e.target.value })}
+                placeholder="Correspondent account"
+                className="bg-white border-slate-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Bank BIC/SWIFT</Label>
+              <Input
+                value={formData.bank_bic}
+                onChange={(e) => setFormData({ ...formData, bank_bic: e.target.value })}
+                placeholder="BIC/SWIFT code"
+                className="bg-white border-slate-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Bank Country</Label>
+              <Input
+                value={formData.bank_country}
+                onChange={(e) => setFormData({ ...formData, bank_country: e.target.value })}
+                placeholder="Country"
+                className="bg-white border-slate-300"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
               <Label className="text-slate-700">Active</Label>
               <Switch
                 checked={formData.active}
@@ -266,16 +314,17 @@ export default function StaffPayeerAccounts() {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeDialog} className="border-slate-300 text-slate-600">
+
+          <SheetFooter className="border-t border-slate-200 pt-4">
+            <Button variant="outline" onClick={closeDrawer} className="border-slate-300 text-slate-600">
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={saveMutation.isPending} className="bg-[#1e3a5f] hover:bg-[#152a45]">
               {saveMutation.isPending ? 'Saving...' : 'Save'}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
