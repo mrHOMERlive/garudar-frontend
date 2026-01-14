@@ -84,7 +84,7 @@ export default function StaffClients() {
         email: client.client_mail || '',
         login: '',
         password: '',
-        active: true,
+        active: client.is_active ?? true,
         kyc_status: client.kyc_status || '',
         created_date: client.kyc_submitted_at || new Date().toISOString()
       }));
@@ -246,9 +246,9 @@ export default function StaffClients() {
   );
 
   const sortedClients = [...filteredClients].sort((a, b) => {
-    const dateA = new Date(a.created_date);
-    const dateB = new Date(b.created_date);
-    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    const idA = a.client_id || '';
+    const idB = b.client_id || '';
+    return sortOrder === 'desc' ? idB.localeCompare(idA) : idA.localeCompare(idB);
   });
 
   const totalPages = Math.ceil(sortedClients.length / itemsPerPage);
