@@ -82,7 +82,7 @@ export default function StaffClients() {
         last_id: client.last_id || '',
         description: '',
         email: client.client_mail || '',
-        login: '',
+        login: client.username || '',
         password: '',
         active: client.is_active ?? true,
         kyc_status: client.kyc_status || '',
@@ -115,6 +115,8 @@ export default function StaffClients() {
       };
 
       if (editingClient) {
+        if (data.login) apiData.username = data.login;
+        if (data.password) apiData.password = data.password;
         return apiClient.updateClient(editingClient.client_id, apiData);
       } else {
         const createData = {
@@ -612,7 +614,7 @@ export default function StaffClients() {
                   <Input
                     value={formData.login}
                     onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    placeholder="username"
+                    placeholder={editingClient ? (editingClient.login || 'username') : 'username'}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
