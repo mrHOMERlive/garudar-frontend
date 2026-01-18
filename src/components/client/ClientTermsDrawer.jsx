@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { apiClient } from '@/api/apiClient';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Download, Upload, CheckCircle, X, Trash2 } from 'lucide-react';
+import { Download, Upload, CheckCircle, X, Trash2, Building2 } from 'lucide-react';
 
 export default function ClientTermsDrawer({ order, client, open, onClose, onUpdate }) {
   const [uploadingWordOrder, setUploadingWordOrder] = useState(false);
@@ -18,6 +18,9 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // TODO: Заглушка для Payeer Account - эндпоинт еще не создан
+  const selectedPayeerAccount = null;
 
   const { data: terms, isLoading: termsLoading } = useQuery({
     queryKey: ['order-terms', order?.orderId],
@@ -115,193 +118,104 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
       <SheetContent className="w-full sm:max-w-2xl bg-white border-slate-200 text-slate-900 flex flex-col overflow-hidden">
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            Order #{order.orderId}
+            <div className="bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold text-lg">
+              Order #{order.orderId}
+            </div>
           </SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
           <div className="space-y-6">
-            {/* Order Info */}
-            <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-200">
-              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{client?.client_name || order.clientId}</span></div>
-              <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{order.amount?.toLocaleString()} {order.currency}</span></div>
-              <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiaryName}</span></div>
-              <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bankName} ({order.bankBic})</span></div>
-            </div>
-
-            <Separator className="bg-slate-200" />
-
             {/* TERMS Section */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Terms</h3>
-              {/* Payment Proof Status */}
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  {order.paymentProof ? (
-                    <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  ) : (
-                    <div className="w-4 h-4 rounded-full border-2 border-slate-400" />
-                  )}
-                  <Label className="text-xs text-slate-700 font-medium">Payment Proof</Label>
-                </div>
-                <div className="text-xs text-slate-600">
-                  {order.paymentProof ? 'Submitted' : 'Not submitted'}
-                </div>
-              </div>
-            </div>
-
-            <Separator className="bg-slate-200" />
-              {termsLoading ? (
-                <div className="text-sm text-slate-500">Loading terms...</div>
-              ) : terms ? (
-                <>
-                
-                  {/* Remuneration Info */}
-                  {terms.remunerationType && (
-                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <div className="text-xs text-slate-500 mb-1">Remuneration Type</div>
-                          <div className="font-medium text-slate-900">{terms.remunerationType.toUpperCase()}</div>
-                        </div>
-                        {terms.remunerationType === 'percent' && terms.remunerationPercentage && (
-                          <div>
-                            <div className="text-xs text-slate-500 mb-1">Remuneration %</div>
-                            <div className="font-medium text-slate-900">{parseFloat(terms.remunerationPercentage)}%</div>
-                          </div>
-                        )}
-                        {terms.remunerationType === 'fixed' && terms.remunerationFixed && (
-                          <div>
-                            <div className="text-xs text-slate-500 mb-1">Remuneration Fixed</div>
-                            <div className="font-medium text-slate-900">{parseFloat(terms.remunerationFixed).toLocaleString()} {terms.currency}</div>
-                          </div>
-                        )}
-                      </div>
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Terms</h3>
+              
+              <div className="bg-white rounded-lg p-4 border border-slate-200">
+                <div className="space-y-3 text-xs">
+                  {/* Amount */}
+                  <div className="pb-3 border-b border-slate-100">
+                    <div className="text-slate-500 mb-1">Amount</div>
+                    <div className="text-base font-semibold text-slate-900">
+                      {parseFloat(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
                     </div>
-                  )}
+                  </div>
 
-                  {terms.amountRemuneration && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <div className="text-xs text-slate-600 mb-1">Amount Remuneration</div>
-                      <div className="text-lg font-bold text-[#1e3a5f]">
-                        {parseFloat(terms.amountRemuneration).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {terms.currency}
-                      </div>
+                  {/* Remuneration Type & Details */}
+                  <div className="grid grid-cols-2 gap-4 pb-3 border-b border-slate-100">
+                    <div>
+                      <div className="text-slate-500 mb-1">Remuneration Type</div>
+                      <div className="font-medium text-slate-900">{terms?.remunerationType || '-'}</div>
                     </div>
-                  )}
-
-                  {terms.exchangeRate && (
-                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <div className="text-xs text-slate-500 mb-1">Client Payment Currency</div>
-                          <div className="font-medium text-slate-900">{terms.clientPaymentCurrency || 'RUB'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500 mb-1">Exchange Rate</div>
-                          <div className="font-medium text-slate-900">{parseFloat(terms.exchangeRate).toFixed(4)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {terms.amountToBePaid && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                      <div className="text-xs text-slate-600 mb-1">Total Amount to be Paid</div>
-                      <div className="text-lg font-bold text-emerald-700">
-                        {parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {terms.clientPaymentCurrency || 'RUB'}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3">
-                    {terms.dataFixing && (
-                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                        <div className="text-xs text-slate-600 mb-1">Data Fixing</div>
-                        <div className="text-sm text-slate-900">{terms.dataFixing}</div>
+                    {terms?.remunerationType === 'percent' && terms?.remunerationPercentage && (
+                      <div>
+                        <div className="text-slate-500 mb-1">Remuneration %</div>
+                        <div className="font-medium text-slate-900">{parseFloat(terms.remunerationPercentage)}%</div>
                       </div>
                     )}
-                    {terms.datePaid && (
-                      <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                        <div className="text-xs text-slate-600 mb-1">Date Paid</div>
-                        <div className="text-sm text-slate-900">{terms.datePaid}</div>
+                    {terms?.remunerationType === 'fixed' && terms?.remunerationFixed && (
+                      <div>
+                        <div className="text-slate-500 mb-1">Remuneration Fixed</div>
+                        <div className="font-medium text-slate-900">{parseFloat(terms.remunerationFixed).toLocaleString()} {order.currency}</div>
                       </div>
                     )}
                   </div>
-                </>
-              ) : (
-                <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-500 text-center">
-                  No terms information available yet. Staff will add terms details soon.
-                </div>
-              )}
 
-              
+                  {terms?.amountRemuneration && (
+                    <div className="pb-3 border-b border-slate-100">
+                      <div className="text-slate-500 mb-1">Amount Remuneration</div>
+                      <div className="text-base font-semibold text-slate-900">
+                        {parseFloat(terms.amountRemuneration).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
+                      </div>
+                    </div>
+                  )}
 
-            {/* WORD Order Section */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Document</h3>
-              
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <Label className="text-xs text-slate-700 mb-2 block font-medium">WORD Order (from Staff)</Label>
-                {wordOrderUnsigned ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-blue-300 hover:bg-blue-100"
-                    onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
-                  >
-                    <Download className="w-3 h-3 mr-2" />
-                    Download Unsigned Order
-                  </Button>
-                ) : (
-                  <div className="text-xs text-slate-500">No order document available yet</div>
-                )}
-              </div>
+                  {/* Client Payment Currency & Exchange Rate */}
+                  {terms?.exchangeRate && (
+                    <div className="grid grid-cols-2 gap-4 pb-3 border-b border-slate-100">
+                      <div>
+                        <div className="text-slate-500 mb-1">Client Payment Currency</div>
+                        <div className="font-medium text-slate-900">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">Exchange Rate</div>
+                        <div className="font-medium text-slate-900">{Number(terms.exchangeRate).toFixed(4)}</div>
+                      </div>
+                    </div>
+                  )}
 
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                <Label className="text-xs text-slate-700 mb-2 block font-medium">Upload Signed Order</Label>
-                <div className="flex items-center gap-2">
-                  <label className="flex-1">
-                    <input
-                      type="file"
-                      onChange={handleWordOrderUpload}
-                      className="hidden"
-                      accept=".doc,.docx,.pdf"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-green-300 hover:bg-green-100"
-                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                      disabled={uploadingWordOrder}
-                    >
-                      <Upload className="w-3 h-3 mr-2" />
-                      {uploadingWordOrder ? 'Uploading...' : 'Upload Signed Order'}
-                    </Button>
-                  </label>
-                  {wordOrderSigned && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="border-green-300"
-                      onClick={() => handleDownloadDocument(wordOrderSigned.doc_id, wordOrderSigned.file_name)}
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
+                  {/* FV - Remuneration - Total */}
+                  {terms?.exchangeRate && order.amount && (
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <div className="text-slate-500 mb-1">FV</div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {(parseFloat(order.amount) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">Remuneration</div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {(parseFloat(terms.amountRemuneration || 0) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">TOTAL</div>
+                        <div className="text-sm font-bold text-slate-900">
+                          {terms.amountToBePaid ? parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 
+                           (parseFloat(terms.amountRemuneration || 0) * parseFloat(terms.exchangeRate || 1) + parseFloat(order.amount) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
-            </div>
 
-            <Separator className="bg-slate-200" />
-
-            {/* Payment Proof Section */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Payment Proof</h3>
-              
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                <Label className="text-xs text-slate-700 mb-2 block font-medium">Upload Payment Proof</Label>
+              {/* Payment Proof Upload Section */}
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <Label className="text-xs text-slate-700 mb-2 block">Upload Payment Proof</Label>
                 <div className="flex items-center gap-2">
                   <label className="flex-1">
                     <input
@@ -314,7 +228,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="w-full border-blue-300 hover:bg-blue-100"
+                      className="w-full"
                       onClick={(e) => e.currentTarget.previousElementSibling?.click()}
                       disabled={uploadingPaymentProof}
                     >
@@ -325,8 +239,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                   {paymentProofDoc && (
                     <Button 
                       size="sm" 
-                      variant="outline" 
-                      className="border-blue-300"
+                      variant="outline"
                       onClick={() => handleDownloadDocument(paymentProofDoc.doc_id, paymentProofDoc.file_name)}
                     >
                       <Download className="w-3 h-3" />
@@ -334,12 +247,237 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                   )}
                 </div>
                 {paymentProofDoc && (
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-[10px] text-slate-500">
                     Uploaded: {new Date(paymentProofDoc.uploaded_at).toLocaleDateString()}
                   </div>
                 )}
               </div>
+
+              {/* Data Fixing & Date Paid */}
+              {(terms?.dataFixing || terms?.datePaid) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {terms?.dataFixing && (
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="text-[10px] text-slate-500 mb-1">Data Fixing</div>
+                      <div className="text-xs text-slate-900">{new Date(terms.dataFixing).toLocaleDateString()}</div>
+                    </div>
+                  )}
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-[10px] text-slate-500 mb-1">Date Paid</div>
+                    <div className="text-xs text-slate-900">
+                      {terms?.datePaid 
+                        ? new Date(terms.datePaid).toLocaleDateString()
+                        : 'Not Paid'}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+
+            <Separator className="bg-slate-200" />
+
+            {/* WORD Order Section */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Order Document</h3>
+              
+              <div className="bg-white rounded-lg p-3 border border-slate-200">
+                <Label className="text-xs text-slate-700 mb-2 block">WORD Order (from Staff)</Label>
+                {wordOrderUnsigned ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download Unsigned Order
+                  </Button>
+                ) : (
+                  <div className="text-xs text-slate-500">No order document available yet</div>
+                )}
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <Label className="text-xs text-slate-700 mb-2 block">Upload Signed Order</Label>
+                <div className="flex items-center gap-2">
+                  <label className="flex-1">
+                    <input
+                      type="file"
+                      onChange={handleWordOrderUpload}
+                      className="hidden"
+                      accept=".doc,.docx,.pdf"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                      disabled={uploadingWordOrder}
+                    >
+                      <Upload className="w-3 h-3 mr-2" />
+                      {uploadingWordOrder ? 'Uploading..' : 'Upload Signed Order'}
+                    </Button>
+                  </label>
+                  {wordOrderSigned && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleDownloadDocument(wordOrderSigned.doc_id, wordOrderSigned.file_name)}
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Separator className="bg-slate-200" />
+
+            {/* Order Info Section */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Order Information</h3>
+
+              <div className="bg-white rounded-lg p-4 text-xs space-y-2 border border-slate-200">
+                <div><span className="text-slate-500 font-medium">Beneficiary Name:</span> <span className="text-slate-900">{order.beneficiaryName}</span></div>
+                <div><span className="text-slate-500 font-medium">Beneficiary Address:</span> <span className="text-slate-900">{order.beneficiaryAdress}</span></div>
+                <div><span className="text-slate-500 font-medium">Destination Account:</span> <span className="text-slate-900">{order.destinationAccount}</span></div>
+                <div><span className="text-slate-500 font-medium">Bank Name:</span> <span className="text-slate-900">{order.bankName}</span></div>
+                <div><span className="text-slate-500 font-medium">BIC/SWIFT:</span> <span className="text-slate-900">{order.bankBic}</span></div>
+                <div><span className="text-slate-500 font-medium">Bank Address:</span> <span className="text-slate-900">{order.bankAddress}</span></div>
+                <div><span className="text-slate-500 font-medium">Country:</span> <span className="text-slate-900">{order.bankCountry}</span></div>
+                {order.remark && (
+                  <div><span className="text-slate-500 font-medium">Remark:</span> <span className="text-slate-900">{order.remark}</span></div>
+                )}
+              </div>
+            </div>
+
+            {/* Payeer Account Info Section - shown when staff selected an account */}
+            {(order.client_payment_account_id || order.gan_bank_account) && (
+              <>
+                <Separator className="bg-slate-200" />
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    Payeer Account Information
+                  </h3>
+
+                  {selectedPayeerAccount ? (
+                    <div className="bg-white rounded-lg p-4 border border-slate-200">
+                      <div className="grid gap-3">
+                        {/* Account Name - Highlighted */}
+                        <div className="bg-white rounded-lg p-3 border border-slate-200">
+                          <div className="text-xs text-slate-500 mb-1 font-medium">Account Name</div>
+                          <div className="text-base font-semibold text-[#1e3a5f]">
+                            {selectedPayeerAccount.account_name || '-'}
+                          </div>
+                        </div>
+
+                        {/* Account Number & Currency */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-white rounded-lg p-3 border border-slate-200">
+                            <div className="text-xs text-slate-500 mb-1 font-medium">Account Number</div>
+                            <div className="text-sm font-mono text-slate-900">
+                              {selectedPayeerAccount.account_number}
+                            </div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border border-slate-200">
+                            <div className="text-xs text-slate-500 mb-1 font-medium">Currency</div>
+                            <div className="text-sm font-semibold text-blue-600">
+                              {selectedPayeerAccount.currency}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bank Details */}
+                        <div className="bg-white rounded-lg p-3 border border-slate-200 space-y-2 text-xs">
+                          {selectedPayeerAccount.bank_name && (
+                            <div>
+                              <span className="text-slate-500 font-medium">Bank Name:</span>{' '}
+                              <span className="text-slate-900">{selectedPayeerAccount.bank_name}</span>
+                            </div>
+                          )}
+                          {selectedPayeerAccount.bank_address && (
+                            <div>
+                              <span className="text-slate-500 font-medium">Bank Address:</span>{' '}
+                              <span className="text-slate-900">{selectedPayeerAccount.bank_address}</span>
+                            </div>
+                          )}
+                          {(selectedPayeerAccount.bank_bic || selectedPayeerAccount.bank_swift) && (
+                            <div className="flex gap-4">
+                              {selectedPayeerAccount.bank_bic && (
+                                <div>
+                                  <span className="text-slate-500 font-medium">BIC:</span>{' '}
+                                  <span className="text-slate-900 font-mono">{selectedPayeerAccount.bank_bic}</span>
+                                </div>
+                              )}
+                              {selectedPayeerAccount.bank_swift && (
+                                <div>
+                                  <span className="text-slate-500 font-medium">SWIFT:</span>{' '}
+                                  <span className="text-slate-900 font-mono">{selectedPayeerAccount.bank_swift}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {selectedPayeerAccount.id_payeer && (
+                            <div>
+                              <span className="text-slate-500 font-medium">Payeer ID:</span>{' '}
+                              <span className="text-slate-900">{selectedPayeerAccount.id_payeer}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                      <div className="text-xs space-y-2">
+                        {order.client_payment_account_number && (
+                          <div>
+                            <span className="text-slate-500 font-medium">Account Number:</span>{' '}
+                            <span className="text-slate-900 font-mono">{order.client_payment_account_number}</span>
+                          </div>
+                        )}
+                        {order.client_payment_account_name && (
+                          <div>
+                            <span className="text-slate-500 font-medium">Account Name:</span>{' '}
+                            <span className="text-slate-900">{order.client_payment_account_name}</span>
+                          </div>
+                        )}
+                        {order.client_payment_bank_name && (
+                          <div>
+                            <span className="text-slate-500 font-medium">Bank Name:</span>{' '}
+                            <span className="text-slate-900">{order.client_payment_bank_name}</span>
+                          </div>
+                        )}
+                        {order.client_payment_bank_address && (
+                          <div>
+                            <span className="text-slate-500 font-medium">Bank Address:</span>{' '}
+                            <span className="text-slate-900">{order.client_payment_bank_address}</span>
+                          </div>
+                        )}
+                        {(order.client_payment_bank_bic || order.client_payment_bank_swift) && (
+                          <div className="flex gap-4">
+                            {order.client_payment_bank_bic && (
+                              <div>
+                                <span className="text-slate-500 font-medium">BIC:</span>{' '}
+                                <span className="text-slate-900 font-mono">{order.client_payment_bank_bic}</span>
+                              </div>
+                            )}
+                            {order.client_payment_bank_swift && (
+                              <div>
+                                <span className="text-slate-500 font-medium">SWIFT:</span>{' '}
+                                <span className="text-slate-900 font-mono">{order.client_payment_bank_swift}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 

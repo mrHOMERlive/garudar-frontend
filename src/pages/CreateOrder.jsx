@@ -24,6 +24,7 @@ export default function CreateOrder() {
     client_payment_currency: 'RUB',
     beneficiary_name: '',
     beneficiary_address: '',
+    beneficiary_country: '',
     destination_account: '',
     country_bank: '',
     bic: '',
@@ -74,6 +75,9 @@ export default function CreateOrder() {
     if (!addressValidation.valid) {
       newErrors.beneficiary_address = addressValidation.error;
     }
+    if (!formData.beneficiary_country) {
+      newErrors.beneficiary_country = 'Beneficiary country is required';
+    }
     if (!formData.destination_account) {
       newErrors.destination_account = 'Account number is required';
     }
@@ -110,9 +114,12 @@ export default function CreateOrder() {
       // Generate CSV data
       const csvData = generateCSVData(orderData);
       
-      // Найти название страны по коду
-      const selectedCountry = countries.find(c => c.code === orderData.country_bank);
-      const countryName = selectedCountry ? selectedCountry.name : orderData.country_bank;
+      // Найти названия стран по кодам
+      const selectedBankCountry = countries.find(c => c.code === orderData.country_bank);
+      const bankCountryName = selectedBankCountry ? selectedBankCountry.name : orderData.country_bank;
+      
+      const selectedBeneficiaryCountry = countries.find(c => c.code === orderData.beneficiary_country);
+      const beneficiaryCountryName = selectedBeneficiaryCountry ? selectedBeneficiaryCountry.name : orderData.beneficiary_country;
       
       // Преобразуем данные формы в формат API (OrderPoboDto-Input)
       const apiOrderData = {
@@ -122,8 +129,9 @@ export default function CreateOrder() {
         client_payment_currency: orderData.client_payment_currency,
         beneficiary_name: orderData.beneficiary_name,
         beneficiary_adress: orderData.beneficiary_address,
+        beneficiary_country: beneficiaryCountryName,
         destination_account: orderData.destination_account,
-        bank_country: countryName,
+        bank_country: bankCountryName,
         bank_bic: orderData.bic,
         bank_name: orderData.bank_name,
         bank_address: orderData.bank_address,

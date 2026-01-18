@@ -1,12 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UserCheck, AlertCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { UserCheck, AlertCircle, Search, Globe } from 'lucide-react';
 import { validateLatinText } from './utils/validators';
+import { apiClient } from '@/api/apiClient';
 
 export default function BeneficiaryInfoSection({ formData, onChange, errors, setErrors }) {
+  const [countries, setCountries] = useState([]);
+  const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
+  const [loadingCountries, setLoadingCountries] = useState(false);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const countriesData = await apiClient.getCountries();
+        setCountries(Array.isArray(countriesData) ? countriesData : []);
+      } catch (error) {
+        console.error('Failed to load countries:', error);
+        setCountries([]);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Поиск стран по началу названия или кода
+  const countrySearchResults = useMemo(() => {
+    if (!countrySearchQuery) return countries;
+    const query = countrySearchQuery.toUpperCase();
+    return countries.filter(country => 
+      country.name.toUpperCase().startsWith(query) || 
+      country.code.toUpperCase().startsWith(query)
+    );
+  }, [countries, countrySearchQuery]);
+
+  const selectedCountry = countries.find(c => c.code === formData.beneficiary_country);
+
+  const handleCountryChange = (countryCode) => {
+    onChange({ beneficiary_country: countryCode });
+  };
+
   const handleNameChange = (value) => {
     onChange({ beneficiary_name: value });
     
@@ -91,6 +132,64 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
           <div className="text-xs text-slate-500">
             {formData.beneficiary_address?.length || 0} / 105 characters
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="beneficiary_country" className="text-slate-700 font-medium">
+            Beneficiary Country *
+          </Label>
+          <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                disabled={loadingCountries}
+                className={`w-full justify-between border-slate-200 focus:border-teal-600 focus:ring-teal-600 ${errors.beneficiary_country ? 'border-red-500' : ''}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-slate-400" />
+                  {selectedCountry ? (
+                    <span>{selectedCountry.name} ({selectedCountry.code})</span>
+                  ) : (
+                    <span className="text-slate-400">
+                      {loadingCountries ? 'Loading countries...' : 'Select country...'}
+                    </span>
+                  )}
+                </div>
+                <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0" align="start" sideOffset={4}>
+              <Command shouldFilter={false}>
+                <CommandInput 
+                  placeholder="Search country..." 
+                  value={countrySearchQuery}
+                  onValueChange={setCountrySearchQuery}
+                />
+                <CommandEmpty>No country found.</CommandEmpty>
+                <CommandGroup className="max-h-64 overflow-auto">
+                  {countrySearchResults.map((country) => (
+                    <CommandItem
+                      key={country.code}
+                      value={country.name}
+                      onSelect={() => {
+                        handleCountryChange(country.code);
+                        setCountrySearchOpen(false);
+                        setCountrySearchQuery('');
+                      }}
+                    >
+                      {country.name} ({country.code})
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {errors.beneficiary_country && (
+            <div className="flex items-center gap-1 text-sm text-red-600">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.beneficiary_country}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
