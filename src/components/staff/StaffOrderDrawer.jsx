@@ -15,7 +15,7 @@ import apiClient from '@/api/apiClient';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
-import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
+// import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator'; // Removed for Excel download
 import moment from 'moment';
 
 const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
@@ -281,6 +281,24 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       }
     } catch (error) {
       toast.error('Failed to download: ' + error.message);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    try {
+      const blob = await apiClient.exportOrderExcel(order.orderId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Order_${order.orderId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Excel downloaded successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to download Excel: ' + error.message);
     }
   };
 
@@ -841,10 +859,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       size="sm"
                       variant="outline"
                       className="border-blue-300 hover:bg-blue-100"
-                      onClick={() => downloadWordTemplate(order)}
+                      onClick={handleDownloadExcel}
                     >
                       <FileText className="w-3 h-3 mr-2" />
-                      Download Unsigned Order
+                      Download Unsigned Order (Excel)
                     </Button>
                     <div className="flex items-center gap-2">
                       <label className="flex-1">
