@@ -72,7 +72,7 @@ export default function StaffActiveOrders() {
   useEffect(() => {
     const loadClients = async () => {
       const newClientsMap = {};
-      
+
       for (const clientId of uniqueClientIds) {
         try {
           const clientData = await apiClient.getClientById(clientId);
@@ -94,7 +94,7 @@ export default function StaffActiveOrders() {
           };
         }
       }
-      
+
       setClientsMap(newClientsMap);
     };
 
@@ -104,7 +104,7 @@ export default function StaffActiveOrders() {
   }, [uniqueClientIds]);
 
   const activeOrders = useMemo(() => {
-    return orders.filter(o => ACTIVE_STATUSES.includes(o.status));
+    return orders.filter(o => ACTIVE_STATUSES.includes(o.status) && !o.deleted && !o.executed);
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -114,9 +114,9 @@ export default function StaffActiveOrders() {
       if (search) {
         const s = search.toLowerCase();
         return order.orderId?.toLowerCase().includes(s) ||
-               order.clientId?.toString().includes(s) ||
-               order.beneficiaryName?.toLowerCase().includes(s) ||
-               order.bankBic?.toLowerCase().includes(s);
+          order.clientId?.toString().includes(s) ||
+          order.beneficiaryName?.toLowerCase().includes(s) ||
+          order.bankBic?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -179,7 +179,7 @@ export default function StaffActiveOrders() {
   const handleStatusChange = (order, newStatus) => {
     updateMutation.mutate({
       id: order.orderId,
-      data: { 
+      data: {
         status: newStatus
       }
     });
@@ -188,24 +188,24 @@ export default function StaffActiveOrders() {
 
   const handleToggleInvoice = (order) => {
     const newInvoice = !order.invocieReceived;
-    updateMutation.mutate({ 
-      id: order.orderId, 
-      data: { invocie_received: newInvoice } 
+    updateMutation.mutate({
+      id: order.orderId,
+      data: { invocie_received: newInvoice }
     });
     toast.success(`Invoice ${newInvoice ? 'received' : 'pending'}`);
   };
 
   const handleTogglePaymentProof = (order) => {
     const newProof = !order.paymentProof;
-    const data = { 
+    const data = {
       payment_proof: newProof
     };
-    
+
     // If payment proof is set and status is pending_payment, move to on_execution
     if (newProof && order.status === 'pending_payment') {
       data.status = 'on_execution';
     }
-    
+
     updateMutation.mutate({ id: order.orderId, data });
     toast.success(`Payment proof ${newProof ? 'confirmed' : 'removed'}`);
   };
@@ -219,8 +219,8 @@ export default function StaffActiveOrders() {
 
     try {
       const blob = await apiClient.exportTxtInstructions(selectedOrderIds);
-      const filename = `${new Date().toISOString().slice(0,10).replace(/-/g,'')}_instruction.txt`;
-      
+      const filename = `${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_instruction.txt`;
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -230,7 +230,7 @@ export default function StaffActiveOrders() {
 
       toast.success(`Instruction file created for ${selectedOrderIds.length} orders`);
       setSelectedIds(new Set());
-      
+
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     } catch (error) {
       toast.error('Failed to create instruction file: ' + (error.message || 'Unknown error'));
@@ -247,7 +247,7 @@ export default function StaffActiveOrders() {
     selectedOrders.forEach(order => {
       updateMutation.mutate({
         id: order.orderId,
-        data: { 
+        data: {
           status: 'released',
           executed: true
         }
@@ -357,9 +357,9 @@ export default function StaffActiveOrders() {
             </SelectContent>
           </Select>
           {(statusFilter !== 'all' || currencyFilter !== 'all' || search) && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => { setStatusFilter('all'); setCurrencyFilter('all'); setSearch(''); }}
               className="text-slate-500 hover:text-slate-800"
             >
@@ -388,7 +388,7 @@ export default function StaffActiveOrders() {
                   />
                 </TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-xs">
-                  <button 
+                  <button
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-[#152a45] transition-colors"
                   >
@@ -411,8 +411,8 @@ export default function StaffActiveOrders() {
               ) : filteredOrders.length === 0 ? (
                 <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8 text-xs">No active orders</TableCell></TableRow>
               ) : paginatedOrders.map((order) => (
-                <TableRow 
-                  key={order.orderId} 
+                <TableRow
+                  key={order.orderId}
                   className={`border-slate-200 hover:bg-blue-50/50 cursor-pointer transition-colors ${order.nonMandiriExecution ? 'opacity-60' : ''}`}
                 >
                   <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
@@ -435,8 +435,8 @@ export default function StaffActiveOrders() {
                     {parseFloat(order.amount || 0).toLocaleString()} {order.currency}
                   </TableCell>
                   <TableCell className="py-2 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <Badge className={`text-xs ${order.invoiceReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}>
-                      {order.invoiceReceived ? 'Y' : 'N'}
+                    <Badge className={`text-xs ${order.invocieReceived ? 'bg-emerald-600' : 'bg-slate-400'}`}>
+                      {order.invocieReceived ? 'Y' : 'N'}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-2 cursor-pointer" onClick={() => openDrawer(order)}>

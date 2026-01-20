@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
-import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper';
+
+// import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper'; // Removed
 import apiClient from '@/api/apiClient';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -42,7 +43,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [uploadingInvoice, setUploadingInvoice] = useState(false);
   const [uploadingOther, setUploadingOther] = useState(false);
   const [uploadingWordOrder, setUploadingWordOrder] = useState(false);
-  
+
   const [ganBankName, setGanBankName] = useState('');
   const [ganBankAccount, setGanBankAccount] = useState('');
   const [dateReport, setDateReport] = useState('');
@@ -61,7 +62,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [docPaidDate, setDocPaidDate] = useState('');
   const [paymentProofNo, setPaymentProofNo] = useState('');
   const [paymentProofDate, setPaymentProofDate] = useState('');
-  
+
   const [clientPaymentAccountId, setClientPaymentAccountId] = useState('');
   const [clientPaymentAccountName, setClientPaymentAccountName] = useState('');
   const [clientPaymentAccountNumber, setClientPaymentAccountNumber] = useState('');
@@ -76,9 +77,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     enabled: open,
   });
 
+  const activePayeerAccounts = payeerAccounts.filter(acc => acc.status === 'active');
+
+
+
   const { data: terms } = useQuery({
     queryKey: ['order-terms', order?.orderId],
     queryFn: () => apiClient.getOrderTerms(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
+  const { data: documents = [], refetch: refetchDocuments } = useQuery({
+    queryKey: ['order-documents', order?.orderId],
+    queryFn: () => apiClient.getOrderDocuments(order?.orderId),
     enabled: !!order?.orderId && open,
   });
 
@@ -89,12 +100,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setDataFixing(order.dataFixing || '');
       setInvoiceNumber(order.invoiceNumber || '');
       setStaffDescription(order.staffDescription || '');
-      setInvoiceReceived(order.invoiceReceived || false);
+      setInvoiceReceived(order.invoiceReceived || order.invocieReceived || false);
       setPaymentProof(order.paymentProof || false);
       setDatePaymentProof(order.datePaymentProof || '');
       setAttachmentTransactionStatus(order.attachmentTransactionStatus || '');
       setNonMandiriExecution(order.nonMandiriExecution || false);
-      
+
       setGanBankName(order.ganBankName || '');
       setGanBankAccount(order.ganBankAccount || '');
       setDateReport(order.dateReport || '');
@@ -113,7 +124,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setDocPaidDate(order.docPaidDate || '');
       setPaymentProofNo(order.paymentProofNo || '');
       setPaymentProofDate(order.paymentProofDate || '');
-      
+
       setClientPaymentAccountId(order.clientPaymentAccountId || '');
       setClientPaymentAccountName(order.clientPaymentAccountName || '');
       setClientPaymentAccountNumber(order.clientPaymentAccountNumber || '');
@@ -134,8 +145,42 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setExchangeRateMode('manual');
       if (terms.datePaid) setDatePaid(terms.datePaid);
       if (terms.dataFixing) setDataFixing(terms.dataFixing);
+
+      // Populate other terms fields
+      setConversionMethod(terms.conversionMethod || 'none');
+      setGanBankName(terms.GANBankName || '');
+      setGanBankAccount(terms.GANBankAccount || '');
+      setDateReport(terms.dateReport || '');
+      setBaseCurrency(terms.baseCurrency || '');
+      setExecutingBank(terms.executingBank || '');
+      setFxExecutingBank(terms.FXExecutingBank ?? '');
+      setBankStatementInType(terms.bankStatementInType || '');
+      setBankStatementInId(terms.bankStatementInId || '');
+      setBankStatementOutType(terms.bankStatementOutType || '');
+      setBankStatementOutId(terms.bankStatementOutId || '');
+      setAmountToBePaidTargetCur(terms.amountToBePaidTargetCur ?? '');
+      setAmountPaidTargetCur(terms.amountPaidTargetCur ?? '');
+      setDocPaidNo(terms.docPaidNo || '');
+      setDocPaidDate(terms.docPaidDate || '');
+      setPaymentProofNo(terms.paymentProofNo || '');
+      setPaymentProofDate(terms.paymentProofDate || '');
+      if (terms.amountToBePaid) setAmountToBePaid(terms.amountToBePaid);
+
+      // Auto-select Payment Account based on GANBankAccount from terms
+      if (terms.GANBankAccount && payeerAccounts.length > 0) {
+        const matchedAccount = payeerAccounts.find(acc => acc.account_no === terms.GANBankAccount);
+        if (matchedAccount) {
+          setClientPaymentAccountId(matchedAccount.account_no);
+          setClientPaymentAccountName(matchedAccount.currency || matchedAccount.account_no);
+          setClientPaymentAccountNumber(matchedAccount.account_no || '');
+          setClientPaymentBankName(matchedAccount.bank_name || '');
+          setClientPaymentBankAddress(matchedAccount.bank_address || '');
+          setClientPaymentBankBic(matchedAccount.bank_bic || '');
+          setClientPaymentBankSwift('');
+        }
+      }
     }
-  }, [terms, open]);
+  }, [terms, open, payeerAccounts]);
 
   if (!order) return null;
 
@@ -167,68 +212,79 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (exchangeRate && exchangeRate !== '') {
-        const termsData = {
-          remuneration_type: remunerationType.toLowerCase(),
-          exchange_rate: parseFloat(exchangeRate),
-          client_payment_currency: clientPaymentCurrency || null,
-        };
+      // 1. Update Terms (always attempt to save terms data)
+      const termsData = {
+        remuneration_type: remunerationType.toLowerCase(),
+        exchange_rate: exchangeRate !== '' ? parseFloat(exchangeRate) : null,
+        client_payment_currency: clientPaymentCurrency || null,
+        date_paid: datePaid || null,
+        data_fixing: dataFixing || null,
+        GAN_bank_name: ganBankName || null,
+        GAN_bank_account: ganBankAccount || null,
+        date_report: dateReport || null,
+        conversion_method: conversionMethod,
+        base_currency: baseCurrency || null,
+        executing_bank: executingBank || null,
+        FX: !!fxExecutingBank, // derive boolean logic if needed, or stick to simple
+        FX_executing_bank: fxExecutingBank !== '' ? parseFloat(fxExecutingBank) : null,
+        status: status, // Terms status same as order? Or separate? API allows it.
+        bank_statement_in_type: bankStatementInType || null,
+        bank_statement_in_id: bankStatementInId || null,
+        bank_statement_out_type: bankStatementOutType || null,
+        bank_statement_out_id: bankStatementOutId || null,
+        amount_to_be_paid_target_cur: amountToBePaidTargetCur !== '' ? parseFloat(amountToBePaidTargetCur) : null,
+        amount_paid_target_cur: amountPaidTargetCur !== '' ? parseFloat(amountPaidTargetCur) : null,
+        amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : null,
+        doc_paid_no: docPaidNo || null,
+        doc_paid_date: docPaidDate || null,
+        payment_proof_no: paymentProofNo || null,
+        payment_proof_date: paymentProofDate || null,
+      };
 
-        if (remunerationType === 'PERCENT' && remunerationPercentage !== '') {
-          termsData.remuneration_percentage = parseFloat(remunerationPercentage);
-        } else if (remunerationType === 'FIXED' && remunerationFixed !== '') {
-          termsData.remuneration_fixed = parseFloat(remunerationFixed);
-        }
-
-        await apiClient.createOrUpdateOrderTerms(order.orderId, termsData);
+      if (remunerationType === 'PERCENT' && remunerationPercentage !== '') {
+        termsData.remuneration_percentage = parseFloat(remunerationPercentage);
+      } else if (remunerationType === 'FIXED' && remunerationFixed !== '') {
+        termsData.remuneration_fixed = parseFloat(remunerationFixed);
       }
 
+      await apiClient.createOrUpdateOrderTerms(order.orderId, termsData);
+
+      // 2. Update Order
       const updates = {
         status,
         invoice_number: invoiceNumber,
-        staff_description: staffDescription,
         invocie_received: invoiceReceived,
         payment_proof: paymentProof,
+        date_payment_proof: paymentProofDate || null,
         non_mandiri_execution: nonMandiriExecution,
-        
-        gan_bank_name: ganBankName,
-        gan_bank_account: ganBankAccount,
-        date_report: dateReport,
-        amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : null,
-        conversion_method: conversionMethod,
-        base_currency: baseCurrency,
-        executing_bank: executingBank,
-        fx_executing_bank: fxExecutingBank !== '' ? parseFloat(fxExecutingBank) : null,
-        bank_statement_in_type: bankStatementInType,
-        bank_statement_in_id: bankStatementInId,
-        bank_statement_out_type: bankStatementOutType,
-        bank_statement_out_id: bankStatementOutId,
-        amount_to_be_paid_target_cur: amountToBePaidTargetCur !== '' ? parseFloat(amountToBePaidTargetCur) : null,
-        amount_paid_target_cur: amountPaidTargetCur !== '' ? parseFloat(amountPaidTargetCur) : null,
-        doc_paid_no: docPaidNo,
-        doc_paid_date: docPaidDate,
-        payment_proof_no: paymentProofNo,
-        payment_proof_date: paymentProofDate,
-        
-        client_payment_account_id: clientPaymentAccountId,
-        client_payment_account_name: clientPaymentAccountName,
-        client_payment_account_number: clientPaymentAccountNumber,
-        client_payment_bank_name: clientPaymentBankName,
-        client_payment_bank_address: clientPaymentBankAddress,
-        client_payment_bank_bic: clientPaymentBankBic,
-        client_payment_bank_swift: clientPaymentBankSwift,
+
       };
 
       await onSave(updates);
       toast.success('Order updated successfully');
+      refetchDocuments(); // Refresh docs just in case
     } catch (error) {
+      console.error(error);
       toast.error('Failed to update order: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
 
-  const historyEntries = parseStatusHistory(order.statusHistory);
+  const handleDownload = async (docId) => {
+    try {
+      const response = await apiClient.downloadDocument(order.orderId, docId);
+      if (response && response.presigned_url) {
+        window.open(response.presigned_url, '_blank');
+      } else {
+        toast.error('No download URL returned');
+      }
+    } catch (error) {
+      toast.error('Failed to download: ' + error.message);
+    }
+  };
+
+  // const historyEntries = parseStatusHistory(order.statusHistory); // Removed
 
   const handleProofUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -236,9 +292,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
     setUploadingProof(true);
     try {
-      const response = await apiClient.uploadFile(file);
-      setAttachmentTransactionStatus(response.fileUrl || response.url);
+      await apiClient.uploadOrderDocument(order.orderId, file, 'payment_proof');
       toast.success('Payment proof uploaded successfully');
+      refetchDocuments();
     } catch (error) {
       toast.error('Failed to upload payment proof: ' + (error.message || 'Unknown error'));
     } finally {
@@ -251,26 +307,22 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     if (!file) return;
 
     const setLoading = type === 'sales_contract' ? setUploadingSalesContract :
-                       type === 'invoice' ? setUploadingInvoice :
-                       type === 'word_order' ? setUploadingWordOrder : setUploadingOther;
+      type === 'invoice' ? setUploadingInvoice :
+        type === 'word_order' ? setUploadingWordOrder : setUploadingOther;
 
     setLoading(true);
     try {
-      const response = await apiClient.uploadOrderDocument(order.orderId, file, type);
+      await apiClient.uploadOrderDocument(order.orderId, file, type);
       toast.success('Document uploaded successfully');
-      
-      if (response.fileUrl || response.url) {
-        const field = type === 'sales_contract' ? 'attachmentSalesContract' :
-                      type === 'invoice' ? 'attachmentInvoice' :
-                      type === 'word_order' ? 'attachmentWordOrder' : 'attachmentOther';
-        order[field] = response.fileUrl || response.url;
-      }
+      refetchDocuments();
     } catch (error) {
       toast.error('Failed to upload document: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
   };
+
+  const getDoc = (type) => documents.find(d => d.doc_type === type);
 
   return (
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
@@ -308,7 +360,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Client Payment Instructions</h3>
               <p className="text-xs text-slate-500 italic">Select the account where client should send payment</p>
-              
+
               <div>
                 <Label className="text-xs text-slate-600 font-bold">Select Payment Account *</Label>
                 <Select value={clientPaymentAccountId} onValueChange={(val) => {
@@ -321,13 +373,18 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     setClientPaymentBankAddress(account.bank_address || '');
                     setClientPaymentBankBic(account.bank_bic || '');
                     setClientPaymentBankSwift(account.bank_bic || '');
+
+                    // Auto-fill fields for backend
+                    if (account.currency) setClientPaymentCurrency(account.currency);
+                    setGanBankName(account.bank_name || '');
+                    setGanBankAccount(account.account_no || '');
                   }
                 }}>
                   <SelectTrigger className="mt-1 bg-white border-slate-300">
                     <SelectValue placeholder="Select account from Payeer Accounts..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {payeerAccounts.map(acc => (
+                    {activePayeerAccounts.map(acc => (
                       <SelectItem key={acc.account_no} value={acc.account_no}>
                         {acc.account_no} ({acc.currency})
                       </SelectItem>
@@ -392,7 +449,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             {/* SECTION 3: FX & CONVERSION Section */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Section 3: Transfer Amounts & FX</h3>
-              
+
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs text-slate-600">Source Currency</Label>
@@ -451,10 +508,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <div>
                 <Label className="text-xs text-slate-600">Data Fixing</Label>
                 <Input
+                  type="date"
                   value={dataFixing}
                   onChange={(e) => setDataFixing(e.target.value)}
                   className="mt-1 bg-white border-slate-300"
-                  placeholder="Notes"
                 />
               </div>
             </div>
@@ -464,7 +521,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             {/* SECTION 4: EXECUTION Section */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Section 4: GAN's Execution & Payment</h3>
-              
+
               <div>
                 <Label className="text-xs text-slate-600">Date of Execution</Label>
                 <Input
@@ -482,7 +539,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectValue placeholder="Select executing bank..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {payeerAccounts.map(acc => (
+                    {activePayeerAccounts.map(acc => (
                       <SelectItem key={acc.account_no} value={acc.account_no}>
                         {acc.account_no} ({acc.currency})
                       </SelectItem>
@@ -634,8 +691,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   <Label className="text-xs text-slate-600">Payment Proof Date</Label>
                   <Input
                     type="date"
-                    value={datePaymentProof}
-                    onChange={(e) => setDatePaymentProof(e.target.value)}
+                    value={paymentProofDate}
+                    onChange={(e) => setPaymentProofDate(e.target.value)}
                     className="mt-1 bg-white border-slate-300"
                   />
                 </div>
@@ -662,16 +719,16 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       </Button>
                     </label>
                   </div>
-                  {attachmentTransactionStatus && (
-                    <a
-                      href={attachmentTransactionStatus}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-xs text-[#1e3a5f] hover:underline"
+                  {getDoc('payment_proof') && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownload(getDoc('payment_proof').doc_id)}
+                      className="inline-flex items-center gap-2 text-xs text-[#1e3a5f] hover:underline p-0 h-auto"
                     >
                       <Download className="w-3 h-3" />
                       Download Uploaded Proof
-                    </a>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -705,12 +762,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         {uploadingSalesContract ? 'Uploading...' : 'Upload'}
                       </Button>
                     </label>
-                    {order.attachmentSalesContract && (
-                      <a href={order.attachmentSalesContract} target="_blank" rel="noopener noreferrer">
-                        <Button size="sm" variant="outline" className="border-slate-300">
-                          <Download className="w-3 h-3" />
-                        </Button>
-                      </a>
+                    {getDoc('sales_contract') && (
+                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('sales_contract').doc_id)}>
+                        <Download className="w-3 h-3" />
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -738,12 +793,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         {uploadingInvoice ? 'Uploading...' : 'Upload'}
                       </Button>
                     </label>
-                    {order.attachmentInvoice && (
-                      <a href={order.attachmentInvoice} target="_blank" rel="noopener noreferrer">
-                        <Button size="sm" variant="outline" className="border-slate-300">
-                          <Download className="w-3 h-3" />
-                        </Button>
-                      </a>
+                    {getDoc('invoice') && (
+                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('invoice').doc_id)}>
+                        <Download className="w-3 h-3" />
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -771,12 +824,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         {uploadingOther ? 'Uploading...' : 'Upload'}
                       </Button>
                     </label>
-                    {order.attachmentOther && (
-                      <a href={order.attachmentOther} target="_blank" rel="noopener noreferrer">
-                        <Button size="sm" variant="outline" className="border-slate-300">
-                          <Download className="w-3 h-3" />
-                        </Button>
-                      </a>
+                    {getDoc('other') && (
+                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('other').doc_id)}>
+                        <Download className="w-3 h-3" />
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -815,12 +866,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                           {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Client'}
                         </Button>
                       </label>
-                      {order.attachmentWordOrderSigned && (
-                        <a href={order.attachmentWordOrderSigned} target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" variant="outline" className="border-blue-300">
-                            <Download className="w-3 h-3" />
-                          </Button>
-                        </a>
+                      {getDoc('word_order') && (
+                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(getDoc('word_order').doc_id)}>
+                          <Download className="w-3 h-3" />
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -1005,27 +1054,14 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             <Separator className="bg-slate-200" />
 
-            {/* History */}
-            {historyEntries.length > 0 && (
-              <div>
-                <Label className="text-xs text-slate-600 font-bold uppercase">History</Label>
-                <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
-                  {historyEntries.slice().reverse().map((h, i) => (
-                    <div key={i} className="flex justify-between text-xs bg-slate-50 rounded p-2 border border-slate-200">
-                      <span className="font-medium text-slate-700">{h.status?.replace('_', ' ').toUpperCase()}</span>
-                      <span className="text-slate-500">{moment(h.timestamp).format('DD/MM/YY HH:mm')}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* History Removed - backend doesn't support status history yet */}
 
             <Separator className="bg-slate-200" />
 
             {/* Order Information */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
-              
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Amount</div>
@@ -1055,7 +1091,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
-                <div className="font-semibold text-slate-900 text-sm">{order.beneficiaryAddress}</div>
+                <div className="font-semibold text-slate-900 text-sm">{order.beneficiaryAddress || order.beneficiaryAdress}</div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
@@ -1095,18 +1131,18 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200 flex gap-3">
-          <Button 
+          <Button
             type="button"
-            variant="outline" 
-            onClick={onClose} 
+            variant="outline"
+            onClick={onClose}
             className="flex-1 border-slate-300"
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             type="button"
-            onClick={handleSave} 
-            disabled={saving} 
+            onClick={handleSave}
+            disabled={saving}
             className="flex-1 bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             {saving ? 'Saving...' : 'Save'}
