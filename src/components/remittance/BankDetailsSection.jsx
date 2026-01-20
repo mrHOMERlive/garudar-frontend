@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Building, AlertCircle, Search, Loader2 } from 'lucide-react';
+import { Building, AlertCircle, Search } from 'lucide-react';
 import { validateAccountNumber, validateBIC, IBAN_COUNTRIES } from './utils/validators';
 import {
   Command,
@@ -28,6 +28,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
 
+
   // Загрузка BIC по выбранной стране
   const { data: bicData = [], isLoading: bicLoading } = useQuery({
     queryKey: ['bic', formData.country_bank],
@@ -36,7 +37,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   });
 
   // Фильтрация активных BIC (isDelete=false, isInactive=false)
-  const activeBics = useMemo(() => 
+  const activeBics = useMemo(() =>
     bicData.filter(bic => !bic.isDelete && !bic.isInactive),
     [bicData]
   );
@@ -45,24 +46,26 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const bicSearchResults = useMemo(() => {
     if (!bicSearchQuery) return [];
     const query = bicSearchQuery.toUpperCase();
-    return activeBics.filter(bic => 
+    return activeBics.filter(bic =>
       bic.bicSwiftCd?.startsWith(query)
     ).slice(0, 20);
   }, [activeBics, bicSearchQuery]);
+
+
 
   // Поиск стран по началу названия или кода
   const countrySearchResults = useMemo(() => {
     if (!countrySearchQuery) return countries;
     const query = countrySearchQuery.toUpperCase();
-    return countries.filter(country => 
-      country.name.toUpperCase().startsWith(query) || 
+    return countries.filter(country =>
+      country.name.toUpperCase().startsWith(query) ||
       country.code.toUpperCase().startsWith(query)
     );
   }, [countries, countrySearchQuery]);
 
   const handleAccountChange = (value) => {
     onChange({ destination_account: value });
-    
+
     if (formData.country_bank) {
       const validation = validateAccountNumber(value, formData.country_bank);
       setErrors(prev => ({
@@ -74,7 +77,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
   const handleCountryChange = (countryCode) => {
     onChange({ country_bank: countryCode });
-    
+
     // Revalidate account if exists
     if (formData.destination_account) {
       const validation = validateAccountNumber(formData.destination_account, countryCode);
@@ -83,7 +86,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         destination_account: validation.valid ? null : validation.error
       }));
     }
-    
+
     // Revalidate BIC if exists (skip if manual override is enabled)
     if (formData.bic && !formData.bank_manual_override) {
       const validation = validateBIC(formData.bic, countryCode);
@@ -102,35 +105,35 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
     const address = [bicItem.addr1, bicItem.addr2, bicItem.addr3, bicItem.cityNm]
       .filter(Boolean)
       .join(', ');
-    
+
     onChange({
       bic: bicItem.bicSwiftCd,
       bank_name: bicItem.nm,
       bank_address: address,
       bank_manual_override: false
     });
-    
+
     // Validate BIC
     const validation = validateBIC(bicItem.bicSwiftCd, formData.country_bank);
     setErrors(prev => ({
       ...prev,
       bic: validation.valid ? null : validation.error
     }));
-    
+
     setBicSearchOpen(false);
     setBicSearchQuery('');
   };
 
   const handleBICManualEntry = (value) => {
     onChange({ bic: value });
-    
+
     if (value.length >= 8 && !formData.bank_manual_override) {
       const validation = validateBIC(value, formData.country_bank);
       setErrors(prev => ({
         ...prev,
         bic: validation.valid ? null : validation.error
       }));
-      
+
       // Try to auto-fill bank details from API data
       const foundBic = activeBics.find(b => b.bicSwiftCd === value.toUpperCase());
       if (foundBic) {
@@ -217,10 +220,10 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0" align="start" sideOffset={4}>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
               <Command shouldFilter={false}>
-                <CommandInput 
-                  placeholder="Search country..." 
+                <CommandInput
+                  placeholder="Search country..."
                   value={countrySearchQuery}
                   onValueChange={setCountrySearchQuery}
                 />
@@ -266,10 +269,10 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[350px] p-0" align="start" sideOffset={4}>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
               <Command>
-                <CommandInput 
-                  placeholder="Search BIC..." 
+                <CommandInput
+                  placeholder="Search BIC..."
                   onValueChange={handleBICSearch}
                 />
                 <CommandEmpty>
@@ -291,7 +294,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                             setBicSearchOpen(false);
                           }
                         }}
-                        className="bg-teal-700 hover:bg-teal-600"
+                        className="bg-[#1e3a5f] hover:bg-[#152a45]"
                       >
                         Confirm
                       </Button>
@@ -299,15 +302,9 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                   </div>
                 </CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
-                  {bicLoading && (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      <span className="text-sm text-slate-500">Loading...</span>
-                    </div>
-                  )}
                   {bicSearchResults.map((result) => (
                     <CommandItem
-                      key={result.id}
+                      key={result.bicSwiftCd}
                       value={`${result.bicSwiftCd} ${result.nm}`}
                       onSelect={() => handleBICSelect(result)}
                     >
@@ -321,7 +318,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
               </Command>
             </PopoverContent>
           </Popover>
-          {errors.bic && !formData.bank_manual_override && (
+          {errors.bic && (
             <div className="flex items-center gap-1 text-sm text-red-600">
               <AlertCircle className="w-4 h-4" />
               <span>{errors.bic}</span>

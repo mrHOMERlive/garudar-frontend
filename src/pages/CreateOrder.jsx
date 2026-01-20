@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { Send, Download, Copy, Mail, History, Upload } from 'lucide-react';
@@ -18,6 +18,7 @@ import { validateLatinText } from '../components/remittance/utils/validators';
 const INVOICE_EMAIL = 'sales@garudar.id';
 
 export default function CreateOrder() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     amount: 0,
     currency: 'USD',
@@ -60,7 +61,7 @@ export default function CreateOrder() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.amount || formData.amount <= 0) {
       newErrors.amount = 'Amount is required';
     }
@@ -110,17 +111,17 @@ export default function CreateOrder() {
     mutationFn: async (orderData) => {
       const user = await apiClient.getCurrentUser();
       const orderNumber = `PO-${new Date().toISOString().slice(0, 10)}-${Date.now().toString().slice(-6)}`;
-      
+
       // Generate CSV data
       const csvData = generateCSVData(orderData);
-      
+
       // Найти названия стран по кодам
       const selectedBankCountry = countries.find(c => c.code === orderData.country_bank);
       const bankCountryName = selectedBankCountry ? selectedBankCountry.name : orderData.country_bank;
-      
+
       const selectedBeneficiaryCountry = countries.find(c => c.code === orderData.beneficiary_country);
       const beneficiaryCountryName = selectedBeneficiaryCountry ? selectedBeneficiaryCountry.name : orderData.beneficiary_country;
-      
+
       // Преобразуем данные формы в формат API (OrderPoboDto-Input)
       const apiOrderData = {
         order_id: orderNumber,
@@ -141,7 +142,7 @@ export default function CreateOrder() {
         invocie_received: false,
         payment_proof: false,
       };
-      
+
       return await apiClient.createOrder(apiOrderData);
     },
     onSuccess: async (data) => {
@@ -149,9 +150,9 @@ export default function CreateOrder() {
       toast.success('Order created successfully!', {
         description: `Order #${data.orderId}`
       });
-      
+
       await uploadDocumentsAfterOrder(data.orderId);
-      
+
       setShowInvoiceModal(true);
     },
     onError: (error) => {
@@ -176,13 +177,13 @@ export default function CreateOrder() {
 
   const handleFileUpload = (file, type) => {
     if (!file) return;
-    
+
     const setFile = {
       salesContract: setSalesContractFile,
       invoice: setInvoiceFile,
       other: setOtherDocsFile
     }[type];
-    
+
     setFile(file);
     toast.success('Document selected', {
       description: file.name
@@ -191,7 +192,7 @@ export default function CreateOrder() {
 
   const uploadDocumentsAfterOrder = async (orderId) => {
     const uploads = [];
-    
+
     if (invoiceFile) {
       uploads.push({
         file: invoiceFile,
@@ -199,7 +200,7 @@ export default function CreateOrder() {
         name: 'Invoice'
       });
     }
-    
+
     if (salesContractFile) {
       uploads.push({
         file: salesContractFile,
@@ -207,7 +208,7 @@ export default function CreateOrder() {
         name: 'Sales Contract (as Payment Proof)'
       });
     }
-    
+
     if (otherDocsFile) {
       uploads.push({
         file: otherDocsFile,
@@ -215,11 +216,11 @@ export default function CreateOrder() {
         name: 'Other Documents'
       });
     }
-    
+
     if (uploads.length === 0) return;
-    
+
     setUploadingDocuments(true);
-    
+
     try {
       for (const upload of uploads) {
         await apiClient.uploadOrderDocument(orderId, upload.file, upload.docType);
@@ -242,9 +243,9 @@ export default function CreateOrder() {
           <div className="flex items-center justify-between">
             <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                  alt="Logo" 
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -303,7 +304,7 @@ export default function CreateOrder() {
             setErrors={setErrors}
           />
 
-           {/* Invoice & Documents Info Block */}
+          {/* Invoice & Documents Info Block */}
           <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -334,7 +335,7 @@ export default function CreateOrder() {
                 <div className="pt-3 border-t border-amber-200">
                   <h4 className="font-semibold text-amber-900 mb-3">Upload Documents (Optional)</h4>
                   <p className="text-xs text-amber-700 mb-3">You can upload documents here or send them by email</p>
-                  
+
                   <div className="space-y-3">
                     {/* Sales Contract Upload */}
                     <div>
@@ -458,7 +459,10 @@ export default function CreateOrder() {
       {createdOrder && (
         <InvoiceInfoModal
           open={showInvoiceModal}
-          onClose={() => setShowInvoiceModal(false)}
+          onClose={() => {
+            setShowInvoiceModal(false);
+            navigate(createPageUrl('UserDashboard'));
+          }}
           orderNumber={createdOrder.orderId}
           invoiceNumber={formData.remark_inv_no}
         />
