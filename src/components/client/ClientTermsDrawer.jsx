@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { apiClient } from '@/api/apiClient';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Download, Upload, CheckCircle, X, Trash2, Building2 } from 'lucide-react';
+import { Download, Upload, CheckCircle, X, Trash2, Building2, FileText } from 'lucide-react';
 
 export default function ClientTermsDrawer({ order, client, open, onClose, onUpdate }) {
   const [uploadingWordOrder, setUploadingWordOrder] = useState(false);
@@ -105,6 +105,24 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
     }
   };
 
+  const handleDownloadExcel = async () => {
+    try {
+      const blob = await apiClient.exportOrderExcel(order.orderId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Order_${order.orderId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Excel downloaded successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to download Excel: ' + error.message);
+    }
+  };
+
   const getDocumentByType = (docType) => {
     return documents?.find(doc => doc.doc_type === docType);
   };
@@ -129,7 +147,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
             {/* TERMS Section */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Terms</h3>
-              
+
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="space-y-3 text-xs">
                   {/* Amount */}
@@ -203,8 +221,8 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                       <div>
                         <div className="text-slate-500 mb-1">TOTAL</div>
                         <div className="text-sm font-bold text-slate-900">
-                          {terms.amountToBePaid ? parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 
-                           (parseFloat(terms.amountRemuneration || 0) * parseFloat(terms.exchangeRate || 1) + parseFloat(order.amount) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {terms.amountToBePaid ? parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                            (parseFloat(terms.amountRemuneration || 0) * parseFloat(terms.exchangeRate || 1) + parseFloat(order.amount) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-0.5">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
                       </div>
@@ -237,8 +255,8 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                     </Button>
                   </label>
                   {paymentProofDoc && (
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => handleDownloadDocument(paymentProofDoc.doc_id, paymentProofDoc.file_name)}
                     >
@@ -265,7 +283,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                     <div className="text-[10px] text-slate-500 mb-1">Date Paid</div>
                     <div className="text-xs text-slate-900">
-                      {terms?.datePaid 
+                      {terms?.datePaid
                         ? new Date(terms.datePaid).toLocaleDateString()
                         : 'Not Paid'}
                     </div>
@@ -279,9 +297,9 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
             {/* WORD Order Section */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Order Document</h3>
-              
+
               <div className="bg-white rounded-lg p-3 border border-slate-200">
-                <Label className="text-xs text-slate-700 mb-2 block">WORD Order (from Staff)</Label>
+                <Label className="text-xs text-slate-700 mb-2 block">Order (from Staff)</Label>
                 {wordOrderUnsigned ? (
                   <Button
                     type="button"
@@ -293,44 +311,57 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                     <Download className="w-3 h-3 mr-2" />
                     Download Unsigned Order
                   </Button>
+                ) : terms?.amountRemuneration ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-blue-300 hover:bg-blue-100"
+                    onClick={handleDownloadExcel}
+                  >
+                    <FileText className="w-3 h-3 mr-2" />
+                    Download Unsigned Order
+                  </Button>
                 ) : (
                   <div className="text-xs text-slate-500">No order document available yet</div>
                 )}
               </div>
 
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <Label className="text-xs text-slate-700 mb-2 block">Upload Signed Order</Label>
-                <div className="flex items-center gap-2">
-                  <label className="flex-1">
-                    <input
-                      type="file"
-                      onChange={handleWordOrderUpload}
-                      className="hidden"
-                      accept=".doc,.docx,.pdf"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                      disabled={uploadingWordOrder}
-                    >
-                      <Upload className="w-3 h-3 mr-2" />
-                      {uploadingWordOrder ? 'Uploading..' : 'Upload Signed Order'}
-                    </Button>
-                  </label>
-                  {wordOrderSigned && (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleDownloadDocument(wordOrderSigned.doc_id, wordOrderSigned.file_name)}
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  )}
+              {terms?.amountRemuneration && (
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <Label className="text-xs text-slate-700 mb-2 block">Upload Signed Order</Label>
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        onChange={handleWordOrderUpload}
+                        className="hidden"
+                        accept=".doc,.docx,.pdf"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                        disabled={uploadingWordOrder}
+                      >
+                        <Upload className="w-3 h-3 mr-2" />
+                        {uploadingWordOrder ? 'Uploading..' : 'Upload Signed Order'}
+                      </Button>
+                    </label>
+                    {wordOrderSigned && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadDocument(wordOrderSigned.doc_id, wordOrderSigned.file_name)}
+                      >
+                        <Download className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <Separator className="bg-slate-200" />
@@ -484,7 +515,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200 space-y-2">
           <div className="flex gap-2">
-            <Button 
+            <Button
               type="button"
               onClick={() => setShowCancelDialog(true)}
               variant="outline"
@@ -493,7 +524,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
               <X className="w-4 h-4 mr-2" />
               Cancel Order
             </Button>
-            <Button 
+            <Button
               type="button"
               onClick={() => setShowDeleteDialog(true)}
               variant="outline"
@@ -504,9 +535,9 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
               Delete Order
             </Button>
           </div>
-          <Button 
+          <Button
             type="button"
-            onClick={onClose} 
+            onClick={onClose}
             className="w-full bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             Close

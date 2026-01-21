@@ -205,7 +205,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         {/* Country Selection */}
         <div className="space-y-2">
           <Label className="text-slate-700 font-medium">Country (Bank) *</Label>
-          <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen}>
+          <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -254,7 +254,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             BIC (Bank) *
             <span className="text-xs text-slate-500 ml-2">(8 or 11 characters)</span>
           </Label>
-          <Popover open={bicSearchOpen} onOpenChange={setBicSearchOpen}>
+          <Popover open={bicSearchOpen} onOpenChange={setBicSearchOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"

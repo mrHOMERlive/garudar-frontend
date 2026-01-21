@@ -124,7 +124,7 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
         </div>
         <div className="space-y-2">
           <Label className="text-slate-700 font-medium">Beneficiary Country *</Label>
-          <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen}>
+          <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
