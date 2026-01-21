@@ -15,7 +15,7 @@ import apiClient from '@/api/apiClient';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
-// import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator'; // Removed for Excel download
+import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import moment from 'moment';
 
 const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
@@ -176,7 +176,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
           setClientPaymentBankName(matchedAccount.bank_name || '');
           setClientPaymentBankAddress(matchedAccount.bank_address || '');
           setClientPaymentBankBic(matchedAccount.bank_bic || '');
-          setClientPaymentBankSwift('');
+          setClientPaymentBankSwift(matchedAccount.bank_bic || '');
         }
       }
     }
@@ -281,24 +281,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       }
     } catch (error) {
       toast.error('Failed to download: ' + error.message);
-    }
-  };
-
-  const handleDownloadExcel = async () => {
-    try {
-      const blob = await apiClient.exportOrderExcel(order.orderId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Order_${order.orderId}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('Excel downloaded successfully');
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to download Excel: ' + error.message);
     }
   };
 
@@ -630,17 +612,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               </div>
 
-              <div>
-                <Label className="text-xs text-slate-600">Total Originator Pays (Amount to be Paid)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={amountToBePaid}
-                  onChange={(e) => setAmountToBePaid(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
-                  placeholder="Calculated: amount + remuneration"
-                />
-                <p className="text-xs text-slate-500 mt-1">In source currency ({clientPaymentCurrency})</p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
+                <div className="text-lg font-bold text-[#1e3a5f]">
+                  {Number(amountToBePaid || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} {order.currency}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -653,7 +629,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
                   <div className="text-xs text-slate-600 mb-1">Net to Beneficiary ({order.currency})</div>
                   <div className="text-sm font-bold text-emerald-700">
-                    {((order.amount || 0) - calculateAmountRemuneration()).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {Number(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
               </div>
@@ -859,10 +835,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       size="sm"
                       variant="outline"
                       className="border-blue-300 hover:bg-blue-100"
-                      onClick={handleDownloadExcel}
+                      onClick={() => downloadWordTemplate(order)}
                     >
                       <FileText className="w-3 h-3 mr-2" />
-                      Download Unsigned Order (Excel)
+                      Download Unsigned Order
                     </Button>
                     <div className="flex items-center gap-2">
                       <label className="flex-1">
