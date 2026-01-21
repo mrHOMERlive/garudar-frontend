@@ -79,6 +79,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
   const activePayeerAccounts = payeerAccounts.filter(acc => acc.status === 'active');
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => apiClient.getCurrencies(),
+    enabled: open,
+  });
+
 
 
   const { data: terms } = useQuery({
@@ -284,6 +290,25 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     }
   };
 
+
+  const handleDownloadExcel = async () => {
+    try {
+      const blob = await apiClient.exportOrderExcel(order.orderId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Order_${order.orderId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Excel downloaded successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to download Excel: ' + error.message);
+    }
+  };
+
   // const historyEntries = parseStatusHistory(order.statusHistory); // Removed
 
   const handleProofUpload = async (e) => {
@@ -453,21 +478,39 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs text-slate-600">Source Currency</Label>
-                  <Input
+                  <Select
                     value={clientPaymentCurrency}
-                    onChange={(e) => setClientPaymentCurrency(e.target.value.toUpperCase())}
-                    className="mt-1 bg-white border-slate-300"
-                    placeholder="RUB/BRL"
-                  />
+                    onValueChange={setClientPaymentCurrency}
+                  >
+                    <SelectTrigger className="mt-1 bg-white border-slate-300">
+                      <SelectValue placeholder="RUB" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((c) => (
+                        <SelectItem key={c.code || c} value={c.code || c}>
+                          {c.symbol ? c.symbol + ' ' : ''}{c.code || c} {c.name ? `- ${c.name}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label className="text-xs text-slate-600">Reference Currency</Label>
-                  <Input
+                  <Select
                     value={baseCurrency || order.currency}
-                    onChange={(e) => setBaseCurrency(e.target.value.toUpperCase())}
-                    className="mt-1 bg-white border-slate-300"
-                    placeholder="USD"
-                  />
+                    onValueChange={setBaseCurrency}
+                  >
+                    <SelectTrigger className="mt-1 bg-white border-slate-300">
+                      <SelectValue placeholder="USD" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((c) => (
+                        <SelectItem key={c.code || c} value={c.code || c}>
+                          {c.symbol ? c.symbol + ' ' : ''}{c.code || c} {c.name ? `- ${c.name}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label className="text-xs text-slate-600">Payment Currency</Label>
@@ -540,8 +583,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </SelectTrigger>
                   <SelectContent>
                     {activePayeerAccounts.map(acc => (
-                      <SelectItem key={acc.account_no} value={acc.account_no}>
-                        {acc.account_no} ({acc.currency})
+                      <SelectItem key={acc.account_no} value={acc.bank_name}>
+                        {acc.bank_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -612,9 +655,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
-                <div className="text-lg font-bold text-[#1e3a5f]">
+                <div className="text-lg font-bold text-indigo-900">
                   {Number(amountToBePaid || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} {order.currency}
                 </div>
               </div>
@@ -828,14 +871,14 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 {/* WORD Order */}
                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">WORD Order</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">Order</Label>
                   <div className="flex flex-col gap-2">
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       className="border-blue-300 hover:bg-blue-100"
-                      onClick={() => downloadWordTemplate(order)}
+                      onClick={handleDownloadExcel}
                     >
                       <FileText className="w-3 h-3 mr-2" />
                       Download Unsigned Order

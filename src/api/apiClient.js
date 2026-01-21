@@ -182,6 +182,23 @@ class ApiClient {
         return this.request(`/orders/pobo/${orderId}/terms`);
     }
 
+    async exportOrderExcel(orderId) {
+        const token = this.getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${this.baseUrl}/orders/orders/${orderId}/excel`, {
+            method: 'GET',
+            headers,
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to export excel order');
+        }
+        return response.blob();
+    }
+
     async exportTxtInstructions(orderIds) {
         const token = this.getToken();
         const headers = {
