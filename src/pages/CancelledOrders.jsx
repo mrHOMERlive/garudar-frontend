@@ -167,7 +167,7 @@ export default function CancelledOrders() {
                 </TableRow>
               ) : paginatedOrders.map((order) => (
                 <TableRow
-                  key={order.id}
+                  key={order.order_number || order.id}
                   className="hover:bg-red-50 cursor-pointer transition-colors border-b border-slate-100"
                   onClick={() => {
                     setSelectedOrder(order);
