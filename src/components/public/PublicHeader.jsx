@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { 
+import {
   ChevronDown, Menu, X, Globe, ArrowRight,
-  CreditCard, RefreshCw, Building2, ShoppingCart, 
+  CreditCard, RefreshCw, Building2, ShoppingCart,
   Code, MessageSquare, FileText, HelpCircle, Workflow
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png";
 
 export default function PublicHeader({ language, setLanguage }) {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -22,24 +23,40 @@ export default function PublicHeader({ language, setLanguage }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleStaffClick = (e) => {
+    e.preventDefault();
+    const savedUser = localStorage.getItem('gtrans_user');
+    
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      if (userData.role === 'ADMIN') {
+        navigate(createPageUrl('StaffDashboard'));
+      } else {
+        navigate(createPageUrl('GTrans'));
+      }
+    } else {
+      navigate(createPageUrl('GTrans'));
+    }
+  };
+
   const navItems = [
     {
       label: language === 'en' ? 'Products' : 'Produk',
       items: [
-        { 
-          label: language === 'en' ? 'GTrans B2B Payments' : 'GTrans Pembayaran B2B', 
+        {
+          label: language === 'en' ? 'GTrans B2B Payments' : 'GTrans Pembayaran B2B',
           description: language === 'en' ? 'Cross-border pay-in / pay-out for businesses' : 'Pembayaran lintas batas untuk bisnis',
           icon: CreditCard,
           href: createPageUrl('GTransB2BPayments')
         },
-        { 
-          label: language === 'en' ? 'GTrans eCommerce Collect & Settle' : 'GTrans Koleksi & Penyelesaian eCommerce', 
+        {
+          label: language === 'en' ? 'GTrans eCommerce Collect & Settle' : 'GTrans Koleksi & Penyelesaian eCommerce',
           description: language === 'en' ? 'Get paid globally, settle locally' : 'Terima pembayaran global, selesaikan lokal',
           icon: ShoppingCart,
           href: createPageUrl('GTransECommerceCollectSettle')
         },
-        { 
-          label: 'GTrans MerchantPay', 
+        {
+          label: 'GTrans MerchantPay',
           description: language === 'en' ? 'Foreign buyers pay in their currency' : 'Pembeli asing bayar dalam mata uang mereka',
           icon: RefreshCw,
           href: createPageUrl('GTransMerchantPay')
@@ -49,20 +66,20 @@ export default function PublicHeader({ language, setLanguage }) {
     {
       label: language === 'en' ? 'Solutions' : 'Solusi',
       items: [
-        { 
-          label: language === 'en' ? 'FX Solutions' : 'Solusi FX', 
+        {
+          label: language === 'en' ? 'FX Solutions' : 'Solusi FX',
           description: language === 'en' ? 'Competitive rates, zero fees, transparent pricing' : 'Kurs kompetitif, nol biaya, harga transparan',
           icon: RefreshCw,
           href: createPageUrl('GTransFXSolutions')
         },
-        { 
-          label: language === 'en' ? 'API Integration' : 'Integrasi API', 
+        {
+          label: language === 'en' ? 'API Integration' : 'Integrasi API',
           description: language === 'en' ? 'Connect via our platform APIs' : 'Hubungkan melalui API platform kami',
           icon: Code,
           href: createPageUrl('GTransAPIIntegration')
         },
-        { 
-          label: language === 'en' ? 'Marketplaces & Platforms' : 'Marketplace & Platform', 
+        {
+          label: language === 'en' ? 'Marketplaces & Platforms' : 'Marketplace & Platform',
           description: language === 'en' ? 'Coming soon' : 'Segera hadir',
           icon: Building2,
           href: '#'
@@ -72,18 +89,18 @@ export default function PublicHeader({ language, setLanguage }) {
     {
       label: language === 'en' ? 'Resources' : 'Sumber Daya',
       items: [
-        { 
-          label: language === 'en' ? 'Documentation' : 'Dokumentasi', 
+        {
+          label: language === 'en' ? 'Documentation' : 'Dokumentasi',
           icon: FileText,
           href: createPageUrl('GTransDocumentation')
         },
-        { 
-          label: language === 'en' ? 'Work Scheme' : 'Skema Kerja', 
+        {
+          label: language === 'en' ? 'Work Scheme' : 'Skema Kerja',
           icon: Workflow,
           href: createPageUrl('GTransWorkScheme')
         },
-        { 
-          label: language === 'en' ? 'FAQ' : 'FAQ', 
+        {
+          label: language === 'en' ? 'FAQ' : 'FAQ',
           icon: HelpCircle,
           href: createPageUrl('GTransFAQ')
         }
@@ -148,7 +165,7 @@ export default function PublicHeader({ language, setLanguage }) {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item, idx) => (
-              <div 
+              <div
                 key={idx}
                 className="relative"
                 onMouseEnter={() => setActiveDropdown(idx)}
@@ -161,7 +178,7 @@ export default function PublicHeader({ language, setLanguage }) {
                     activeDropdown === idx && "rotate-180"
                   )} />
                 </button>
-                
+
                 {activeDropdown === idx && (
                   <div className="absolute top-full left-0 pt-2 w-80 z-50">
                     <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -213,11 +230,14 @@ export default function PublicHeader({ language, setLanguage }) {
               </Button>
             </Link>
 
-            <Link to={createPageUrl('StaffDashboard')}>
-              <Button variant="outline" size="sm" className="text-slate-500 border-slate-300">
-                {language === 'en' ? 'For Staff' : 'Untuk Staf'}
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-slate-500 border-slate-300"
+              onClick={handleStaffClick}
+            >
+              {language === 'en' ? 'For Staff' : 'Untuk Staf'}
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -251,7 +271,7 @@ export default function PublicHeader({ language, setLanguage }) {
                   ))}
                 </div>
               ))}
-              
+
               <div className="pt-4 space-y-2 border-t border-slate-200 mt-4">
                 <Link to={createPageUrl('GTransLogin')} onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
