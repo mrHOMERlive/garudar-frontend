@@ -22,7 +22,7 @@ export default function ClientCancelledDrawer({ order, open, onClose }) {
             {/* Order Information */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
-
+              
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Amount</div>
@@ -92,9 +92,9 @@ export default function ClientCancelledDrawer({ order, open, onClose }) {
 
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200">
-          <Button
+          <Button 
             type="button"
-            onClick={onClose}
+            onClick={onClose} 
             className="w-full bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             Close
