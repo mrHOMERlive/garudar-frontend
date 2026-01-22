@@ -171,81 +171,55 @@ export default function StaffDashboard() {
           </div>
         </div>
 
-        {/* Client Requests Management Section */}
         <div className="mt-12">
-          <h2 className="text-xl font-bold text-slate-800 mb-6">Client Requests Management</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Platform Usage Terms</CardTitle>
-                <CardDescription className="text-slate-500">Manage terms & conditions</CardDescription>
-              </CardHeader>
-            </Card>
+            <h2 className="text-xl font-bold text-slate-800 mb-6">Client Requests Management</h2>
 
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileSignature className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Service Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Manage service agreements</CardDescription>
-              </CardHeader>
-            </Card>
+            {/* Main Action Card */}
+            <div className="mb-6">
+              <Link to={createPageUrl('StaffClientRequests')}>
+                <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-[#1e3a5f] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileCheck className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-[#1e3a5f] text-xl">Manage Client Badges</CardTitle>
+                        <CardDescription className="text-slate-500 text-base mt-1">Configure which requests are visible to clients and manage account status</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+            </div>
 
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
+            {/* Other Request Types - Compact List */}
+            <Card className="bg-slate-50 border-slate-200">
               <CardHeader>
-                <div className="w-12 h-12 bg-cyan-600 rounded-lg flex items-center justify-center mb-3">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Privacy Policy</CardTitle>
-                <CardDescription className="text-slate-500">Manage privacy policies</CardDescription>
+                <CardTitle className="text-slate-700 text-base">Other Request Types (Coming Soon)</CardTitle>
               </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
+              <CardContent>
+                <div className="space-y-2">
+                  {[
+                    { icon: FileSignature, label: 'Service Agreement' },
+                    { icon: FileText, label: 'Platform Terms & Conditions' },
+                    { icon: FileCheck, label: 'Service Level Agreement (SLA)' },
+                    { icon: FileText, label: 'Data Processing Agreement (DPA)' },
+                    { icon: Shield, label: 'AML/KYC & Compliance Annex' },
+                    { icon: FileSignature, label: 'Other Request for Signing' },
+                    { icon: FileText, label: 'Other Request to Submit' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-200">
+                      <div className="w-8 h-8 bg-slate-200 rounded flex items-center justify-center flex-shrink-0">
+                        <item.icon className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <span className="text-sm text-slate-600">{item.label}</span>
+                    </div>
+                  ))}
                 </div>
-                <CardTitle className="text-[#1e3a5f]">Data Processing Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Manage DPAs</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileCheck className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Service Level Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Manage SLAs</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileSignature className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Other Request for Signing</CardTitle>
-                <CardDescription className="text-slate-500">Custom signing requests</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-amber-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Other Request to Submit</CardTitle>
-                <CardDescription className="text-slate-500">Custom submission requests</CardDescription>
-              </CardHeader>
+              </CardContent>
             </Card>
           </div>
-        </div>
       </main>
     </div>
   );

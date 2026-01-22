@@ -15,7 +15,5 @@ export const ContentBlock = base44.entities.ContentBlock;
 
 export const AppSetting = base44.entities.AppSetting;
 
-
-
 // auth sdk:
 export const User = base44.auth;

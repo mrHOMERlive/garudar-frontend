@@ -133,6 +133,10 @@ class ApiClient {
         return this.request('/clients/me');
     }
 
+    async getClientBadges(clientId) {
+        return this.request(`/clients/${clientId}/badges`);
+    }
+
     // Orders POBO
     async getOrders(params = {}) {
         const queryParams = new URLSearchParams();

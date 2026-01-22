@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/api/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck } from 'lucide-react';
+import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck, Shield } from 'lucide-react';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -27,6 +27,12 @@ export default function UserDashboard() {
     queryKey: ['all-orders'],
     queryFn: () => apiClient.getOrders({ include_deleted: true }),
     enabled: !!user
+  });
+
+  const { data: clientBadges = [] } = useQuery({
+    queryKey: ['client-badges', client?.client_id],
+    queryFn: () => apiClient.getClientBadges(client.client_id),
+    enabled: false // TODO: включить когда бэкенд добавит эндпоинт /api/v1/clients/{client_id}/badges
   });
 
   const kycApproved = client?.kyc_status === 'approved';
@@ -189,11 +195,11 @@ export default function UserDashboard() {
         </div>
 
         <div className="border-t border-slate-200 pt-8">
-          <h2 className="text-xl font-bold text-slate-700 mb-6">History</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {modules.filter(m => ['ExecutedOrders', 'CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
+          <h2 className="text-lg font-semibold text-slate-600 mb-4">History</h2>
+          <div className="mb-6">
+            {modules.filter(m => m.page === 'ExecutedOrders').map((module) => (
               <Link key={module.page + module.title} to={createPageUrl(module.page)}>
-                <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer">
                   <CardHeader>
                     <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center mb-3`}>
                       <module.icon className="w-6 h-6 text-white" />
@@ -202,6 +208,17 @@ export default function UserDashboard() {
                     <CardDescription className="text-slate-500">{module.description}</CardDescription>
                   </CardHeader>
                 </Card>
+              </Link>
+            ))}
+          </div>
+          
+          <div className="flex gap-4 text-sm">
+            {modules.filter(m => ['CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
+              <Link key={module.page + module.title} to={createPageUrl(module.page)}>
+                <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors">
+                  <module.icon className="w-3.5 h-3.5" />
+                  <span className="underline">{module.title}</span>
+                </div>
               </Link>
             ))}
           </div>
@@ -228,76 +245,75 @@ export default function UserDashboard() {
               </Card>
             </Link>
 
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Platform Usage Terms</CardTitle>
-                <CardDescription className="text-slate-500">Review and accept terms</CardDescription>
-              </CardHeader>
-            </Card>
 
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Service Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Sign service agreement</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-cyan-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Privacy Policy</CardTitle>
-                <CardDescription className="text-slate-500">Review privacy policy</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Data Processing Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Sign DPA</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Service Level Agreement</CardTitle>
-                <CardDescription className="text-slate-500">Review SLA</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Other Request for Signing</CardTitle>
-                <CardDescription className="text-slate-500">Additional documents to sign</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full opacity-60">
-              <CardHeader>
-                <div className="w-12 h-12 bg-amber-600 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-[#1e3a5f]">Other Request to Submit</CardTitle>
-                <CardDescription className="text-slate-500">Additional submissions required</CardDescription>
-              </CardHeader>
-            </Card>
+            
           </div>
+          {(() => {
+            const otherBadges = [
+              { type: 'service_agreement', label: 'Service Agreement', icon: FileText },
+              { type: 'platform_terms', label: 'Platform Terms & Conditions', icon: FileText },
+              { type: 'sla', label: 'Service Level Agreement (SLA)', icon: FileText },
+              { type: 'dpa', label: 'Data Processing Agreement (DPA)', icon: FileText },
+              { type: 'aml_kyc_compliance', label: 'AML/KYC & Compliance Annex', icon: Shield },
+              { type: 'other_signing', label: 'Other Request for Signing', icon: FileText },
+              { type: 'other_submit', label: 'Other Request to Submit', icon: FileText, link: 'ClientSubmitNDA' }
+            ];
+
+            const activeBadges = otherBadges.filter(badge => {
+              const badgeData = clientBadges.find(b => b.badge_type === badge.type);
+              return badgeData?.is_active || false;
+            });
+
+            if (activeBadges.length === 0) return null;
+
+            return (
+              <Card className="bg-slate-50 border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-slate-700 text-base">Other Requests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {activeBadges.map((badge) => {
+                      const badgeData = clientBadges.find(b => b.badge_type === badge.type);
+                      const status = badgeData?.status;
+                      const needsAttention = status === 'need_signing' || status === 'pending';
+                      const BadgeIcon = badge.icon;
+
+                      const itemClasses = `
+                        flex items-center gap-3 p-3 rounded-lg bg-white border transition-all
+                        ${needsAttention ? 'border-red-300 bg-red-50 animate-pulse' : 'border-slate-200'}
+                        ${badge.link ? 'cursor-pointer hover:border-[#1e3a5f] hover:shadow-sm' : ''}
+                      `;
+
+                      const content = (
+                        <div className={itemClasses}>
+                          <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${needsAttention ? 'bg-red-600 animate-pulse' : 'bg-slate-600'}`}>
+                            <BadgeIcon className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className={`text-sm font-medium ${needsAttention ? 'text-red-900' : 'text-slate-900'}`}>{badge.label}</div>
+                            {badgeData?.staff_comment && (
+                              <div className={`text-xs mt-0.5 ${needsAttention ? 'text-red-700' : 'text-slate-600'}`}>
+                                {badgeData.staff_comment}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+
+                      return badge.link ? (
+                        <Link key={badge.type} to={createPageUrl(badge.link)}>
+                          {content}
+                        </Link>
+                      ) : (
+                        <div key={badge.type}>{content}</div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       </main>
     </div>
