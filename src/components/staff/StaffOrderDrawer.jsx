@@ -348,6 +348,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   };
 
   const getDoc = (type) => documents.find(d => d.doc_type === type);
+  const signedOrderDoc = getDoc('word_order') || getDoc('word_order_signed_client');
 
   return (
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
@@ -903,8 +904,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                           {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Client'}
                         </Button>
                       </label>
-                      {getDoc('word_order') && (
-                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(getDoc('word_order').doc_id)}>
+                      {signedOrderDoc && (
+                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(signedOrderDoc.doc_id)}>
                           <Download className="w-3 h-3" />
                         </Button>
                       )}
