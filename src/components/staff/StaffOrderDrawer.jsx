@@ -158,7 +158,13 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setGanBankAccount(terms.GANBankAccount || '');
       setDateReport(terms.dateReport || '');
       setBaseCurrency(terms.baseCurrency || '');
-      setExecutingBank(terms.executingBank || '');
+      // Resolve executing bank to account_no if possible
+      let exBank = terms.executingBank || '';
+      if (exBank && payeerAccounts.length > 0) {
+        const found = payeerAccounts.find(p => p.bank_name === exBank || p.account_no === exBank);
+        if (found) exBank = found.account_no;
+      }
+      setExecutingBank(exBank);
       setFxExecutingBank(terms.FXExecutingBank ?? '');
       setBankStatementInType(terms.bankStatementInType || '');
       setBankStatementInId(terms.bankStatementInId || '');
@@ -528,8 +534,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="central_bank">Central Bank Official Rate</SelectItem>
+                    <SelectItem value="executing_bank">Executing Bank Rate</SelectItem>
                     <SelectItem value="manual">Manual / Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -584,7 +590,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </SelectTrigger>
                   <SelectContent>
                     {activePayeerAccounts.map(acc => (
-                      <SelectItem key={acc.account_no} value={acc.bank_name}>
+                      <SelectItem key={acc.account_no} value={acc.account_no}>
                         {acc.bank_name}
                       </SelectItem>
                     ))}
@@ -1113,12 +1119,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Debit Account</div>
-                  <div className="font-semibold text-slate-900">{order.debitAccountNo || '-'}</div>
+                  <div className="font-semibold text-slate-900">{executingBank || '-'}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
-                  <div className="font-semibold text-slate-900 text-xs break-all">{order.transactionReference || '-'}</div>
+                  <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
                 </div>
               </div>
 
