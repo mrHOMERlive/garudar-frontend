@@ -4,8 +4,16 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import apiClient from '@/api/apiClient';
+import { useQuery } from '@tanstack/react-query';
 
 export default function ClientCancelledDrawer({ order, open, onClose }) {
+  const { data: terms } = useQuery({
+    queryKey: ['order-terms', order?.orderId],
+    queryFn: () => apiClient.getOrderTerms(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
   if (!order) return null;
 
   return (
@@ -36,12 +44,12 @@ export default function ClientCancelledDrawer({ order, open, onClose }) {
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Debit Account</div>
-                  <div className="font-semibold text-slate-900">{order.debit_account_no || '-'}</div>
+                  <div className="font-semibold text-slate-900">{terms?.executingBank || '-'}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
-                  <div className="font-semibold text-slate-900 text-xs break-all">{order.transaction_reference || '-'}</div>
+                  <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
                 </div>
               </div>
 

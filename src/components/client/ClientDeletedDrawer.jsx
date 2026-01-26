@@ -6,13 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Download } from 'lucide-react';
+import apiClient from '@/api/apiClient';
+import { useQuery } from '@tanstack/react-query';
 
 export default function ClientDeletedDrawer({ order, open, onClose }) {
+  const { data: terms } = useQuery({
+    queryKey: ['order-terms', order?.orderId],
+    queryFn: () => apiClient.getOrderTerms(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
   if (!order) return null;
 
-  const hasDocuments = order.attachment_sales_contract || order.attachment_invoice || 
-                       order.attachment_other || order.attachment_word_order || 
-                       order.attachment_word_order_signed;
+  const hasDocuments = order.attachment_sales_contract || order.attachment_invoice ||
+    order.attachment_other || order.attachment_word_order ||
+    order.attachment_word_order_signed;
 
   return (
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
@@ -30,7 +38,7 @@ export default function ClientDeletedDrawer({ order, open, onClose }) {
               <>
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Documents</h3>
-                  
+
                   {order.attachment_sales_contract && (
                     <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                       <Label className="text-xs text-slate-600 mb-2 block">Sales Contract</Label>
@@ -99,7 +107,7 @@ export default function ClientDeletedDrawer({ order, open, onClose }) {
             {/* Order Information */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
-              
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Amount</div>
@@ -113,12 +121,12 @@ export default function ClientDeletedDrawer({ order, open, onClose }) {
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Debit Account</div>
-                  <div className="font-semibold text-slate-900">{order.debit_account_no || '-'}</div>
+                  <div className="font-semibold text-slate-900">{terms?.executingBank || '-'}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
-                  <div className="font-semibold text-slate-900 text-xs break-all">{order.transaction_reference || '-'}</div>
+                  <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
                 </div>
               </div>
 
@@ -169,9 +177,9 @@ export default function ClientDeletedDrawer({ order, open, onClose }) {
 
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200">
-          <Button 
+          <Button
             type="button"
-            onClick={onClose} 
+            onClick={onClose}
             className="w-full bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             Close
