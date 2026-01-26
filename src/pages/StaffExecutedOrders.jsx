@@ -28,7 +28,7 @@ export default function StaffExecutedOrders() {
   });
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.status === 'RELEASED' || o.status === 'REJECTED');
+    return orders.filter(o => o.status === 'released' || o.status === 'rejected');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -37,8 +37,8 @@ export default function StaffExecutedOrders() {
       if (search) {
         const s = search.toLowerCase();
         return order.orderId?.toLowerCase().includes(s) ||
-               order.clientId?.toString().includes(s) ||
-               order.beneficiaryName?.toLowerCase().includes(s);
+          order.clientId?.toString().includes(s) ||
+          order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -153,8 +153,8 @@ export default function StaffExecutedOrders() {
                   </TableCell>
                   <TableCell>
                     <Badge className={
-                      order.settled === 'Y' ? 'bg-emerald-600' : 
-                      order.settled === 'N' ? 'bg-red-500' : 'bg-slate-400'
+                      order.settled === 'Y' ? 'bg-emerald-600' :
+                        order.settled === 'N' ? 'bg-red-500' : 'bg-slate-400'
                     }>
                       {order.settled || 'NA'}
                     </Badge>

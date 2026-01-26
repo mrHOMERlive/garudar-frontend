@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -339,7 +339,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
     const setLoading = type === 'sales_contract' ? setUploadingSalesContract :
       type === 'invoice' ? setUploadingInvoice :
-        type === 'word_order' ? setUploadingWordOrder : setUploadingOther;
+        (type === 'word_order' || type === 'word_order_signed_client') ? setUploadingWordOrder : setUploadingOther;
 
     setLoading(true);
     try {
@@ -364,6 +364,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             #{order.orderId}
             <OrderStatusBadge status={status} />
           </SheetTitle>
+          <SheetDescription className="hidden">
+            Manage order details, documents, and status.
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
@@ -894,7 +897,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       <label className="flex-1">
                         <input
                           type="file"
-                          onChange={(e) => handleDocUpload(e, 'word_order')}
+                          onChange={(e) => handleDocUpload(e, 'word_order_signed_client')}
                           className="hidden"
                           accept=".doc,.docx"
                         />
