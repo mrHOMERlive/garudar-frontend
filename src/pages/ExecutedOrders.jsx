@@ -23,7 +23,7 @@ export default function ExecutedOrders() {
   });
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.executed && o.status?.toLowerCase() === 'released');
+    return orders.filter(o => o.status === 'released' || o.status === 'rejected');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -31,7 +31,7 @@ export default function ExecutedOrders() {
       if (search) {
         const s = search.toLowerCase();
         return order.orderId?.toLowerCase().includes(s) ||
-               order.beneficiaryName?.toLowerCase().includes(s);
+          order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -49,9 +49,9 @@ export default function ExecutedOrders() {
                 </Button>
               </Link>
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                  alt="Logo" 
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -142,10 +142,10 @@ export default function ExecutedOrders() {
                   <TableCell>
                     <Badge className={
                       order.actReportStatus === 'signed' ? 'bg-blue-600' :
-                      order.actReportStatus === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
+                        order.actReportStatus === 'on_sign' ? 'bg-amber-500' : 'bg-slate-400'
                     }>
                       {order.actReportStatus === 'signed' ? 'Signed' :
-                       order.actReportStatus === 'on_sign' ? 'On Sign' : 'Not Made'}
+                        order.actReportStatus === 'on_sign' ? 'On Sign' : 'Not Made'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
