@@ -221,7 +221,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                       <div>
                         <div className="text-slate-500 mb-1">TOTAL</div>
                         <div className="text-sm font-bold text-slate-900">
-                          {terms.amountToBePaid ? parseFloat(terms.amountToBePaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                          {(terms.amountToBePaidTargetCur || terms.amount_to_be_paid_target_cur) ? parseFloat(terms.amountToBePaidTargetCur || terms.amount_to_be_paid_target_cur).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
                             (parseFloat(terms.amountRemuneration || 0) * parseFloat(terms.exchangeRate || 1) + parseFloat(order.amount) * parseFloat(terms.exchangeRate || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-0.5">{terms.clientPaymentCurrency || order.clientPaymentCurrency || 'RUB'}</div>
