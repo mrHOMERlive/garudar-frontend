@@ -11,32 +11,19 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { parseStatusHistory } from '@/components/utils/statusHistoryHelper';
-import { apiClient } from '@/api/apiClient';
+import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, FileText } from 'lucide-react';
 import moment from 'moment';
 
 export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) {
-  const [formData, setFormData] = useState({
-    mt103_number: '',
-    mt103_date: '',
-    mt103_received: false,
-    transaction_status_number: '',
-    transaction_status_date: '',
-    transaction_status_received: false,
-    act_report_number: '',
-    act_report_date: '',
-    act_report_status: 'not_made',
-    settled: 'NA',
-    refund: false,
-    staff_description: '',
-    closed: false
-  });
+  const [formData, setFormData] = useState({});
   const [uploading, setUploading] = useState({});
 
   useEffect(() => {
     if (order) {
       setFormData({
+        mt103_status: order.mt103_status || 'not_sent',
         mt103_number: order.mt103_number || '',
         mt103_date: order.mt103_date || '',
         mt103_received: order.mt103_received || false,
@@ -63,16 +50,17 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
   const handleFileUpload = async (file, field) => {
     if (!file) return;
-    
+
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
-      const fileUrl = await apiClient.uploadFile(file);
-      const updates = { [field]: fileUrl };
-      
-      await apiClient.updateOrder(order.id, updates);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const updates = { [field]: file_url };
+
+      await base44.entities.RemittanceOrder.update(order.id, updates);
       toast.success('Document uploaded successfully');
-      
-      if (order) order[field] = fileUrl;
+
+      // Update local order
+      if (order) order[field] = file_url;
     } catch (error) {
       toast.error('Failed to upload document');
     } finally {
@@ -84,10 +72,10 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-white border-slate-200 text-slate-900">
+      <SheetContent aria-describedby={undefined} className="w-full sm:max-w-2xl overflow-y-auto bg-white border-slate-200 text-slate-900">
         <SheetHeader>
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            Order #{order.orderId}
+            Order #{order.order_number}
             <Badge className="bg-emerald-600 text-white">Released</Badge>
           </SheetTitle>
         </SheetHeader>
@@ -97,13 +85,13 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
           <div className="bg-slate-50 rounded-lg p-4 space-y-2 border border-slate-200">
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="text-slate-500">Client:</div>
-              <div className="text-slate-900">{order.clientId || '-'}</div>
+              <div className="text-slate-900">{order.client_name || '-'}</div>
               <div className="text-slate-500">Amount:</div>
-              <div className="font-medium text-emerald-700">{parseFloat(order.amount)?.toLocaleString()} {order.currency}</div>
+              <div className="font-medium text-emerald-700">{order.amount?.toLocaleString()} {order.currency}</div>
               <div className="text-slate-500">Beneficiary:</div>
-              <div className="text-slate-900">{order.beneficiaryName}</div>
+              <div className="text-slate-900">{order.beneficiary_name}</div>
               <div className="text-slate-500">Bank:</div>
-              <div className="text-slate-900">{order.bankName} ({order.bic})</div>
+              <div className="text-slate-900">{order.bank_name} ({order.bic})</div>
             </div>
           </div>
 
@@ -116,7 +104,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               <div>
                 <Label className="text-xs text-slate-600">Number</Label>
                 <Input
-                  value={formData.transaction_status_number}
+                  value={formData.transaction_status_number || ''}
                   onChange={(e) => setFormData({ ...formData, transaction_status_number: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
@@ -125,14 +113,14 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 <Label className="text-xs text-slate-600">Date</Label>
                 <Input
                   type="date"
-                  value={formData.transaction_status_date}
+                  value={formData.transaction_status_date || ''}
                   onChange={(e) => setFormData({ ...formData, transaction_status_date: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Received</Label>
+              <Label className="text-xs text-slate-600">Status</Label>
               <Select
                 value={formData.transaction_status_received ? 'Y' : 'N'}
                 onValueChange={(val) => setFormData({ ...formData, transaction_status_received: val === 'Y' })}
@@ -185,7 +173,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               <div>
                 <Label className="text-xs text-slate-600">Number</Label>
                 <Input
-                  value={formData.mt103_number}
+                  value={formData.mt103_number || ''}
                   onChange={(e) => setFormData({ ...formData, mt103_number: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
@@ -194,14 +182,14 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 <Label className="text-xs text-slate-600">Date</Label>
                 <Input
                   type="date"
-                  value={formData.mt103_date}
+                  value={formData.mt103_date || ''}
                   onChange={(e) => setFormData({ ...formData, mt103_date: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
               </div>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Received</Label>
+              <Label className="text-xs text-slate-600">Status</Label>
               <Select
                 value={formData.mt103_received ? 'Y' : 'N'}
                 onValueChange={(val) => setFormData({ ...formData, mt103_received: val === 'Y' })}
@@ -254,7 +242,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               <div>
                 <Label className="text-xs text-slate-600">Number</Label>
                 <Input
-                  value={formData.act_report_number}
+                  value={formData.act_report_number || ''}
                   onChange={(e) => setFormData({ ...formData, act_report_number: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
@@ -263,7 +251,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 <Label className="text-xs text-slate-600">Date</Label>
                 <Input
                   type="date"
-                  value={formData.act_report_date}
+                  value={formData.act_report_date || ''}
                   onChange={(e) => setFormData({ ...formData, act_report_date: e.target.value })}
                   className="mt-1 bg-white border-slate-300"
                 />
@@ -272,7 +260,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
             <div>
               <Label className="text-xs text-slate-600">Status</Label>
               <Select
-                value={formData.act_report_status}
+                value={formData.act_report_status || 'not_made'}
                 onValueChange={(val) => setFormData({ ...formData, act_report_status: val })}
               >
                 <SelectTrigger className="bg-white border-slate-300">
@@ -351,68 +339,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
           <Separator className="bg-slate-200" />
 
-          {/* Additional Fields */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-slate-700">Settled</Label>
-              <Select
-                value={formData.settled}
-                onValueChange={(value) => setFormData({ ...formData, settled: value })}
-              >
-                <SelectTrigger className="bg-white border-slate-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Y">Yes</SelectItem>
-                  <SelectItem value="N">No</SelectItem>
-                  <SelectItem value="NA">N/A</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label className="text-slate-700">Refund</Label>
-              <Switch
-                checked={formData.refund}
-                onCheckedChange={(checked) => setFormData({ ...formData, refund: checked })}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label className="text-slate-700">Closed (Move to Client History)</Label>
-              <Switch
-                checked={formData.closed}
-                onCheckedChange={(checked) => setFormData({ ...formData, closed: checked })}
-              />
-            </div>
-          </div>
-
-          <Separator className="bg-slate-200" />
-
           {/* Notes */}
           <div className="space-y-2">
             <Label className="text-xs text-slate-600">Staff Notes</Label>
             <Textarea
-              value={formData.staff_description}
+              value={formData.staff_description || ''}
               onChange={(e) => setFormData({ ...formData, staff_description: e.target.value })}
               placeholder="Additional notes..."
               className="bg-white border-slate-300 min-h-[80px]"
             />
-          </div>
-
-          {/* Timeline */}
-          <div>
-            <Label className="mb-3 block text-slate-700">Status History</Label>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {historyEntries.length > 0 ? historyEntries.map((entry, i) => (
-                <div key={i} className="flex justify-between text-sm bg-slate-50 border border-slate-200 rounded p-2">
-                  <span className="capitalize text-slate-700">{entry.status?.replace('_', ' ')}</span>
-                  <span className="text-slate-500">{moment(entry.timestamp).format('DD/MM/YY HH:mm')}</span>
-                </div>
-              )) : (
-                <div className="text-sm text-slate-500">No history</div>
-              )}
-            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

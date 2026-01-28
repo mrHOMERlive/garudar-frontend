@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
-import { ArrowLeft, Search, Eye, Globe } from 'lucide-react';
+import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import moment from 'moment';
 import StaffExecutedDrawer from '@/components/staff/StaffExecutedDrawer';
 
 export default function StaffExecutedOrders() {
@@ -19,30 +20,81 @@ export default function StaffExecutedOrders() {
   const [settledFilter, setSettledFilter] = useState('all');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const queryClient = useQueryClient();
 
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => apiClient.getAllClients(),
+  });
+
+  const { data: rawOrders = [], isLoading } = useQuery({
     queryKey: ['staff-executed-orders'],
     queryFn: () => apiClient.getOrders(),
   });
 
+  const orders = useMemo(() => {
+    return rawOrders.map(order => {
+      const client = clients.find(c => c.client_id === order.clientId);
+      return {
+        ...order,
+        id: order.orderId,
+        order_number: order.orderId,
+        client_name: client?.client_name || client?.username || order.clientId,
+        updated_date: order.updatedAt,
+        amount: Number(order.amount),
+        beneficiary_name: order.beneficiaryName,
+        bank_name: order.bankName,
+        // Map boolean fields that might be named differently in DTO vs UI expectations
+        // Assuming API returns snake_case or we map camelCase to snake_case for the UI
+        mt103_received: order.mt103Received || order.mt103_received,
+        transaction_status_received: order.transactionStatusReceived || order.transaction_status_received,
+        act_report_status: order.actReportStatus || order.act_report_status,
+        settled: order.settled || 'NA',
+
+        // Pass through other fields
+        status: order.status,
+        executed: order.executed,
+        refund: order.refund
+      };
+    });
+  }, [rawOrders, clients]);
+
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.status === 'released' || o.status === 'rejected');
+    return orders.filter(o => o.status === 'released' || o.executed);
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
-    return executedOrders.filter(order => {
+    const filtered = executedOrders.filter(order => {
       if (settledFilter !== 'all' && order.settled !== settledFilter) return false;
       if (search) {
         const s = search.toLowerCase();
-        return order.orderId?.toLowerCase().includes(s) ||
-          order.clientId?.toString().includes(s) ||
-          order.beneficiaryName?.toLowerCase().includes(s);
+        return order.order_number?.toLowerCase().includes(s) ||
+          order.client_name?.toLowerCase().includes(s) ||
+          order.beneficiary_name?.toLowerCase().includes(s);
       }
       return true;
     });
-  }, [executedOrders, settledFilter, search]);
+
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.updated_date).getTime();
+      const dateB = new Date(b.updated_date).getTime();
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+  }, [executedOrders, settledFilter, search, sortOrder]);
+
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredOrders.slice(startIndex, endIndex);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(currentPage * itemsPerPage, filteredOrders.length);
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => apiClient.updateOrder(id, data),
@@ -81,8 +133,8 @@ export default function StaffExecutedOrders() {
               </div>
             </div>
             <Link to={createPageUrl('GTrans')}>
-              <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-1" />
+              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                <Globe className="w-4 h-4 mr-2" />
                 Public Site
               </Button>
             </Link>
@@ -114,70 +166,133 @@ export default function StaffExecutedOrders() {
           </Select>
         </div>
 
+        {filteredOrders.length > 0 && (
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-slate-500">
+              Showing {startIndex}-{endIndex} of {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+            </p>
+            <p className="text-xs text-slate-400 italic">Click on an order to view details</p>
+          </div>
+        )}
+
         <div className="bg-white border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold">Order ID</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Client</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Amount</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Beneficiary</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Bank/BIC</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">MT103</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Settled</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Refund</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Order ID</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">
+                  <button
+                    onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                    className="flex items-center gap-1 hover:text-[#152a45] transition-colors"
+                  >
+                    Date
+                    <ArrowUpDown className="w-4 h-4" />
+                  </button>
+                </TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Amount</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Beneficiary</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Bank</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">Transaction<br />Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">MT103</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center pr-6">Act<br />Report</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">Loading...</TableCell></TableRow>
               ) : filteredOrders.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8">No executed orders</TableCell></TableRow>
-              ) : filteredOrders.map((order) => (
-                <TableRow key={order.id} className="border-slate-200 hover:bg-slate-50">
-                  <TableCell className="text-[#1e3a5f] font-mono text-sm">{order.orderId}</TableCell>
-                  <TableCell className="text-slate-700">{order.clientId || '-'}</TableCell>
-                  <TableCell className="text-[#1e3a5f] font-medium">
-                    {parseFloat(order.amount)?.toLocaleString()} {order.currency}
+                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">No executed orders</TableCell></TableRow>
+              ) : paginatedOrders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  className="border-slate-200 hover:bg-blue-50/50 cursor-pointer transition-colors"
+                  onClick={() => openDrawer(order)}
+                >
+                  <TableCell className="text-[#1e3a5f] font-mono text-sm py-4">{order.order_number}</TableCell>
+                  <TableCell className="text-sm text-slate-900 py-4">
+                    {moment(order.updated_date).format('DD/MM/YYYY')}
                   </TableCell>
-                  <TableCell className="text-slate-700 max-w-[150px] truncate">{order.beneficiaryName}</TableCell>
-                  <TableCell className="text-slate-600 text-sm">
-                    <div>{order.bankName?.slice(0, 20)}</div>
-                    <div className="font-mono text-xs">{order.bic}</div>
+                  <TableCell className="text-sm font-semibold text-blue-600 tabular-nums py-4">
+                    {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
                   </TableCell>
-                  <TableCell>
-                    <Badge className={order.mt103_status === 'sent' ? 'bg-emerald-600' : 'bg-slate-400'}>
-                      {order.mt103_status === 'sent' ? 'Sent' : 'Not Sent'}
-                    </Badge>
+                  <TableCell className="text-sm text-slate-900 py-4">{order.beneficiary_name}</TableCell>
+                  <TableCell className="text-sm text-slate-900 py-4">{order.bank_name}</TableCell>
+                  <TableCell className="text-center py-4">
+                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}>
+                      {order.transaction_status_received ?
+                        <CheckCircle className="w-5 h-5 text-green-600" /> :
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      }
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge className={
-                      order.settled === 'Y' ? 'bg-emerald-600' :
-                        order.settled === 'N' ? 'bg-red-500' : 'bg-slate-400'
-                    }>
-                      {order.settled || 'NA'}
-                    </Badge>
+                  <TableCell className="text-center py-4">
+                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}>
+                      {order.mt103_received ?
+                        <CheckCircle className="w-5 h-5 text-green-600" /> :
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      }
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge className={order.refund ? 'bg-[#f5a623]' : 'bg-slate-400'}>
-                      {order.refund ? 'Y' : 'N'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      onClick={() => openDrawer(order)}
-                      className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
-                    >
-                      <Eye className="w-3.5 h-3.5 mr-1" />
-                      View
-                    </Button>
+                  <TableCell className="text-center py-4 pr-6">
+                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.act_report_status === 'signed' ? 'bg-green-100' :
+                      order.act_report_status === 'on_sign' ? 'bg-amber-100' : 'bg-red-100'
+                      }`}>
+                      {order.act_report_status === 'signed' ?
+                        <CheckCircle className="w-5 h-5 text-green-600" /> :
+                        order.act_report_status === 'on_sign' ?
+                          <MinusCircle className="w-5 h-5 text-amber-600" /> :
+                          <XCircle className="w-5 h-5 text-red-600" />
+                      }
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+
+          {filteredOrders.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-slate-600">Rows per page:</span>
+                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
+                  setItemsPerPage(Number(val));
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger className="w-20 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="h-9 w-9"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm text-slate-600 min-w-[100px] text-center">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-9 w-9"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
