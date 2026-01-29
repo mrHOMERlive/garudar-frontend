@@ -507,7 +507,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div>
                   <Label className="text-xs text-slate-600">Reference Currency</Label>
                   <Select
-                    value={baseCurrency || order.currency}
+                    value={baseCurrency}
                     onValueChange={setBaseCurrency}
                   >
                     <SelectTrigger className="mt-1 bg-white border-slate-300">

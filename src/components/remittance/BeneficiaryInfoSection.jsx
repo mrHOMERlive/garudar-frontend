@@ -29,6 +29,17 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
     fetchCountries();
   }, []);
 
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
+
+  const countrySearchResults = useMemo(() => {
+    if (!countrySearchQuery) return countries;
+    const query = countrySearchQuery.toUpperCase();
+    return countries.filter(country =>
+      country.name.toUpperCase().startsWith(query) ||
+      country.code.toUpperCase().startsWith(query)
+    );
+  }, [countries, countrySearchQuery]);
+
 
 
   const selectedCountry = countries.find(c => c.code === formData.beneficiary_country);
@@ -140,17 +151,22 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search country..." />
+              <Command shouldFilter={false}>
+                <CommandInput
+                  placeholder="Search country..."
+                  value={countrySearchQuery}
+                  onValueChange={setCountrySearchQuery}
+                />
                 <CommandEmpty>No country found.</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
-                  {countries.map((country) => (
+                  {countrySearchResults.map((country) => (
                     <CommandItem
                       key={country.code}
                       value={country.name}
                       onSelect={() => {
                         handleCountryChange(country.code);
                         setCountrySearchOpen(false);
+                        setCountrySearchQuery('');
                       }}
                     >
                       {country.name} ({country.code})
