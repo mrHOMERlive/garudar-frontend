@@ -15,6 +15,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
 import moment from 'moment';
+import apiClient from '@/api/apiClient';
 
 export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -24,17 +25,17 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
     if (order) {
       setFormData({
         mt103_status: order.mt103_status || 'not_sent',
-        mt103_number: order.mt103_number || '',
+        mt103_number: order.mt103_no || order.mt103_number || '',
         mt103_date: order.mt103_date || '',
         mt103_received: order.mt103_received || false,
-        transaction_status_number: order.transaction_status_number || '',
+        transaction_status_number: order.transaction_status_no || order.transaction_status_number || '',
         transaction_status_date: order.transaction_status_date || '',
-        transaction_status_received: order.transaction_status_received || false,
-        act_report_number: order.act_report_number || '',
+        transaction_status_received: (order.transaction_status_status === 'Y') || order.transaction_status_received || false,
+        act_report_number: order.act_report_no || order.act_report_number || '',
         act_report_date: order.act_report_date || '',
-        act_report_status: order.act_report_status || 'not_made',
-        settled: order.settled || 'NA',
-        refund: order.refund || false,
+        act_report_status: order.doc_package_status || order.act_report_status || 'not_made',
+        settled: order.settled_status || order.settled || 'NA',
+        refund: (order.refund_flag === 'Y') || order.refund || false,
         staff_description: order.staff_description || '',
         closed: order.closed || false
       });
@@ -43,9 +44,41 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
   if (!order) return null;
 
-  const handleSave = () => {
-    onUpdate(formData);
-    onClose();
+
+
+  const handleSave = async () => {
+    try {
+      const payload = {
+        doc_package_status: formData.act_report_status,
+        mt103_status: formData.mt103_received ? 'sent' : 'not_sent',
+        settled_status: formData.settled,
+        refund_flag: formData.refund ? 'Y' : 'N',
+        staff_description: formData.staff_description,
+
+        mt103_file_url: order.attachment_mt103,
+        mt103_no: formData.mt103_number,
+        mt103_date: formData.mt103_date || null,
+
+        transaction_status_file_url: order.attachment_transaction_status,
+        transaction_status_no: formData.transaction_status_number,
+        transaction_status_date: formData.transaction_status_date || null,
+        transaction_status_status: formData.transaction_status_received ? 'Y' : 'N',
+
+        act_report_file_url: order.attachment_act_report_signed || order.attachment_act_report,
+        act_report_no: formData.act_report_number,
+        act_report_date: formData.act_report_date || null
+      };
+
+      const idToUpdate = order.sourceOrderId || order.orderId;
+      await apiClient.updateExecutedOrder(idToUpdate, payload);
+
+      onUpdate(formData);
+      onClose();
+      toast.success('Changes saved successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save changes');
+    }
   };
 
   const handleFileUpload = async (file, field) => {
@@ -53,15 +86,30 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
+      // Use existing upload method for now to ensure compatibility
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const updates = { [field]: file_url };
 
-      await base44.entities.RemittanceOrder.update(order.id, updates);
-      toast.success('Document uploaded successfully');
-
-      // Update local order
+      // Update local order reference immediately for UI
       if (order) order[field] = file_url;
+
+      // Map local field to API field
+      let apiField = null;
+      if (field === 'attachment_mt103') apiField = 'mt103_file_url';
+      if (field === 'attachment_transaction_status') apiField = 'transaction_status_file_url';
+      if (field === 'attachment_act_report') apiField = 'act_report_file_url';
+      if (field === 'attachment_act_report_signed') apiField = 'act_report_file_url';
+
+      if (apiField) {
+        const payload = {
+          [apiField]: file_url
+        };
+        const idToUpdate = order.sourceOrderId || order.orderId;
+        await apiClient.updateExecutedOrder(idToUpdate, payload);
+      }
+
+      toast.success('Document uploaded successfully');
     } catch (error) {
+      console.error(error);
       toast.error('Failed to upload document');
     } finally {
       setUploading(prev => ({ ...prev, [field]: false }));

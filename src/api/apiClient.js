@@ -186,6 +186,21 @@ class ApiClient {
         return this.request(`/orders/pobo/${orderId}/terms`);
     }
 
+    async getExecutedOrders() {
+        return this.request('/orders/executed-orders');
+    }
+
+    async getExecutedOrderById(executedId) {
+        return this.request(`/orders/executed-orders/${executedId}`);
+    }
+
+    async updateExecutedOrder(executedId, updateData) {
+        return this.request(`/orders/executed-orders/${executedId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updateData),
+        });
+    }
+
     async exportOrderExcel(orderId) {
         const token = this.getToken();
         const headers = {};

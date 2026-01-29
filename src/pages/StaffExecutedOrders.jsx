@@ -36,9 +36,16 @@ export default function StaffExecutedOrders() {
     queryFn: () => apiClient.getOrders(),
   });
 
+  const { data: executedOrdersList = [] } = useQuery({
+    queryKey: ['executed-orders-list'],
+    queryFn: () => apiClient.getExecutedOrders(),
+  });
+
   const orders = useMemo(() => {
     return rawOrders.map(order => {
       const client = clients.find(c => c.client_id === order.clientId);
+      const executedDetails = executedOrdersList.find(e => e.sourceOrderId === order.orderId) || {};
+
       return {
         ...order,
         id: order.orderId,
@@ -48,20 +55,39 @@ export default function StaffExecutedOrders() {
         amount: Number(order.amount),
         beneficiary_name: order.beneficiaryName,
         bank_name: order.bankName,
-        // Map boolean fields that might be named differently in DTO vs UI expectations
-        // Assuming API returns snake_case or we map camelCase to snake_case for the UI
-        mt103_received: order.mt103Received || order.mt103_received,
-        transaction_status_received: order.transactionStatusReceived || order.transaction_status_received,
-        act_report_status: order.actReportStatus || order.act_report_status,
-        settled: order.settled || 'NA',
+
+        // Merge executed details
+        executedId: executedDetails.executedId,
+
+        // Map fields for UI (merging both sources, prioritizing executedDetails)
+        mt103_received: executedDetails.mt103Status === 'sent' || order.mt103Received || order.mt103_received, // Logic might differ, checking status
+        transaction_status_received: (executedDetails.transactionStatusStatus === 'Y') || order.transactionStatusReceived || order.transaction_status_received,
+        act_report_status: executedDetails.docPackageStatus || order.actReportStatus || order.act_report_status,
+        settled: executedDetails.settledStatus || order.settled || 'NA',
+        refund: (executedDetails.refundFlag === 'Y') || order.refund,
+        staff_description: executedDetails.staffDescription || order.staff_description,
+
+        // New fields from ExecutedOrder
+        mt103_no: executedDetails.mt103No,
+        mt103_date: executedDetails.mt103Date,
+        transaction_status_no: executedDetails.transactionStatusNo,
+        transaction_status_date: executedDetails.transactionStatusDate,
+        transaction_status_status: executedDetails.transactionStatusStatus,
+        act_report_no: executedDetails.actReportNo,
+        act_report_date: executedDetails.actReportDate,
+        doc_package_status: executedDetails.docPackageStatus,
+
+        // File URLs from ExecutedOrder (prioritize these)
+        attachment_mt103: executedDetails.mt103FileUrl,
+        attachment_transaction_status: executedDetails.transactionStatusFileUrl,
+        attachment_act_report_signed: executedDetails.actReportFileUrl,
 
         // Pass through other fields
         status: order.status,
         executed: order.executed,
-        refund: order.refund
       };
     });
-  }, [rawOrders, clients]);
+  }, [rawOrders, clients, executedOrdersList]);
 
   const executedOrders = useMemo(() => {
     return orders.filter(o => o.status === 'released' || o.executed);
@@ -301,7 +327,8 @@ export default function StaffExecutedOrders() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onUpdate={(data) => {
-          updateMutation.mutate({ id: selectedOrder.id, data });
+          queryClient.invalidateQueries({ queryKey: ['staff-executed-orders'] });
+          queryClient.invalidateQueries({ queryKey: ['executed-orders-list'] });
         }}
       />
     </div>
