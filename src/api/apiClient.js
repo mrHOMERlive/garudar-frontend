@@ -47,7 +47,19 @@ class ApiClient {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `HTTP error ${response.status}`);
+            let errorMessage = errorData.error || `HTTP error ${response.status}`;
+
+            // Handle Pydantic/FastAPI validation errors which usually come in 'detail'
+            if (response.status === 422 && errorData.detail) {
+                if (Array.isArray(errorData.detail)) {
+                    errorMessage = errorData.detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join(', ');
+                } else {
+                    errorMessage = errorData.detail;
+                }
+            }
+
+            console.error('API Request Failed:', url, response.status, errorData);
+            throw new Error(errorMessage);
         }
 
         if (response.status === 204) {

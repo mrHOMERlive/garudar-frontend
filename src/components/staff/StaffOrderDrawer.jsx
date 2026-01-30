@@ -227,7 +227,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       // 1. Update Terms (always attempt to save terms data)
       const termsData = {
         remuneration_type: remunerationType.toLowerCase(),
-        exchange_rate: exchangeRate !== '' ? parseFloat(exchangeRate) : null,
         client_payment_currency: clientPaymentCurrency || null,
         date_paid: datePaid || null,
         data_fixing: dataFixing || null,
@@ -237,15 +236,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         conversion_method: conversionMethod === 'none' ? null : conversionMethod,
         base_currency: baseCurrency || null,
         executing_bank: executingBank || null,
-        FX: !!fxExecutingBank, // derive boolean logic if needed, or stick to simple
-        FX_executing_bank: fxExecutingBank !== '' ? parseFloat(fxExecutingBank) : null,
-        status: status, // Terms status same as order? Or separate? API allows it.
+        FX: !!fxExecutingBank,
+        status: status,
         bank_statement_in_type: bankStatementInType || null,
         bank_statement_in_id: bankStatementInId || null,
         bank_statement_out_type: bankStatementOutType || null,
         bank_statement_out_id: bankStatementOutId || null,
-        amount_to_be_paid_target_cur: amountToBePaidTargetCur !== '' ? parseFloat(amountToBePaidTargetCur) : null,
-        amount_paid_target_cur: amountPaidTargetCur !== '' ? parseFloat(amountPaidTargetCur) : null,
         amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : (calculateAmountRemuneration() + (Number(order.amount) || 0)),
         doc_paid_no: docPaidNo || null,
         doc_paid_date: docPaidDate || null,
@@ -253,11 +249,39 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         payment_proof_date: paymentProofDate || null,
       };
 
-      if (remunerationType === 'PERCENT' && remunerationPercentage !== '') {
-        termsData.remuneration_percentage = parseFloat(remunerationPercentage);
-      } else if (remunerationType === 'FIXED' && remunerationFixed !== '') {
-        termsData.remuneration_fixed = parseFloat(remunerationFixed);
+      // Conditionally add Decimal fields to avoid sending null
+      if (exchangeRate !== '') {
+        termsData.exchange_rate = parseFloat(exchangeRate);
       }
+      if (fxExecutingBank !== '') {
+        termsData.FX_executing_bank = parseFloat(fxExecutingBank);
+      }
+      if (amountToBePaidTargetCur !== '') {
+        termsData.amount_to_be_paid_target_cur = parseFloat(amountToBePaidTargetCur);
+      }
+      if (amountPaidTargetCur !== '') {
+        termsData.amount_paid_target_cur = parseFloat(amountPaidTargetCur);
+      }
+
+      if (remunerationType === 'PERCENT') {
+        if (!remunerationPercentage && remunerationPercentage !== 0) {
+          toast.error('Please enter Remuneration Percentage');
+          setSaving(false);
+          return;
+        }
+        termsData.remuneration_percentage = parseFloat(remunerationPercentage);
+        termsData.remuneration_fixed = null; // Clear fixed if switching to percent
+      } else if (remunerationType === 'FIXED') {
+        if (!remunerationFixed && remunerationFixed !== 0) {
+          toast.error('Please enter Remuneration Fixed Amount');
+          setSaving(false);
+          return;
+        }
+        termsData.remuneration_fixed = parseFloat(remunerationFixed);
+        termsData.remuneration_percentage = null; // Clear percent if switching to fixed
+      }
+
+      console.log('Sending Terms Payload:', termsData);
 
       await apiClient.createOrUpdateOrderTerms(order.orderId, termsData);
 
