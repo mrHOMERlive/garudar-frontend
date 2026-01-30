@@ -405,7 +405,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     type="file"
                     onChange={(e) => handleFileUpload(e.target.files?.[0], 'attachment_act_report')}
                     className="hidden"
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf,.doc,.docx,.xlsx,.xls"
                   />
                   <Button
                     type="button"
@@ -439,7 +439,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     type="file"
                     onChange={(e) => handleFileUpload(e.target.files?.[0], 'attachment_act_report_signed')}
                     className="hidden"
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf,.doc,.docx,.xlsx,.xls"
                   />
                   <Button
                     type="button"
