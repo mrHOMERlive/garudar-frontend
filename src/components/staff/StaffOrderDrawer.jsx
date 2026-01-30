@@ -105,7 +105,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setDatePaid(order.datePaid || '');
       setDataFixing(order.dataFixing || '');
       setInvoiceNumber(order.invoiceNumber || '');
-      setStaffDescription(order.staffDescription || '');
+
       setInvoiceReceived(order.invoiceReceived || order.invocieReceived || false);
       setPaymentProof(order.paymentProof || false);
       setDatePaymentProof(order.datePaymentProof || '');
@@ -151,6 +151,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setExchangeRateMode('manual');
       if (terms.datePaid) setDatePaid(terms.datePaid);
       if (terms.dataFixing) setDataFixing(terms.dataFixing);
+      setStaffDescription(terms.description || '');
 
       // Populate other terms fields
       setConversionMethod(terms.conversionMethod || 'none');
@@ -247,6 +248,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         doc_paid_date: docPaidDate || null,
         payment_proof_no: paymentProofNo || null,
         payment_proof_date: paymentProofDate || null,
+        description: staffDescription || null,
       };
 
       // Conditionally add Decimal fields to avoid sending null
@@ -1112,9 +1114,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               />
             </div>
 
-            {/* Staff Notes */}
             <div>
-              <Label className="text-xs text-slate-600">Staff Notes</Label>
+              <Label className="text-xs text-slate-600">Description</Label>
               <Textarea
                 value={staffDescription}
                 onChange={(e) => setStaffDescription(e.target.value)}
