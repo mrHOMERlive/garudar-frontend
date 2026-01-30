@@ -198,6 +198,10 @@ class ApiClient {
         return this.request(`/orders/pobo/${orderId}/terms`);
     }
 
+    async getLastInstructionExportDate(orderId) {
+        return this.request(`/orders/pobo/${orderId}/last-txt-export`);
+    }
+
     async getExecutedOrders() {
         return this.request('/orders/executed-orders');
     }

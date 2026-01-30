@@ -99,6 +99,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     enabled: !!order?.orderId && open,
   });
 
+  const { data: lastInstructionExport } = useQuery({
+    queryKey: ['last-instruction-export', order?.orderId],
+    queryFn: () => apiClient.getLastInstructionExportDate(order?.orderId),
+    enabled: !!order?.orderId && open,
+  });
+
   useEffect(() => {
     if (order && open) {
       setStatus(order.status || 'created');
@@ -1098,7 +1104,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             <div>
               <Label className="text-xs text-slate-600">Last Instruction Export</Label>
               <div className="mt-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded p-2">
-                {order.lastDownload ? moment(order.lastDownload).format('DD/MM/YYYY HH:mm') : 'Not exported yet'}
+                {lastInstructionExport?.last_export_date ? moment(lastInstructionExport.last_export_date).format('DD/MM/YYYY HH:mm') : 'Not exported yet'}
               </div>
             </div>
 
