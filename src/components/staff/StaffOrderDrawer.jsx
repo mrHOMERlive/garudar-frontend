@@ -234,7 +234,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         GAN_bank_name: ganBankName || null,
         GAN_bank_account: ganBankAccount || null,
         date_report: dateReport || null,
-        conversion_method: conversionMethod,
+        conversion_method: conversionMethod === 'none' ? null : conversionMethod,
         base_currency: baseCurrency || null,
         executing_bank: executingBank || null,
         FX: !!fxExecutingBank, // derive boolean logic if needed, or stick to simple
@@ -246,7 +246,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         bank_statement_out_id: bankStatementOutId || null,
         amount_to_be_paid_target_cur: amountToBePaidTargetCur !== '' ? parseFloat(amountToBePaidTargetCur) : null,
         amount_paid_target_cur: amountPaidTargetCur !== '' ? parseFloat(amountPaidTargetCur) : null,
-        amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : null,
+        amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : (calculateAmountRemuneration() + (Number(order.amount) || 0)),
         doc_paid_no: docPaidNo || null,
         doc_paid_date: docPaidDate || null,
         payment_proof_no: paymentProofNo || null,
