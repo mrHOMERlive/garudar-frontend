@@ -668,7 +668,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
                 <div className="text-lg font-bold text-indigo-900">
-                  {Number(amountToBePaid || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} {order.currency}
+                  {Number(amountToBePaid || (calculateAmountRemuneration() + (Number(order.amount) || 0))).toLocaleString('en-US', { minimumFractionDigits: 2 })} {order.currency}
                 </div>
               </div>
 
