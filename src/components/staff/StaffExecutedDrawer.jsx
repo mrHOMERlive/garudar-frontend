@@ -432,6 +432,28 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </div>
             </div>
             <div className="space-y-2">
+              <Label className="text-xs text-slate-600">Signed by Client Act Report</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                  onClick={() => {
+                    const doc = documents.find(d => d.doc_type === 'act_report_signed_client');
+                    if (doc) {
+                      handleDownload(doc.doc_id, doc.file_name);
+                    } else {
+                      toast.error('Document not found');
+                    }
+                  }}
+                >
+                  <Download className="w-3 h-3 mr-2" />
+                  Download Signed
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label className="text-xs text-slate-600">Signed Act Report</Label>
               <div className="flex items-center gap-2">
                 <label className="flex-1">
