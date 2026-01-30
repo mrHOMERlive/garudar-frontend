@@ -201,6 +201,23 @@ class ApiClient {
         });
     }
 
+    async generateExecutedOrderActReport(sourceOrderId) {
+        const token = this.getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${this.baseUrl}/orders/executed-orders/${sourceOrderId}/act-report`, {
+            method: 'GET',
+            headers,
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to generate Act Report');
+        }
+        return response.blob();
+    }
+
     async exportOrderExcel(orderId) {
         const token = this.getToken();
         const headers = {};

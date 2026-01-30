@@ -21,46 +21,77 @@ export default function ExecutedOrders() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const { data: orders = [], isLoading, refetch } = useQuery({
-    queryKey: ['executed-orders'],
+    queryKey: ['executed-orders-full'],
     queryFn: async () => {
-      const response = await apiClient.getOrders();
-      // Map API camelCase to UI snake_case
-      return response.map(order => ({
-        ...order,
-        id: order.orderId,
-        order_number: order.orderId,
-        updated_date: order.updatedAt,
-        amount: order.amount,
-        currency: order.currency,
-        beneficiary_name: order.beneficiaryName,
-        beneficiary_address: order.beneficiaryAdress, // API has typo 'Adress'
-        destination_account: order.destinationAccount,
-        bank_name: order.bankName,
-        bank_address: order.bankAddress,
-        bic: order.bankBic,
-        country_bank: order.bankCountry,
-        transaction_remark: order.remark,
-        transaction_reference: order.orderId,
-        client_id: order.clientId,
-        client_name: order.clientName, // May be undefined in API, drawer falls back to client_id
-        debit_account_no: order.executingBank || '-', // Best guess mapping or placeholder
+      // 1. Fetch executed orders (contains files + statuses)
+      const executedList = await apiClient.getExecutedOrders();
 
-        // Status flags
-        transaction_status_received: order.transactionStatusReceived || false,
-        mt103_received: order.mt103Received || false,
-        act_report_status: order.actReportStatus || 'not_made',
-        executed: order.status === 'executed',
-        status: order.status,
-      }));
+      // 2. Fetch all orders (contains details like beneficiary, amount, etc.)
+      // We don't filter by executed status here because we need to find the matching POBO order
+      // regardless of its status in that table (though mostly they should be 'executed' or 'released')
+      const poboList = await apiClient.getOrders({ include_deleted: false });
+
+      // 3. Join them
+      const joined = executedList.map(exec => {
+        const pobo = poboList.find(p => p.orderId === exec.sourceOrderId) || {};
+
+        return {
+          // Base fields from POBO
+          id: exec.sourceOrderId,
+          order_number: exec.sourceOrderId,
+          client_id: pobo.clientId || '-',
+          client_name: pobo.clientName, // might be undefined
+          amount: pobo.amount,
+          currency: pobo.currency,
+
+          // Dates
+          updated_date: pobo.updatedAt || exec.movedAt, // Fallback to movedAt if POBO missing
+
+          // Beneficiary & Bank
+          beneficiary_name: pobo.beneficiaryName || '-',
+          beneficiary_address: pobo.beneficiaryAdress,
+          destination_account: pobo.destinationAccount,
+          bank_name: pobo.bankName || '-',
+          bank_address: pobo.bankAddress,
+          bic: pobo.bankBic,
+          country_bank: pobo.bankCountry,
+
+          // Transaction info
+          transaction_remark: pobo.remark,
+          transaction_reference: exec.sourceOrderId, // executed ID usually matches source
+          debit_account_no: pobo.executingBank || '-',
+
+          // STATUS FLAGS (from executedList)
+          transaction_status_received: exec.transactionStatusStatus === 'Y',
+          mt103_received: exec.mt103Status === 'sent',
+          act_report_status: exec.docPackageStatus || 'not_made', // 'signed', 'on_sign', 'not_made'
+
+          // FILES (from executedList)
+          attachment_transaction_status: exec.transactionStatusFileUrl,
+          attachment_mt103: exec.mt103FileUrl,
+          attachment_act_report: exec.actReportFileUrl,
+          // We might implement signed act report upload in drawer which would update this
+
+          // Extra metadata
+          transaction_status_number: exec.transactionStatusNo,
+          transaction_status_date: exec.transactionStatusDate,
+          mt103_number: exec.mt103No,
+          mt103_date: exec.mt103Date,
+          act_report_number: exec.actReportNo,
+          act_report_date: exec.actReportDate,
+
+          // Filter helpers
+          executed: true,
+          status: 'executed',
+        };
+      });
+
+      return joined;
     },
   });
 
-  const executedOrders = useMemo(() => {
-    return orders.filter(o => o.executed || o.status === 'released' || o.status === 'executed');
-  }, [orders]);
-
   const filteredOrders = useMemo(() => {
-    const filtered = executedOrders.filter(order => {
+    const filtered = orders.filter(order => {
       if (search) {
         const s = search.toLowerCase();
         return order.order_number?.toLowerCase().includes(s) ||
@@ -74,7 +105,7 @@ export default function ExecutedOrders() {
       const dateB = new Date(b.updated_date).getTime();
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
-  }, [executedOrders, search, sortOrder]);
+  }, [orders, search, sortOrder]);
 
   const paginatedOrders = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;

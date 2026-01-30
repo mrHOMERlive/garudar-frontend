@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,21 +20,21 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
     enabled: !!order?.id && open,
   });
 
-  const { data: payeerAccounts = [] } = useQuery({
-    queryKey: ['payeer-accounts'],
-    queryFn: () => apiClient.getPayeerAccounts(),
+  const { data: documents, refetch: refetchDocuments } = useQuery({
+    queryKey: ['order-documents', order?.id],
+    queryFn: () => apiClient.getOrderDocuments(order?.id),
+    enabled: !!order?.id && open,
+  });
+
+  const { data: client } = useQuery({
+    queryKey: ['client', 'me'],
+    queryFn: () => apiClient.getMyClient(),
     enabled: open,
-    retry: false, // Don't retry if it fails (e.g. 403)
   });
 
   const debitAccount = useMemo(() => {
-    let exBank = terms?.executingBank || order?.debit_account_no || '';
-    if (exBank && payeerAccounts.length > 0) {
-      const found = payeerAccounts.find(p => p.bank_name === exBank || p.account_no === exBank);
-      if (found) exBank = found.account_no;
-    }
-    return exBank || '-';
-  }, [terms, payeerAccounts, order]);
+    return terms?.executingBank || order?.debit_account_no || '-';
+  }, [terms, order]);
 
   if (!order) return null;
 
@@ -55,12 +55,33 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
       // but the order refetch will get the new status.
       // If we need the URL immediately, we might need a separate call or rely on refetch.
 
+      refetchDocuments();
       onUpdate?.();
     } catch (error) {
       console.error(error);
       toast.error('Failed to upload Act Report');
     } finally {
       setUploadingActReport(false);
+    }
+  };
+
+  const handleDownload = async (docId, fileName) => {
+    try {
+      const response = await apiClient.downloadDocument(order.id, docId);
+      if (response && response.presigned_url) {
+        const link = document.createElement('a');
+        link.href = response.presigned_url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error('Failed to get download URL');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to download document');
     }
   };
 
@@ -71,13 +92,16 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
           <SheetTitle className="text-slate-900 flex items-center gap-3">
             Order #{order.order_number}
           </SheetTitle>
+          <SheetDescription className="text-slate-500">
+            Details for executed order #{order.order_number}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
           <div className="space-y-6">
             {/* Order Info */}
             <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-200">
-              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{order.client_name || order.client_id}</span></div>
+              <div><span className="text-slate-500 font-medium">Client:</span> <span className="text-slate-900">{client?.client_name || order.client_name || order.client_id}</span></div>
               <div><span className="text-slate-500 font-medium">Amount:</span> <span className="text-emerald-600 font-semibold">{order.amount?.toLocaleString()} {order.currency}</span></div>
               <div><span className="text-slate-500 font-medium">Beneficiary:</span> <span className="text-slate-900">{order.beneficiary_name}</span></div>
               <div><span className="text-slate-500 font-medium">Bank:</span> <span className="text-slate-900">{order.bank_name} ({order.bic})</span></div>
@@ -105,13 +129,19 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     <span className="text-slate-500">Date:</span> {new Date(order.transaction_status_date).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_transaction_status && (
-                  <a href={order.attachment_transaction_status} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download Transaction Status
-                    </Button>
-                  </a>
+                {documents?.find(d => d.doc_type === 'transaction_status') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'transaction_status').doc_id,
+                      documents.find(d => d.doc_type === 'transaction_status').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download Transaction Status
+                  </Button>
                 )}
               </div>
             </div>
@@ -138,13 +168,19 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     <span className="text-slate-500">Date:</span> {new Date(order.mt103_date).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_mt103 && (
-                  <a href={order.attachment_mt103} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download MT103
-                    </Button>
-                  </a>
+                {documents?.find(d => d.doc_type === 'mt103') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'mt103').doc_id,
+                      documents.find(d => d.doc_type === 'mt103').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download MT103
+                  </Button>
                 )}
               </div>
             </div>
@@ -175,13 +211,19 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     <span className="text-slate-500">Date:</span> {new Date(order.act_report_date).toLocaleDateString()}
                   </div>
                 )}
-                {order.attachment_act_report && (
-                  <a href={order.attachment_act_report} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300 mb-2">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download Unsigned Act Report
-                    </Button>
-                  </a>
+                {documents?.find(d => d.doc_type === 'act_report_unsigned') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300 mb-2"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'act_report_unsigned').doc_id,
+                      documents.find(d => d.doc_type === 'act_report_unsigned').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download Unsigned Act Report
+                  </Button>
                 )}
               </div>
 
@@ -207,12 +249,18 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                       {uploadingActReport ? 'Uploading...' : 'Upload Signed Act Report'}
                     </Button>
                   </label>
-                  {order.attachment_act_report_signed && (
-                    <a href={order.attachment_act_report_signed} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="outline" className="border-green-300">
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </a>
+                  {documents?.find(d => d.doc_type === 'act_report_signed_client') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-300"
+                      onClick={() => handleDownload(
+                        documents.find(d => d.doc_type === 'act_report_signed_client').doc_id,
+                        documents.find(d => d.doc_type === 'act_report_signed_client').file_name
+                      )}
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
                   )}
                 </div>
               </div>
@@ -224,51 +272,75 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Documents</h3>
 
-              {order.attachment_sales_contract && (
+              {documents?.find(d => d.doc_type === 'sales_contract') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Sales Contract</Label>
-                  <a href={order.attachment_sales_contract} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download
-                    </Button>
-                  </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'sales_contract').doc_id,
+                      documents.find(d => d.doc_type === 'sales_contract').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download
+                  </Button>
                 </div>
               )}
 
-              {order.attachment_invoice && (
+              {documents?.find(d => d.doc_type === 'invoice') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Invoice</Label>
-                  <a href={order.attachment_invoice} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download
-                    </Button>
-                  </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'invoice').doc_id,
+                      documents.find(d => d.doc_type === 'invoice').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download
+                  </Button>
                 </div>
               )}
 
-              {order.attachment_other && (
+              {documents?.find(d => d.doc_type === 'other') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">Other Documents</Label>
-                  <a href={order.attachment_other} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download
-                    </Button>
-                  </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'other').doc_id,
+                      documents.find(d => d.doc_type === 'other').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download
+                  </Button>
                 </div>
               )}
 
-              {order.attachment_word_order && (
+              {documents?.find(d => d.doc_type === 'word_order_unsigned') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-600 mb-2 block">WORD Order</Label>
-                  <a href={order.attachment_word_order} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="w-full border-slate-300">
-                      <Download className="w-3 h-3 mr-2" />
-                      Download
-                    </Button>
-                  </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-slate-300"
+                    onClick={() => handleDownload(
+                      documents.find(d => d.doc_type === 'word_order_unsigned').doc_id,
+                      documents.find(d => d.doc_type === 'word_order_unsigned').file_name
+                    )}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download
+                  </Button>
                 </div>
               )}
             </div>

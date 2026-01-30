@@ -11,15 +11,18 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { parseStatusHistory } from '@/components/utils/statusHistoryHelper';
-import { base44 } from '@/api/base44Client';
+
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
 import moment from 'moment';
 import apiClient from '@/api/apiClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) {
   const [formData, setFormData] = useState({});
   const [uploading, setUploading] = useState({});
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (order) {
@@ -42,6 +45,20 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
     }
   }, [order]);
 
+  // Fetch documents specifically for this order
+  const { data: documents = [], refetch: refetchDocuments } = useQuery({
+    queryKey: ['order-documents', order?.sourceOrderId || order?.orderId],
+    queryFn: () => apiClient.getOrderDocuments(order?.sourceOrderId || order?.orderId),
+    enabled: !!order && open, // Only fetch when drawer is open
+    staleTime: 0, // Always fetch fresh
+  });
+
+  // Find documents by type
+  const mt103Doc = documents.find(d => d.doc_type === 'mt103');
+  const txStatusDoc = documents.find(d => d.doc_type === 'transaction_status');
+  const actReportDoc = documents.find(d => d.doc_type === 'act_report_unsigned'); // Unsigned
+  const actReportSignedDoc = documents.find(d => d.doc_type === 'act_report_signed_staff'); // Signed Staff
+
   if (!order) return null;
 
 
@@ -55,16 +72,13 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
         refund_flag: formData.refund ? 'Y' : 'N',
         staff_description: formData.staff_description,
 
-        mt103_file_url: order.attachment_mt103,
         mt103_no: formData.mt103_number,
         mt103_date: formData.mt103_date || null,
 
-        transaction_status_file_url: order.attachment_transaction_status,
         transaction_status_no: formData.transaction_status_number,
         transaction_status_date: formData.transaction_status_date || null,
         transaction_status_status: formData.transaction_status_received ? 'Y' : 'N',
 
-        act_report_file_url: order.attachment_act_report_signed || order.attachment_act_report,
         act_report_no: formData.act_report_number,
         act_report_date: formData.act_report_date || null
       };
@@ -86,33 +100,74 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
-      // Use existing upload method for now to ensure compatibility
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const orderId = order.sourceOrderId || order.orderId;
+      let docType = null;
 
-      // Update local order reference immediately for UI
-      if (order) order[field] = file_url;
+      if (field === 'attachment_mt103') docType = 'mt103';
+      if (field === 'attachment_transaction_status') docType = 'transaction_status';
+      if (field === 'attachment_act_report') docType = 'act_report_unsigned';
+      if (field === 'attachment_act_report_signed') docType = 'act_report_signed_staff';
 
-      // Map local field to API field
-      let apiField = null;
-      if (field === 'attachment_mt103') apiField = 'mt103_file_url';
-      if (field === 'attachment_transaction_status') apiField = 'transaction_status_file_url';
-      if (field === 'attachment_act_report') apiField = 'act_report_file_url';
-      if (field === 'attachment_act_report_signed') apiField = 'act_report_file_url';
+      if (!docType) throw new Error('Unknown document type');
 
-      if (apiField) {
-        const payload = {
-          [apiField]: file_url
-        };
-        const idToUpdate = order.sourceOrderId || order.orderId;
-        await apiClient.updateExecutedOrder(idToUpdate, payload);
-      }
+      // Upload using new API
+      await apiClient.uploadOrderDocument(orderId, file, docType);
+
+      // Refresh documents list
+      await refetchDocuments();
 
       toast.success('Document uploaded successfully');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to upload document');
+      toast.error(error.message || 'Failed to upload document');
     } finally {
       setUploading(prev => ({ ...prev, [field]: false }));
+    }
+  };
+
+  const handleDownload = async (docId, fileName) => {
+    try {
+      const orderId = order.sourceOrderId || order.orderId;
+      const { presigned_url } = await apiClient.downloadDocument(orderId, docId);
+
+      // Create hidden link and click it
+      const link = document.createElement('a');
+      link.href = presigned_url;
+      link.download = fileName || 'document'; // fileName might be ignored by browser if Content-Disposition is set
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download document');
+    }
+  };
+
+  const handleCreateActReport = async () => {
+    setUploading(prev => ({ ...prev, create_act_report: true }));
+    try {
+      const id = order.sourceOrderId || order.orderId;
+      const blob = await apiClient.generateExecutedOrderActReport(id);
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Act_Report_${id}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Act Report generated successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to generate Act Report');
+    } finally {
+      setUploading(prev => ({ ...prev, create_act_report: false }));
     }
   };
 
@@ -202,12 +257,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   {uploading.attachment_transaction_status ? 'Uploading...' : 'Upload Document'}
                 </Button>
               </label>
-              {order.attachment_transaction_status && (
-                <a href={order.attachment_transaction_status} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="border-slate-300">
-                    <Download className="w-3 h-3" />
-                  </Button>
-                </a>
+              {txStatusDoc && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-slate-300"
+                  onClick={() => handleDownload(txStatusDoc.doc_id, txStatusDoc.file_name)}
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
               )}
             </div>
           </div>
@@ -271,12 +329,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   {uploading.attachment_mt103 ? 'Uploading...' : 'Upload Document'}
                 </Button>
               </label>
-              {order.attachment_mt103 && (
-                <a href={order.attachment_mt103} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="border-slate-300">
-                    <Download className="w-3 h-3" />
-                  </Button>
-                </a>
+              {mt103Doc && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-slate-300"
+                  onClick={() => handleDownload(mt103Doc.doc_id, mt103Doc.file_name)}
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
               )}
             </div>
           </div>
@@ -322,6 +383,21 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </Select>
             </div>
             <div className="space-y-2">
+              <Label className="text-xs text-slate-600">Create Act Report</Label>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full border-blue-600 text-blue-700 hover:bg-blue-50"
+                onClick={handleCreateActReport}
+                disabled={uploading.create_act_report}
+              >
+                <FileText className="w-3 h-3 mr-2" />
+                {uploading.create_act_report ? 'Generating...' : 'Create Act Report'}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-xs text-slate-600">Unsigned Act Report</Label>
               <div className="flex items-center gap-2">
                 <label className="flex-1">
@@ -343,12 +419,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     {uploading.attachment_act_report ? 'Uploading...' : 'Upload Unsigned'}
                   </Button>
                 </label>
-                {order.attachment_act_report && (
-                  <a href={order.attachment_act_report} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="border-slate-300">
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </a>
+                {actReportDoc && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-slate-300"
+                    onClick={() => handleDownload(actReportDoc.doc_id, actReportDoc.file_name)}
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
                 )}
               </div>
             </div>
@@ -374,12 +453,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     {uploading.attachment_act_report_signed ? 'Uploading...' : 'Upload Signed'}
                   </Button>
                 </label>
-                {order.attachment_act_report_signed && (
-                  <a href={order.attachment_act_report_signed} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" variant="outline" className="border-emerald-600">
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </a>
+                {actReportSignedDoc && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-emerald-600 text-emerald-700"
+                    onClick={() => handleDownload(actReportSignedDoc.doc_id, actReportSignedDoc.file_name)}
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
                 )}
               </div>
             </div>
