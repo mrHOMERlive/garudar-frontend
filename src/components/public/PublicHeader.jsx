@@ -230,14 +230,6 @@ export default function PublicHeader({ language, setLanguage }) {
               </Button>
             </Link>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-slate-500 border-slate-300"
-              onClick={handleStaffClick}
-            >
-              {language === 'en' ? 'For Staff' : 'Untuk Staf'}
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
