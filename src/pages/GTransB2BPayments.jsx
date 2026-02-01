@@ -59,7 +59,7 @@ export default function GTransB2BPayments() {
     {
       icon: Factory,
       title: language === 'en' ? 'Oil & Gas' : 'Minyak & Gas',
-      image: 'https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&q=80'
     },
     {
       icon: Settings,
@@ -102,7 +102,7 @@ export default function GTransB2BPayments() {
     {
       step: 3,
       title: language === 'en' ? 'GTrans processes and converts' : 'GTrans proses dan konversi',
-      description: language === 'en' ? 'We match the payment to your transaction, apply FX conversion if agreed, and prepare settlement.' : 'Kami mencocokkan pembayaran dengan transaksi Anda, terapkan konversi FX jika disepakati, dan siapkan penyelesaian.'
+      description: language === 'en' ? 'We match the payment to your transaction, apply conversion if agreed, and prepare settlement.' : 'Kami mencocokkan pembayaran dengan transaksi Anda, terapkan konversi jika disepakati, dan siapkan penyelesaian.'
     },
     {
       step: 4,

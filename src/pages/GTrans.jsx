@@ -329,14 +329,14 @@ export default function GTrans() {
         </div>
       </section>
 
-      {/* Platform Interface - Animated Demos */}
-      <section className="py-20 bg-gradient-to-br from-slate-900 via-[#1e3a5f] to-slate-900" id="platform">
+      {/* Platform Screenshots */}
+      <section className="py-20 bg-white" id="platform">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
               {language === 'en' ? 'Intuitive Platform Interface' : 'Antarmuka Platform yang Intuitif'}
             </h2>
-            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               {language === 'en'
                 ? 'Create orders and track transfers with ease through our user-friendly dashboard.'
                 : 'Buat pesanan dan lacak transfer dengan mudah melalui dashboard yang ramah pengguna.'
@@ -344,114 +344,37 @@ export default function GTrans() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Creating Order Animation */}
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Creating Order - Animation */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">
+                <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
                   {language === 'en' ? 'Creating Order' : 'Membuat Pesanan'}
                 </h3>
-                <p className="text-slate-400">
+                <p className="text-slate-600">
                   {language === 'en'
-                    ? 'Simple, comprehensive form to create cross-border payment orders.'
-                    : 'Formulir sederhana dan komprehensif untuk membuat pesanan pembayaran lintas batas.'
+                    ? 'Simple, comprehensive form to create cross-border payment orders with all required details.'
+                    : 'Formulir sederhana dan komprehensif untuk membuat pesanan pembayaran lintas batas dengan semua detail yang diperlukan.'
                   }
                 </p>
               </div>
               <CreateOrderAnimation />
             </motion.div>
 
-            {/* Monitoring Order Animation */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {language === 'en' ? 'Monitoring Orders' : 'Memantau Pesanan'}
-                </h3>
-                <p className="text-slate-400">
-                  {language === 'en'
-                    ? 'Track all orders in real-time with full visibility.'
-                    : 'Lacak semua pesanan secara real-time dengan visibilitas penuh.'
-                  }
-                </p>
-              </div>
-              <OrderMonitoringAnimation />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform Screenshots 
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
-              {language === 'en' ? 'Real Platform Screenshots' : 'Screenshot Platform Nyata'}
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {language === 'en'
-                ? 'See the actual interface our clients use every day.'
-                : 'Lihat antarmuka nyata yang digunakan klien kami setiap hari.'
-              }
-            </p>
-          </div>
-
-          <div className="space-y-12">
-            {/* Creating Order - Two Screenshots 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-8"
-            >
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                  {language === 'en' ? 'Order Creation Form' : 'Formulir Pembuatan Pesanan'}
-                </h3>
-                <p className="text-slate-600">
-                  {language === 'en'
-                    ? 'Complete form with all required fields for cross-border transfers.'
-                    : 'Formulir lengkap dengan semua field yang diperlukan untuk transfer lintas batas.'
-                  }
-                </p>
-              </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/27919c1f3_Screenshot2025-12-06at160702.png" 
-                    alt="Create Order - Part 1"
-                    className="w-full h-auto"
-                  />
-                </div>
-                <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/6b1f27775_Screenshot2025-12-06at101704.png" 
-                    alt="Create Order - Part 2"
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-              {/* Monitoring Order 
+            {/* Monitoring Order - Animation */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-2xl p-8"
             >
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                  {language === 'en' ? 'Order Dashboard' : 'Dashboard Pesanan'}
+                  {language === 'en' ? 'Monitoring Order' : 'Memantau Pesanan'}
                 </h3>
                 <p className="text-slate-600">
                   {language === 'en'
@@ -460,17 +383,11 @@ export default function GTrans() {
                   }
                 </p>
               </div>
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b9437221b_Screenshot2025-12-06at101722.png" 
-                  alt="Order Monitoring Interface"
-                  className="w-full h-auto"
-                />
-              </div>
+              <OrderMonitoringAnimation />
             </motion.div>
           </div>
         </div>
-      </section> */}
+      </section>
 
       {/* Client Journey */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-slate-50" id="journey">

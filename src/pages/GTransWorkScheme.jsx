@@ -241,132 +241,44 @@ export default function GTransWorkScheme() {
             </CardContent>
           </Card>
 
-          <h2 className="text-2xl font-bold text-[#1e3a5f] mb-8">
-            {language === 'en' ? 'Transfer Types' : 'Jenis Transfer'}
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            {flowTypes.map((flowType, idx) => (
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-[#1e3a5f] mb-4 text-center">
+              {language === 'en' ? 'Transfer Types' : 'Jenis Transfer'}
+            </h2>
+            <p className="text-slate-600 text-center mb-12 max-w-3xl mx-auto">
+              {language === 'en' 
+                ? 'GTrans supports both Inbound and Outbound transfers. Indonesian companies transfer funds to foreign entities through GAN which acts as the Successor Organizer in the agreed currency. For Inbound transfers, GAN acts as the Successor Operator for Companies in Indonesia that accept payments from overseas partners and send funds to the Customer in the agreed currency (e.g., USD, EUR, CNY).'
+                : 'GTrans mendukung transfer Masuk dan Keluar. Perusahaan Indonesia mentransfer dana ke entitas asing melalui GAN yang bertindak sebagai Penyelenggara Penerus dalam mata uang yang disepakati. Untuk transfer Masuk, GAN bertindak sebagai Operator Penerus untuk Perusahaan di Indonesia yang menerima pembayaran dari mitra luar negeri dan mengirim dana ke Pelanggan dalam mata uang yang disepakati (misalnya, USD, EUR, CNY).'
+              }
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-8">
               <motion.div
-                key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
               >
-                <Card className="border-slate-200 h-full">
-                  <CardContent className="p-8">
-                    <h3 className="text-xl font-bold text-[#1e3a5f] mb-4">{flowType.title}</h3>
-                    <p className="text-slate-600 mb-6">{flowType.description}</p>
-                    <div className="space-y-3">
-                      {flowType.flows.map((flow, fIdx) => (
-                        <div key={fIdx} className="flex items-center gap-4 bg-slate-50 rounded-lg p-4">
-                          <div className="px-3 py-1 rounded bg-[#1e3a5f] text-white text-sm font-medium">
-                            {flow.from}
-                          </div>
-                          <ArrowRight className="w-5 h-5 text-slate-400" />
-                          <div className="px-3 py-1 rounded bg-emerald-600 text-white text-sm font-medium">
-                            {flow.to}
-                          </div>
-                          <span className="text-sm text-slate-500 ml-auto">{flow.type}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Transfer Flow Diagrams */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-[#1e3a5f] mb-4 text-center">
-              {language === 'en' ? 'Transfer Flow Diagrams' : 'Diagram Alur Transfer'}
-            </h2>
-            <p className="text-slate-600 text-center mb-8">
-              {language === 'en' 
-                ? 'Visual representation of inbound and outbound transfer flows with and without FX conversion'
-                : 'Representasi visual alur transfer masuk dan keluar dengan dan tanpa konversi FX'
-              }
-            </p>
-            <div className="grid lg:grid-cols-2 gap-8">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
-                  <ArrowRight className="w-5 h-5 text-emerald-600" />
-                  {language === 'en' ? 'Inbound Transfers' : 'Transfer Masuk'}
+                <h3 className="text-xl font-bold text-[#1e3a5f] mb-6">
+                  {language === 'en' ? 'Inbound Transfer' : 'Transfer Masuk'}
                 </h3>
                 <InboundTransferDiagram language={language} />
               </motion.div>
+
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
               >
-                <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4 flex items-center gap-2">
-                  <ArrowRight className="w-5 h-5 rotate-180 text-blue-600" />
-                  {language === 'en' ? 'Outbound Transfers' : 'Transfer Keluar'}
+                <h3 className="text-xl font-bold text-[#1e3a5f] mb-6">
+                  {language === 'en' ? 'Outbound Transfer' : 'Transfer Keluar'}
                 </h3>
                 <OutboundTransferDiagram language={language} />
               </motion.div>
             </div>
           </div>
 
-          <Card className="border-slate-200 mb-16">
-            <CardContent className="p-8">
-              <div className="flex items-start gap-6">
-                <div className="w-14 h-14 rounded-xl bg-[#f5a623]/20 flex items-center justify-center flex-shrink-0">
-                  <RefreshCw className="w-7 h-7 text-[#f5a623]" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#1e3a5f] mb-4">
-                    {language === 'en' ? 'FX Conversion Options' : 'Opsi Konversi FX'}
-                  </h3>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <h4 className="font-semibold text-slate-800 mb-3">
-                        {language === 'en' ? 'Without FX Conversion' : 'Tanpa Konversi FX'}
-                      </h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2 text-slate-600">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
-                          {language === 'en' 
-                            ? 'Transfer in original currency to beneficiaries holding same-currency accounts'
-                            : 'Transfer dalam mata uang asli ke penerima dengan rekening mata uang yang sama'
-                          }
-                        </li>
-                        <li className="flex items-start gap-2 text-slate-600">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
-                          {language === 'en' ? 'No FX spread applied' : 'Tidak ada spread FX yang diterapkan'}
-                        </li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-800 mb-3">
-                        {language === 'en' ? 'With FX Conversion' : 'Dengan Konversi FX'}
-                      </h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2 text-slate-600">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
-                          {language === 'en'
-                            ? "Convert between any supported currencies at client's instruction"
-                            : 'Konversi antara mata uang yang didukung sesuai instruksi klien'
-                          }
-                        </li>
-                        <li className="flex items-start gap-2 text-slate-600">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-1 flex-shrink-0" />
-                          {language === 'en' ? 'Competitive FX rates' : 'Kurs FX kompetitif'}
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
 
           <Card className="border-[#1e3a5f]/30 bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8f] text-white mb-16">
             <CardContent className="p-8">

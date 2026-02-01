@@ -5,13 +5,12 @@ import { ArrowRight, Building2, Banknote } from 'lucide-react';
 export function InboundTransferDiagram({ language = 'en' }) {
   return (
     <div className="space-y-6">
-      {/* Without FX Change */}
+      {/* 1. Inbound Transfer: USD -> USD */}
       <div className="bg-white rounded-xl border-2 border-slate-200 p-6">
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
-          {language === 'en' ? '1. Inbound Transfer: No currency change' : '1. Inbound Transfer: tanpa perubahan mata uang'}
+          {language === 'en' ? '1. Inbound Transfer world currency' : '1. Inbound Transfer mata uang dunia'}
         </h4>
         <div className="flex items-center justify-between gap-3">
-          {/* Counterparty */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -26,7 +25,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -38,7 +36,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <ArrowRight className="w-5 h-5 text-slate-400" />
           </motion.div>
 
-          {/* GAN */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
@@ -52,7 +49,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -64,7 +60,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
-          {/* Client */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -81,7 +76,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
           </motion.div>
         </div>
 
-        {/* Documents */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -114,13 +108,12 @@ export function InboundTransferDiagram({ language = 'en' }) {
         </motion.div>
       </div>
 
-      {/* With FX Change */}
+      {/* 2. Inbound Transfer: USD -> IDR */}
       <div className="bg-white rounded-xl border-2 border-slate-200 p-6">
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
-          {language === 'en' ? '3. Inbound Transfer: With FX change (foreign to IDR)' : '3. Inbound Transfer: dengan perubahan mata uang (valuta asing ke rupiah)'}
+          {language === 'en' ? '2. Inbound Transfer local currency' : '2. Inbound Transfer mata uang lokal'}
         </h4>
         <div className="flex items-center justify-between gap-3">
-          {/* Counterparty */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -130,12 +123,11 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <div className="text-xs font-medium text-center text-slate-700">
-                {language === 'en' ? 'Counterparty 1 Overseas' : 'Counterparty 1 Overseas'}
+                {language === 'en' ? 'Counterparty 3 Overseas' : 'Counterparty 3 Overseas'}
               </div>
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -147,7 +139,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <ArrowRight className="w-5 h-5 text-slate-400" />
           </motion.div>
 
-          {/* GAN */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
@@ -158,11 +149,9 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
               <div className="text-xs font-bold text-center text-[#1e3a5f]">GAN</div>
-              <div className="text-xs text-center text-[#f5a623] font-semibold mt-1">FX</div>
             </div>
           </motion.div>
 
-          {/* Arrow with IDR */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -174,7 +163,6 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <div className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-mono text-xs font-semibold">IDR</div>
           </motion.div>
 
-          {/* Client */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -185,13 +173,12 @@ export function InboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <div className="text-xs font-medium text-center text-slate-700">
-                {language === 'en' ? 'Client 1 Indonesia' : 'Client 1 Indonesia'}
+                {language === 'en' ? 'Client 3 Indonesia' : 'Client 3 Indonesia'}
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Documents */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -223,6 +210,8 @@ export function InboundTransferDiagram({ language = 'en' }) {
           </div>
         </motion.div>
       </div>
+
+
     </div>
   );
 }
@@ -230,13 +219,12 @@ export function InboundTransferDiagram({ language = 'en' }) {
 export function OutboundTransferDiagram({ language = 'en' }) {
   return (
     <div className="space-y-6">
-      {/* Without FX Change */}
+      {/* 3. Outbound Transfer: USD -> USD */}
       <div className="bg-white rounded-xl border-2 border-slate-200 p-6">
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
-          {language === 'en' ? '2. Outbound Transfer: No currency change' : '2. Outbound Transfer: tanpa perubahan mata uang'}
+          {language === 'en' ? '3. Outbound Transfer world currency' : '3. Outbound Transfer mata uang dunia'}
         </h4>
         <div className="flex items-center justify-between gap-3">
-          {/* Client */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -251,7 +239,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -263,7 +250,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <ArrowRight className="w-5 h-5 text-slate-400" />
           </motion.div>
 
-          {/* GAN */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
@@ -277,7 +263,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -289,7 +274,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
-          {/* Counterparty */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -306,7 +290,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
           </motion.div>
         </div>
 
-        {/* Documents */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -339,13 +322,12 @@ export function OutboundTransferDiagram({ language = 'en' }) {
         </motion.div>
       </div>
 
-      {/* With FX Change */}
+      {/* 4. Outbound Transfer: IDR -> USD */}
       <div className="bg-white rounded-xl border-2 border-slate-200 p-6">
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
-          {language === 'en' ? '4. Outbound Transfer: With FX change (IDR to foreign)' : '4. Outbound Transfer: dengan perubahan mata uang (rupiah ke valuta asing)'}
+          {language === 'en' ? '4. Outbound Transfer local currency' : '4. Outbound Transfer mata uang lokal'}
         </h4>
         <div className="flex items-center justify-between gap-3">
-          {/* Client */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -355,12 +337,11 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <div className="text-xs font-medium text-center text-slate-700">
-                {language === 'en' ? 'Client 2 in Indonesia' : 'Client 2 in Indonesia'}
+                {language === 'en' ? 'Client 4 in Indonesia' : 'Client 4 in Indonesia'}
               </div>
             </div>
           </motion.div>
 
-          {/* Arrow with IDR */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -372,7 +353,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <ArrowRight className="w-5 h-5 text-slate-400" />
           </motion.div>
 
-          {/* GAN */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
@@ -383,11 +363,9 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
               <div className="text-xs font-bold text-center text-[#1e3a5f]">GAN</div>
-              <div className="text-xs text-center text-[#f5a623] font-semibold mt-1">FX</div>
             </div>
           </motion.div>
 
-          {/* Arrow with USD */}
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -399,7 +377,6 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
-          {/* Counterparty */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
@@ -410,13 +387,12 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <div className="text-xs font-medium text-center text-slate-700">
-                {language === 'en' ? 'Counterparty 2 Overseas' : 'Counterparty 2 Overseas'}
+                {language === 'en' ? 'Counterparty 4 Overseas' : 'Counterparty 4 Overseas'}
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Documents */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}

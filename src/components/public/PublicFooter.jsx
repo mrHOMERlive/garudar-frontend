@@ -11,7 +11,6 @@ export default function PublicFooter({ language, setLanguage }) {
   const footerLinks = {
     products: [
       { label: language === 'en' ? 'B2B Payments' : 'Pembayaran B2B', href: createPageUrl('GTrans') + '#products' },
-      { label: language === 'en' ? 'FX Solutions' : 'Solusi FX', href: createPageUrl('GTrans') + '#products' },
       { label: 'MerchantPay', href: createPageUrl('GTrans') + '#products' },
       { label: 'eCommerce Collect', href: createPageUrl('GTrans') + '#products' }
     ],
@@ -53,9 +52,9 @@ export default function PublicFooter({ language, setLanguage }) {
             
             {/* Contact Info */}
             <div className="space-y-3">
-              <a href="mailto:contact@garudar.id" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
+              <a href="mailto:info@garudar.id" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
                 <Mail className="w-5 h-5" />
-                contact@garudar.id
+                info@garudar.id
               </a>
               <a href="tel:+62778123456" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
                 <Phone className="w-5 h-5" />
