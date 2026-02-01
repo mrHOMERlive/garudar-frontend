@@ -105,14 +105,14 @@ export default function AmountCurrencySection({ formData, onChange, errors, setE
               Source Currency *
             </Label>
             <Select
-              value={formData.client_payment_currency || 'RUB'}
+              value={formData.client_payment_currency || 'USD'}
               onValueChange={(value) => onChange({ client_payment_currency: value })}
             >
               <SelectTrigger className="border-slate-200 focus:border-teal-600 focus:ring-teal-600">
                 <SelectValue placeholder="Select source currency" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="RUB">₽ RUB - Russian Ruble</SelectItem>
+                {/* <SelectItem value="RUB">₽ RUB - Russian Ruble</SelectItem> */}
                 {CURRENCIES.map((currency) => (
                   <SelectItem key={currency.code} value={currency.code}>
                     {currency.symbol} {currency.code} - {currency.name}

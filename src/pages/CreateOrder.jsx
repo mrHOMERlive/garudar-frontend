@@ -22,7 +22,7 @@ export default function CreateOrder() {
   const [formData, setFormData] = useState({
     amount: 0,
     currency: 'USD',
-    client_payment_currency: 'RUB',
+    client_payment_currency: 'USD',
     beneficiary_name: '',
     beneficiary_address: '',
     beneficiary_country: '',
