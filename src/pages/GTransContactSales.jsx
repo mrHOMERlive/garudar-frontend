@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
@@ -53,10 +52,13 @@ export default function GTransContactSales() {
   const [submitted, setSubmitted] = useState(false);
 
   const submitMutation = useMutation({
-    mutationFn: (data) => base44.entities.SalesLead.create({
-      ...data,
-      source_page: window.location.href
-    }),
+    mutationFn: async (data) => {
+      console.log('Contact form submitted:', {
+        ...data,
+        source_page: window.location.href
+      });
+      return new Promise((resolve) => setTimeout(resolve, 500));
+    },
     onSuccess: () => {
       setSubmitted(true);
       toast.success(language === 'en' ? 'Thank you! We will contact you soon.' : 'Terima kasih! Kami akan segera menghubungi Anda.');
