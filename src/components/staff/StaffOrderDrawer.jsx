@@ -371,7 +371,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
     const setLoading = type === 'sales_contract' ? setUploadingSalesContract :
       type === 'invoice' ? setUploadingInvoice :
-        (type === 'word_order' || type === 'word_order_signed_client') ? setUploadingWordOrder : setUploadingOther;
+        (type === 'word_order' || type === 'word_order_signed_client' || type === 'word_order_unsigned' || type === 'word_order_signed_staff') ? setUploadingWordOrder : setUploadingOther;
 
     setLoading(true);
     try {
@@ -387,6 +387,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
   const getDoc = (type) => documents.find(d => d.doc_type === type);
   const signedOrderDoc = getDoc('word_order') || getDoc('word_order_signed_client');
+  const unsignedOrderDoc = getDoc('word_order_unsigned');
+  const signedOrderStaffDoc = getDoc('word_order_signed_staff');
 
   return (
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
@@ -603,7 +605,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             <Separator className="bg-slate-200" />
 
-            
+
 
             {/* REMUNERATION & FEES Section */}
             <div className="space-y-3">
@@ -771,50 +773,50 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <Separator className="bg-slate-200" />
 
               {/* SECTION 4: EXECUTION Section */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">GAN's Execution & Payment</h3>
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">GAN's Execution & Payment</h3>
 
-              <div>
-                <Label className="text-xs text-slate-600">Date of Execution</Label>
-                <Input
-                  type="date"
-                  value={dateReport}
-                  onChange={(e) => setDateReport(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
-                />
+                <div>
+                  <Label className="text-xs text-slate-600">Date of Execution</Label>
+                  <Input
+                    type="date"
+                    value={dateReport}
+                    onChange={(e) => setDateReport(e.target.value)}
+                    className="mt-1 bg-white border-slate-300"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs text-slate-600">Executing Bank</Label>
+                  <Select value={executingBank} onValueChange={setExecutingBank}>
+                    <SelectTrigger className="mt-1 bg-white border-slate-300">
+                      <SelectValue placeholder="Select executing bank..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activePayeerAccounts.map(acc => (
+                        <SelectItem key={acc.account_no} value={acc.account_no}>
+                          {acc.bank_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-slate-600">Bank's FX Rate (if applicable)</Label>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={fxExecutingBank}
+                    onChange={(e) => setFxExecutingBank(e.target.value)}
+                    className="mt-1 bg-white border-slate-300"
+                    placeholder="7.15"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Used when Executing Bank applies FX conversion</p>
+                </div>
               </div>
 
-              <div>
-                <Label className="text-xs text-slate-600">Executing Bank</Label>
-                <Select value={executingBank} onValueChange={setExecutingBank}>
-                  <SelectTrigger className="mt-1 bg-white border-slate-300">
-                    <SelectValue placeholder="Select executing bank..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activePayeerAccounts.map(acc => (
-                      <SelectItem key={acc.account_no} value={acc.account_no}>
-                        {acc.bank_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs text-slate-600">Bank's FX Rate (if applicable)</Label>
-                <Input
-                  type="number"
-                  step="0.0001"
-                  value={fxExecutingBank}
-                  onChange={(e) => setFxExecutingBank(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
-                  placeholder="7.15"
-                />
-                <p className="text-xs text-slate-500 mt-1">Used when Executing Bank applies FX conversion</p>
-              </div>
-            </div>
-
-            <Separator className="bg-slate-200" />
+              <Separator className="bg-slate-200" />
 
               {/* Documents Section */}
               <div className="space-y-3">
@@ -931,9 +933,35 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       <label className="flex-1">
                         <input
                           type="file"
+                          onChange={(e) => handleDocUpload(e, 'word_order_unsigned')}
+                          className="hidden"
+                          accept=".doc,.docx,.pdf,.xls,.xlsx"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-blue-300 hover:bg-blue-100"
+                          onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                          disabled={uploadingWordOrder}
+                        >
+                          <Upload className="w-3 h-3 mr-2" />
+                          {uploadingWordOrder ? 'Uploading...' : 'Upload Unsigned by Client'}
+                        </Button>
+                      </label>
+                      {unsignedOrderDoc && (
+                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(unsignedOrderDoc.doc_id)}>
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="flex-1">
+                        <input
+                          type="file"
                           onChange={(e) => handleDocUpload(e, 'word_order_signed_client')}
                           className="hidden"
-                          accept=".doc,.docx"
+                          accept=".doc,.docx,.pdf,.xls,.xlsx"
                         />
                         <Button
                           type="button"
@@ -953,6 +981,32 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         </Button>
                       )}
                     </div>
+                    <div className="flex items-center gap-2">
+                      <label className="flex-1">
+                        <input
+                          type="file"
+                          onChange={(e) => handleDocUpload(e, 'word_order_signed_staff')}
+                          className="hidden"
+                          accept=".doc,.docx,.pdf,.xls,.xlsx"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-blue-300 hover:bg-blue-100"
+                          onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                          disabled={uploadingWordOrder}
+                        >
+                          <Upload className="w-3 h-3 mr-2" />
+                          {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Staff'}
+                        </Button>
+                      </label>
+                      {signedOrderStaffDoc && (
+                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(signedOrderStaffDoc.doc_id)}>
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -960,73 +1014,73 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <Separator className="bg-slate-200" />
 
               {/* Order Information */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Amount</div>
-                  <div className="font-semibold text-slate-900">{order.currency} {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">Amount</div>
+                    <div className="font-semibold text-slate-900">{order.currency} {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">Remittance Currency</div>
+                    <div className="font-semibold text-slate-900">{order.currency}</div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">Debit Account</div>
+                    <div className="font-semibold text-slate-900">{executingBank || '-'}</div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
+                    <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Remittance Currency</div>
-                  <div className="font-semibold text-slate-900">{order.currency}</div>
+                  <div className="text-xs text-slate-500 mb-1">Beneficiary Name</div>
+                  <div className="font-semibold text-slate-900">{order.beneficiaryName}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Debit Account</div>
-                  <div className="font-semibold text-slate-900">{executingBank || '-'}</div>
+                  <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
+                  <div className="font-semibold text-slate-900 text-sm">{order.beneficiaryAddress || order.beneficiaryAdress}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
-                  <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
+                  <div className="text-xs text-slate-500 mb-1">Destination Account</div>
+                  <div className="font-semibold text-slate-900">{order.destinationAccount}</div>
                 </div>
-              </div>
 
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Beneficiary Name</div>
-                <div className="font-semibold text-slate-900">{order.beneficiaryName}</div>
-              </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">Bank Country</div>
+                    <div className="font-semibold text-slate-900">{order.bankCountry}</div>
+                  </div>
 
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
-                <div className="font-semibold text-slate-900 text-sm">{order.beneficiaryAddress || order.beneficiaryAdress}</div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Destination Account</div>
-                <div className="font-semibold text-slate-900">{order.destinationAccount}</div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Bank Country</div>
-                  <div className="font-semibold text-slate-900">{order.bankCountry}</div>
+                  <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div className="text-xs text-slate-500 mb-1">BIC/SWIFT</div>
+                    <div className="font-semibold text-slate-900">{order.bankBic}</div>
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">BIC/SWIFT</div>
-                  <div className="font-semibold text-slate-900">{order.bankBic}</div>
+                  <div className="text-xs text-slate-500 mb-1">Bank Name</div>
+                  <div className="font-semibold text-slate-900">{order.bankName}</div>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <div className="text-xs text-slate-500 mb-1">Bank Address</div>
+                  <div className="font-semibold text-slate-900 text-sm">{order.bankAddress || '-'}</div>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <div className="text-xs text-slate-500 mb-1">Transaction Remark</div>
+                  <div className="font-semibold text-slate-900 text-sm whitespace-pre-wrap">{order.remark}</div>
                 </div>
               </div>
-
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Bank Name</div>
-                <div className="font-semibold text-slate-900">{order.bankName}</div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Bank Address</div>
-                <div className="font-semibold text-slate-900 text-sm">{order.bankAddress || '-'}</div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Transaction Remark</div>
-                <div className="font-semibold text-slate-900 text-sm whitespace-pre-wrap">{order.remark}</div>
-              </div>
-            </div>
 
               <Separator className="bg-slate-200" />
 

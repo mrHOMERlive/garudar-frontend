@@ -177,16 +177,19 @@ export default function CreateOrder() {
   const handleFileUpload = (file, type) => {
     if (!file) return;
 
+    // Map backend doc types to state setters
     const setFile = {
-      salesContract: setSalesContractFile,
+      sales_contract: setSalesContractFile,
       invoice: setInvoiceFile,
       other: setOtherDocsFile
     }[type];
 
-    setFile(file);
-    toast.success('Document selected', {
-      description: file.name
-    });
+    if (setFile) {
+      setFile(file);
+      toast.success('Document selected', {
+        description: file.name
+      });
+    }
   };
 
   const uploadDocumentsAfterOrder = async (orderId) => {
@@ -203,8 +206,8 @@ export default function CreateOrder() {
     if (salesContractFile) {
       uploads.push({
         file: salesContractFile,
-        docType: 'payment_proof',
-        name: 'Sales Contract (as Payment Proof)'
+        docType: 'sales_contract',
+        name: 'Sales Contract'
       });
     }
 
@@ -343,7 +346,7 @@ export default function CreateOrder() {
                         <label className="flex-1">
                           <input
                             type="file"
-                            onChange={(e) => handleFileUpload(e.target.files?.[0], 'salesContract')}
+                            onChange={(e) => handleFileUpload(e.target.files?.[0], 'sales_contract')}
                             className="hidden"
                             accept=".pdf,.doc,.docx"
                           />

@@ -128,6 +128,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
   };
 
   const wordOrderUnsigned = getDocumentByType('word_order_unsigned');
+  const wordOrderSignedStaff = getDocumentByType('word_order_signed_staff');
   const wordOrderSigned = getDocumentByType('word_order_signed_client');
   const paymentProofDoc = getDocumentByType('payment_proof');
 
@@ -300,34 +301,23 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
 
               <div className="bg-white rounded-lg p-3 border border-slate-200">
                 <Label className="text-xs text-slate-700 mb-2 block">Order (from Staff)</Label>
-                {wordOrderUnsigned ? (
+                {wordOrderSignedStaff ? (
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
                     className="w-full"
-                    onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
+                    onClick={() => handleDownloadDocument(wordOrderSignedStaff.doc_id, wordOrderSignedStaff.file_name)}
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download Unsigned Order
-                  </Button>
-                ) : terms?.amountRemuneration ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-blue-300 hover:bg-blue-100"
-                    onClick={handleDownloadExcel}
-                  >
-                    <FileText className="w-3 h-3 mr-2" />
-                    Download Unsigned Order
+                    Download Signed Order
                   </Button>
                 ) : (
                   <div className="text-xs text-slate-500">No order document available yet</div>
                 )}
               </div>
 
-              {terms?.amountRemuneration && (
+              {terms?.amountRemuneration && wordOrderUnsigned && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Label className="text-xs text-slate-700 mb-2 block">Upload Signed Order</Label>
                   <div className="flex items-center gap-2">
@@ -336,7 +326,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                         type="file"
                         onChange={handleWordOrderUpload}
                         className="hidden"
-                        accept=".doc,.docx,.pdf"
+                        accept=".doc,.docx,.pdf,.xls,.xlsx"
                       />
                       <Button
                         type="button"
@@ -362,6 +352,23 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                   </div>
                 </div>
               )}
+              <div className="bg-white rounded-lg p-3 border border-slate-200">
+                <Label className="text-xs text-slate-700 mb-2 block">Signed Order (from Staff)</Label>
+                {wordOrderSignedStaff ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleDownloadDocument(wordOrderSignedStaff.doc_id, wordOrderSignedStaff.file_name)}
+                  >
+                    <Download className="w-3 h-3 mr-2" />
+                    Download Signed Order
+                  </Button>
+                ) : (
+                  <div className="text-xs text-slate-500">No order document available yet</div>
+                )}
+              </div>
             </div>
 
             <Separator className="bg-slate-200" />
