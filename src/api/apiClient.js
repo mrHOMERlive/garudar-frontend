@@ -426,6 +426,111 @@ class ApiClient {
             method: 'DELETE',
         });
     }
+
+    // KYC
+    async getKycProfile(clientId) {
+        return this.request(`/clients/${clientId}/kyc`);
+    }
+
+    async updateKycProfile(clientId, profileData) {
+        return this.request(`/clients/${clientId}/kyc`, {
+            method: 'PUT',
+            body: JSON.stringify(profileData),
+        });
+    }
+
+    async submitKyc(clientId) {
+        return this.request(`/clients/${clientId}/kyc/submit`, {
+            method: 'POST',
+        });
+    }
+
+    async listUbos(clientId) {
+        return this.request(`/clients/${clientId}/ubos`);
+    }
+
+    async createUbo(clientId, uboData) {
+        return this.request(`/clients/${clientId}/ubos`, {
+            method: 'POST',
+            body: JSON.stringify(uboData),
+        });
+    }
+
+    async updateUbo(clientId, uboId, uboData) {
+        return this.request(`/clients/${clientId}/ubos/${uboId}`, {
+            method: 'PUT',
+            body: JSON.stringify(uboData),
+        });
+    }
+
+    async deleteUbo(clientId, uboId) {
+        return this.request(`/clients/${clientId}/ubos/${uboId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async uploadKycDocument(clientId, file, docType, comment = null, isRequired = false) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('doc_type', docType);
+        if (comment) formData.append('comment', comment);
+        formData.append('is_required', isRequired); // Note: server expects boolean string or value
+
+        const token = this.getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${this.baseUrl}/clients/${clientId}/documents`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Document upload failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
+    async downloadKycDocument(clientId, docId) {
+        const token = this.getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        // 1. Get document metadata / presigned url
+        const response = await fetch(`${this.baseUrl}/clients/${clientId}/documents/${docId}/download`, {
+            method: 'GET',
+            headers,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to get download URL');
+        }
+
+        const data = await response.json();
+
+        // 2. Fetch the actual file from presigned URL
+        // Note: Presigned URLs usually don't require Auth headers, but depend on provider. 
+        // Usually plain fetch is enough.
+        const fileResponse = await fetch(data.presigned_url);
+
+        if (!fileResponse.ok) {
+            throw new Error('Failed to download file from storage');
+        }
+
+        return fileResponse.blob();
+    }
+
+    async listKycDocuments(clientId, docType = null) {
+        const query = docType ? `?doc_type=${encodeURIComponent(docType)}` : '';
+        return this.request(`/clients/${clientId}/documents${query}`);
+    }
 }
 
 export const apiClient = new ApiClient();

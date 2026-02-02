@@ -4,6 +4,8 @@ import CreateOrder from "./CreateOrder";
 
 import OrderHistory from "./OrderHistory";
 
+import ClientKYC from "./ClientKYC";
+
 import CurrentOrders from "./CurrentOrders";
 
 import ExecutedOrders from "./ExecutedOrders";
@@ -54,57 +56,59 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
 
 const PAGES = {
-    
+
     CreateOrder: CreateOrder,
-    
+
     OrderHistory: OrderHistory,
-    
+
     CurrentOrders: CurrentOrders,
-    
+
+    ClientKYC: ClientKYC,
+
     ExecutedOrders: ExecutedOrders,
-    
+
     CancelledOrders: CancelledOrders,
-    
+
     DeletedOrders: DeletedOrders,
-    
+
     StaffDashboard: StaffDashboard,
-    
+
     StaffKYC: StaffKYC,
-    
+
     StaffClients: StaffClients,
-    
+
     StaffActiveOrders: StaffActiveOrders,
-    
+
     StaffExecutedOrders: StaffExecutedOrders,
-    
+
     StaffPayeerAccounts: StaffPayeerAccounts,
-    
+
     GTrans: GTrans,
-    
+
     GTransContactSales: GTransContactSales,
-    
+
     GTransWorkScheme: GTransWorkScheme,
-    
+
     GTransDocumentation: GTransDocumentation,
-    
+
     GTransFAQ: GTransFAQ,
-    
+
     GTransLogin: GTransLogin,
-    
+
     GTransPresentation: GTransPresentation,
-    
+
     UserDashboard: UserDashboard,
-    
+
     GTransAPIIntegration: GTransAPIIntegration,
-    
+
     GTransB2BPayments: GTransB2BPayments,
-    
+
     GTransFXSolutions: GTransFXSolutions,
-    
+
     GTransECommerceCollectSettle: GTransECommerceCollectSettle,
-    
+
     GTransMerchantPay: GTransMerchantPay,
-    
+
 }
 
 function _getCurrentPage(url) {
@@ -124,64 +128,66 @@ function _getCurrentPage(url) {
 function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
-    
+
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<GTrans />} />
-                
-                
+            <Routes>
+
+                <Route path="/" element={<GTrans />} />
+
+
                 <Route path="/createorder" element={<RequireAuth><CreateOrder /></RequireAuth>} />
-                
+
                 <Route path="/orderhistory" element={<RequireAuth><OrderHistory /></RequireAuth>} />
-                
+
                 <Route path="/currentorders" element={<RequireAuth><CurrentOrders /></RequireAuth>} />
-                
+
                 <Route path="/executedorders" element={<RequireAuth><ExecutedOrders /></RequireAuth>} />
-                
+
                 <Route path="/cancelledorders" element={<RequireAuth><CancelledOrders /></RequireAuth>} />
-                
+
+                <Route path="/clientkyc" element={<RequireAuth><ClientKYC /></RequireAuth>} />
+
                 <Route path="/deletedorders" element={<RequireAuth><DeletedOrders /></RequireAuth>} />
-                
+
                 <Route path="/staffdashboard" element={<RequireAdmin><StaffDashboard /></RequireAdmin>} />
-                
+
                 <Route path="/staffkyc" element={<RequireAdmin><StaffKYC /></RequireAdmin>} />
-                
+
                 <Route path="/staffclients" element={<RequireAdmin><StaffClients /></RequireAdmin>} />
-                
+
                 <Route path="/staffactiveorders" element={<RequireAdmin><StaffActiveOrders /></RequireAdmin>} />
-                
+
                 <Route path="/staffexecutedorders" element={<RequireAdmin><StaffExecutedOrders /></RequireAdmin>} />
-                
+
                 <Route path="/staffpayeeraccounts" element={<RequireAdmin><StaffPayeerAccounts /></RequireAdmin>} />
-                
+
                 <Route path="/gtrans" element={<GTrans />} />
-                
+
                 <Route path="/gtranscontactsales" element={<GTransContactSales />} />
-                
+
                 <Route path="/gtransworkscheme" element={<GTransWorkScheme />} />
-                
+
                 <Route path="/gtransdocumentation" element={<GTransDocumentation />} />
-                
+
                 <Route path="/gtransfaq" element={<GTransFAQ />} />
-                
+
                 <Route path="/gtranslogin" element={<GTransLogin />} />
-                
+
                 <Route path="/gtranspresentation" element={<GTransPresentation />} />
-                
+
                 <Route path="/userdashboard" element={<RequireAuth><UserDashboard /></RequireAuth>} />
-                
+
                 <Route path="/gtransapiintegration" element={<GTransAPIIntegration />} />
-                
+
                 <Route path="/gtransb2bpayments" element={<GTransB2BPayments />} />
-                
+
                 <Route path="/gtransfxsolutions" element={<GTransFXSolutions />} />
-                
+
                 <Route path="/gtransecommercecollectsettle" element={<GTransECommerceCollectSettle />} />
-                
+
                 <Route path="/gtransmerchantpay" element={<GTransMerchantPay />} />
-                
+
             </Routes>
         </Layout>
     );
