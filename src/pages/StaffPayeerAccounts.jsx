@@ -65,11 +65,11 @@ export default function StaffPayeerAccounts() {
         bank_bic: data.bank_bic || null,
         bank_country: data.bank_country || null
       };
-      
+
       if (editingAccount) {
         return await apiClient.updatePayeerAccount(editingAccount.account_number, payload);
       }
-      
+
       const createPayload = {
         account_no: data.account_number,
         ...payload
@@ -91,6 +91,7 @@ export default function StaffPayeerAccounts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
       toast.success('Account deleted');
+      closeDrawer();
     },
   });
 
@@ -127,6 +128,12 @@ export default function StaffPayeerAccounts() {
   const closeDrawer = () => {
     setDrawerOpen(false);
     setEditingAccount(null);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this account?')) {
+      deleteMutation.mutate(editingAccount.id);
+    }
   };
 
   const handleSubmit = () => {
@@ -167,9 +174,9 @@ export default function StaffPayeerAccounts() {
                 </Button>
               </Link>
               <Button onClick={openCreateDrawer} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Account
-            </Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Account
+              </Button>
             </div>
           </div>
         </div>
@@ -197,8 +204,8 @@ export default function StaffPayeerAccounts() {
                   <TableCell colSpan={5} className="text-center text-slate-500 py-8">No accounts found</TableCell>
                 </TableRow>
               ) : accounts.map((account) => (
-                <TableRow 
-                  key={account.id} 
+                <TableRow
+                  key={account.id}
                   className="border-slate-200 hover:bg-slate-100 cursor-pointer"
                   onClick={() => openEditDrawer(account)}
                 >
@@ -227,7 +234,7 @@ export default function StaffPayeerAccounts() {
               {editingAccount ? 'Edit Account' : 'Add Payeer Account'}
             </SheetTitle>
           </SheetHeader>
-          
+
           <div className="space-y-4 py-6">
             <div className="space-y-2">
               <Label className="text-slate-700">Currency *</Label>
@@ -316,6 +323,16 @@ export default function StaffPayeerAccounts() {
           </div>
 
           <SheetFooter className="border-t border-slate-200 pt-4">
+            {editingAccount && (
+              <Button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="bg-red-500 hover:bg-red-600 text-white mr-auto"
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+              </Button>
+            )}
             <Button variant="outline" onClick={closeDrawer} className="border-slate-300 text-slate-600">
               Cancel
             </Button>
