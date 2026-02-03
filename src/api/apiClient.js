@@ -149,6 +149,13 @@ class ApiClient {
         return this.request(`/clients/${clientId}/badges`);
     }
 
+    async updateClientBadge(clientId, badgeType, badgeData) {
+        return this.request(`/clients/${clientId}/badges/${badgeType}`, {
+            method: 'PUT',
+            body: JSON.stringify(badgeData),
+        });
+    }
+
     // Orders POBO
     async getOrders(params = {}) {
         const queryParams = new URLSearchParams();

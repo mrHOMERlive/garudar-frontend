@@ -22,6 +22,8 @@ import StaffKYCQueue from "./StaffKYCQueue";
 
 import StaffClients from "./StaffClients";
 
+import StaffClientRequests from "./StaffClientRequests";
+
 import StaffActiveOrders from "./StaffActiveOrders";
 
 import StaffExecutedOrders from "./StaffExecutedOrders";
@@ -80,6 +82,8 @@ const PAGES = {
     StaffKYCQueue: StaffKYCQueue,
 
     StaffClients: StaffClients,
+
+    StaffClientRequests: StaffClientRequests,
 
     StaffActiveOrders: StaffActiveOrders,
 
@@ -161,6 +165,8 @@ function PagesContent() {
                 <Route path="/staffkyc" element={<RequireAdmin><StaffKYC /></RequireAdmin>} />
 
                 <Route path="/staffclients" element={<RequireAdmin><StaffClients /></RequireAdmin>} />
+
+                <Route path="/staffclientrequests" element={<RequireAdmin><StaffClientRequests /></RequireAdmin>} />
 
                 <Route path="/staffactiveorders" element={<RequireAdmin><StaffActiveOrders /></RequireAdmin>} />
 
