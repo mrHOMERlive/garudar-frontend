@@ -531,6 +531,19 @@ class ApiClient {
         const query = docType ? `?doc_type=${encodeURIComponent(docType)}` : '';
         return this.request(`/clients/${clientId}/documents${query}`);
     }
+
+    // KYC Admin/Staff
+    async getKycQueue(status = null) {
+        const query = status ? `?status=${encodeURIComponent(status)}` : '';
+        return this.request(`/kyc/queue${query}`);
+    }
+
+    async makeKycDecision(clientId, decisionData) {
+        return this.request(`/clients/${clientId}/kyc/decision`, {
+            method: 'POST',
+            body: JSON.stringify(decisionData),
+        });
+    }
 }
 
 export const apiClient = new ApiClient();

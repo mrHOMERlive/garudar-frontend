@@ -18,6 +18,8 @@ import StaffDashboard from "./StaffDashboard";
 
 import StaffKYC from "./StaffKYC";
 
+import StaffKYCQueue from "./StaffKYCQueue";
+
 import StaffClients from "./StaffClients";
 
 import StaffActiveOrders from "./StaffActiveOrders";
@@ -74,6 +76,8 @@ const PAGES = {
     StaffDashboard: StaffDashboard,
 
     StaffKYC: StaffKYC,
+
+    StaffKYCQueue: StaffKYCQueue,
 
     StaffClients: StaffClients,
 
@@ -147,6 +151,8 @@ function PagesContent() {
                 <Route path="/cancelledorders" element={<RequireAuth><CancelledOrders /></RequireAuth>} />
 
                 <Route path="/clientkyc" element={<RequireAuth><ClientKYC /></RequireAuth>} />
+
+                <Route path="/staffkycqueue" element={<RequireAdmin><StaffKYCQueue /></RequireAdmin>} />
 
                 <Route path="/deletedorders" element={<RequireAuth><DeletedOrders /></RequireAuth>} />
 
