@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Mail, Phone, MessageCircle, MapPin, CheckCircle, 
+import {
+  Mail, Phone, MessageCircle, MapPin, CheckCircle,
   ArrowRight, Send
 } from 'lucide-react';
 
@@ -93,7 +93,7 @@ export default function GTransContactSales() {
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <main className="pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -117,13 +117,13 @@ export default function GTransContactSales() {
 
                 <Card className="border-slate-200">
                   <CardContent className="p-6">
-                    <a href="mailto:sales@garudar.id" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
+                    <a href="mailto:info@garudar.id" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
                       <div className="w-12 h-12 rounded-lg bg-[#1e3a5f]/10 flex items-center justify-center">
                         <Mail className="w-6 h-6 text-[#1e3a5f]" />
                       </div>
                       <div>
                         <div className="font-medium">Email</div>
-                        <div className="text-sm text-slate-500">sales@garudar.id</div>
+                        <div className="text-sm text-slate-500">info@garudar.id</div>
                       </div>
                     </a>
                   </CardContent>
@@ -131,13 +131,13 @@ export default function GTransContactSales() {
 
                 <Card className="border-slate-200">
                   <CardContent className="p-6">
-                    <a href="https://wa.me/62778123456" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
+                    <a href="https://wa.me/6281117796126" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
                       <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
                         <MessageCircle className="w-6 h-6 text-emerald-600" />
                       </div>
                       <div>
                         <div className="font-medium">WhatsApp</div>
-                        <div className="text-sm text-slate-500">+62 778 123 456</div>
+                        <div className="text-sm text-slate-500">+62 811 1779 6126</div>
                       </div>
                     </a>
                   </CardContent>
@@ -145,13 +145,13 @@ export default function GTransContactSales() {
 
                 <Card className="border-slate-200">
                   <CardContent className="p-6">
-                    <a href="tel:+62778123456" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
+                    <a href="tel:+6281117796126" className="flex items-center gap-4 text-slate-700 hover:text-[#1e3a5f] transition-colors">
                       <div className="w-12 h-12 rounded-lg bg-[#f5a623]/20 flex items-center justify-center">
                         <Phone className="w-6 h-6 text-[#f5a623]" />
                       </div>
                       <div>
                         <div className="font-medium">{language === 'en' ? 'Phone' : 'Telepon'}</div>
-                        <div className="text-sm text-slate-500">+62 778 123 456</div>
+                        <div className="text-sm text-slate-500">+62 811 1779 6126</div>
                       </div>
                     </a>
                   </CardContent>
@@ -189,8 +189,8 @@ export default function GTransContactSales() {
                         : 'Pertanyaan Anda telah dikirim. Tim sales kami akan menghubungi Anda dalam 1-2 hari kerja.'
                       }
                     </p>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => setSubmitted(false)}
                       className="border-[#1e3a5f] text-[#1e3a5f]"
                     >
@@ -278,18 +278,16 @@ export default function GTransContactSales() {
                               key={product.value}
                               type="button"
                               onClick={() => handleProductToggle(product.value)}
-                              className={`p-4 rounded-lg border-2 text-left transition-all ${
-                                formData.products_interested.includes(product.value)
-                                  ? 'border-[#1e3a5f] bg-[#1e3a5f]/5'
-                                  : 'border-slate-200 hover:border-slate-300'
-                              }`}
+                              className={`p-4 rounded-lg border-2 text-left transition-all ${formData.products_interested.includes(product.value)
+                                ? 'border-[#1e3a5f] bg-[#1e3a5f]/5'
+                                : 'border-slate-200 hover:border-slate-300'
+                                }`}
                             >
                               <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                  formData.products_interested.includes(product.value)
-                                    ? 'border-[#1e3a5f] bg-[#1e3a5f]'
-                                    : 'border-slate-300'
-                                }`}>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.products_interested.includes(product.value)
+                                  ? 'border-[#1e3a5f] bg-[#1e3a5f]'
+                                  : 'border-slate-300'
+                                  }`}>
                                   {formData.products_interested.includes(product.value) && (
                                     <CheckCircle className="w-3 h-3 text-white" />
                                   )}
@@ -343,8 +341,8 @@ export default function GTransContactSales() {
                         </Label>
                       </div>
 
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         disabled={submitMutation.isPending}
                         className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6 text-lg"
                       >

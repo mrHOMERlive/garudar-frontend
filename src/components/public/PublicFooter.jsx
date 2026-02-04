@@ -44,23 +44,23 @@ export default function PublicFooter({ language, setLanguage }) {
               </div>
             </div>
             <p className="text-slate-300 mb-6 max-w-sm">
-              {language === 'en' 
+              {language === 'en'
                 ? 'One platform for seamless, compliant fund transfers across the globe. Licensed under Bank Indonesia PSP framework.'
                 : 'Satu platform untuk transfer dana yang mulus dan sesuai regulasi di seluruh dunia. Berlisensi di bawah kerangka PSP Bank Indonesia.'
               }
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
               <a href="mailto:info@garudar.id" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
                 <Mail className="w-5 h-5" />
                 info@garudar.id
               </a>
-              <a href="tel:+62778123456" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
+              <a href="tel:+6281117796126" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
                 <Phone className="w-5 h-5" />
-                +62 778 123 456
+                +62 811 1779 6126
               </a>
-              <a href="https://wa.me/62778123456" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
+              <a href="https://wa.me/6281117796126" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors">
                 <MessageCircle className="w-5 h-5" />
                 WhatsApp
               </a>
@@ -119,7 +119,7 @@ export default function PublicFooter({ language, setLanguage }) {
           <div className="text-slate-400 text-sm">
             © {currentYear} PT Garuda Arma Nusa. {language === 'en' ? 'All rights reserved.' : 'Hak cipta dilindungi.'}
           </div>
-          
+
           <div className="flex items-center gap-6">
             {/* Language Switcher */}
             <button
