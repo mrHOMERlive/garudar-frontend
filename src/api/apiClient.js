@@ -3,46 +3,128 @@ const API_BASE = '/api/v1';
 class ApiClient {
     constructor() {
         this.baseUrl = API_BASE;
+        this.isRefreshing = false;
+        this.failedQueue = [];
     }
 
-    getToken() {
-        return localStorage.getItem('gtrans_token');
+    processQueue(error, token = null) {
+        this.failedQueue.forEach(prom => {
+            if (error) {
+                prom.reject(error);
+            } else {
+                prom.resolve(token);
+            }
+        });
+        this.failedQueue = [];
     }
 
-    setToken(token) {
-        localStorage.setItem('gtrans_token', token);
+    getAccessToken() {
+        return localStorage.getItem('access_token') || localStorage.getItem('gtrans_token');
     }
 
-    removeToken() {
+    getRefreshToken() {
+        return localStorage.getItem('refresh_token');
+    }
+
+    setTokens(accessToken, refreshToken) {
+        if (accessToken) localStorage.setItem('access_token', accessToken);
+        if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+        // Clean up legacy token if exists
+        localStorage.removeItem('gtrans_token');
+    }
+
+    removeTokens() {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('gtrans_token');
         localStorage.removeItem('gtrans_user');
     }
 
-    async request(endpoint, options = {}, skipAuthRedirect = false) {
-        const url = `${this.baseUrl}${endpoint}`;
-        const token = this.getToken();
-
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        };
-
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+    async refreshToken() {
+        if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject });
+            });
         }
 
-        const response = await fetch(url, {
+        this.isRefreshing = true;
+        const refreshToken = this.getRefreshToken();
+
+        if (!refreshToken) {
+            this.isRefreshing = false;
+            return Promise.reject(new Error('No refresh token available'));
+        }
+
+        try {
+            const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshToken })
+            });
+
+            if (!response.ok) {
+                throw new Error('Refresh failed');
+            }
+
+            const data = await response.json();
+            this.setTokens(data.access_token, data.refresh_token);
+            this.processQueue(null, data.access_token);
+            return data.access_token;
+        } catch (error) {
+            this.processQueue(error, null);
+            this.logout(true); // Force logout locally if refresh fails
+            throw error;
+        } finally {
+            this.isRefreshing = false;
+        }
+    }
+
+    async request(endpoint, options = {}, skipAuthRedirect = false) {
+        const url = `${this.baseUrl}${endpoint}`;
+        let token = this.getAccessToken();
+
+        const getHeaders = (t) => {
+            const h = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            if (t) {
+                h['Authorization'] = `Bearer ${t}`;
+            }
+            return h;
+        };
+
+        let response = await fetch(url, {
             ...options,
-            headers,
+            headers: getHeaders(token),
         });
 
+        // Handle 401 Unauthorized
         if (response.status === 401) {
-            if (!skipAuthRedirect) {
-                this.removeToken();
-                window.location.href = '/gtranslogin';
+            // Don't retry if it's a login or refresh request
+            if (endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh')) {
+                if (!skipAuthRedirect && !endpoint.includes('/auth/login')) {
+                    this.logout(true);
+                    window.location.href = '/gtranslogin';
+                }
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Invalid credentials');
             }
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Invalid credentials');
+
+            try {
+                const newToken = await this.refreshToken();
+                // Retry original request with new token
+                response = await fetch(url, {
+                    ...options,
+                    headers: getHeaders(newToken),
+                });
+            } catch (refreshError) {
+                if (!skipAuthRedirect) {
+                    this.logout(true);
+                    window.location.href = '/gtranslogin';
+                }
+                throw refreshError;
+            }
         }
 
         if (!response.ok) {
@@ -76,19 +158,35 @@ class ApiClient {
             body: JSON.stringify({ username, password }),
         }, true);
 
-        if (data.token) {
-            this.setToken(data.token);
+        if (data.access_token) {
+            this.setTokens(data.access_token, data.refresh_token);
+        } else if (data.token) {
+            // Legacy fallback support
+            this.setTokens(data.token, null);
         }
 
         return data;
     }
 
-    logout() {
-        this.removeToken();
+    async logout(forceLocal = false) {
+        if (!forceLocal) {
+            const refreshToken = this.getRefreshToken();
+            if (refreshToken) {
+                try {
+                    await this.request('/auth/logout', {
+                        method: 'POST',
+                        body: JSON.stringify({ refresh_token: refreshToken })
+                    }, true);
+                } catch (e) {
+                    console.error('Logout API call failed', e);
+                }
+            }
+        }
+        this.removeTokens();
     }
 
     isAuthenticated() {
-        return !!this.getToken();
+        return !!this.getAccessToken();
     }
 
     // Users
@@ -225,7 +323,7 @@ class ApiClient {
     }
 
     async generateExecutedOrderActReport(sourceOrderId) {
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -242,7 +340,7 @@ class ApiClient {
     }
 
     async exportOrderExcel(orderId) {
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -259,7 +357,7 @@ class ApiClient {
     }
 
     async exportTxtInstructions(orderIds) {
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {
             'Content-Type': 'application/json',
         };
@@ -285,7 +383,7 @@ class ApiClient {
         const formData = new FormData();
         formData.append('file', file);
 
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -314,7 +412,7 @@ class ApiClient {
             formData.append('replace_reason', replaceReason);
         }
 
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;

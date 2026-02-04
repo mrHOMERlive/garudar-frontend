@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem('gtrans_user', JSON.stringify(userData));
       } catch (error) {
         console.error('Auth check failed:', error);
-        apiClient.removeToken();
+        apiClient.removeTokens();
         setUser(null);
         setIsAuthenticated(false);
       }
@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     const response = await apiClient.login(username, password);
-    if (response.token) {
+    if (response.access_token || response.token) {
       const userData = await apiClient.getCurrentUser();
       setUser(userData);
       setIsAuthenticated(true);
