@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import apiClient from '@/api/apiClient';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,24 +47,40 @@ export default function GTransContactSales() {
     products_interested: [],
     expected_volume: '',
     message: '',
-    consent_given: false
+    consent_given: false,
+    website_url: '' // Honeypot field
   });
 
   const [submitted, setSubmitted] = useState(false);
 
   const submitMutation = useMutation({
     mutationFn: async (data) => {
-      console.log('Contact form submitted:', {
-        ...data,
-        source_page: window.location.href
-      });
-      return new Promise((resolve) => setTimeout(resolve, 500));
+      // Honeypot check: if website_url is filled, pretending to be successful but doing nothing
+      if (data.website_url) {
+        return new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      const payload = {
+        company_name: data.company_name,
+        country: data.country || null,
+        contact_person: data.contact_name,
+        business_email: data.email,
+        phone: data.phone || null,
+        products_interested: data.products_interested,
+        monthly_volume: data.expected_volume,
+        message: data.message || null,
+        is_agreed: data.consent_given,
+        website_url: '' // Should be empty for real users
+      };
+
+      return apiClient.createLead(payload);
     },
     onSuccess: () => {
       setSubmitted(true);
       toast.success(language === 'en' ? 'Thank you! We will contact you soon.' : 'Terima kasih! Kami akan segera menghubungi Anda.');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Lead submission error:', error);
       toast.error(language === 'en' ? 'Something went wrong. Please try again.' : 'Terjadi kesalahan. Silakan coba lagi.');
     }
   });
@@ -213,6 +230,16 @@ export default function GTransContactSales() {
                             placeholder={language === 'en' ? 'Your company name' : 'Nama perusahaan Anda'}
                             className="border-slate-300"
                             required
+                          />
+                          {/* Honeypot field - hidden from users */}
+                          <input
+                            type="text"
+                            name="website_url"
+                            value={formData.website_url}
+                            onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                            style={{ display: 'none' }}
+                            tabIndex={-1}
+                            autoComplete="off"
                           />
                         </div>
                         <div className="space-y-2">

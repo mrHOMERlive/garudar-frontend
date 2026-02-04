@@ -551,6 +551,14 @@ class ApiClient {
             body: JSON.stringify(decisionData),
         });
     }
+
+    // Leads
+    async createLead(leadData) {
+        return this.request('/leads', {
+            method: 'POST',
+            body: JSON.stringify(leadData),
+        });
+    }
 }
 
 export const apiClient = new ApiClient();
