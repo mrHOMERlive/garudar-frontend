@@ -46,7 +46,7 @@ export default function GTransLogin() {
     }
 
     setLoading(true);
-    
+
     try {
       const userData = await login(username, password);
       toast.success(language === 'en' ? 'Login successful!' : 'Login berhasil!');
@@ -54,8 +54,8 @@ export default function GTransLogin() {
       navigate(createPageUrl(targetPage));
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(language === 'en' 
-        ? 'Invalid credentials. Please try again.' 
+      toast.error(language === 'en'
+        ? 'Invalid credentials. Please try again.'
         : 'Kredensial tidak valid. Silakan coba lagi.'
       );
     } finally {
@@ -82,8 +82,8 @@ export default function GTransLogin() {
                 {language === 'en' ? 'Client Login' : 'Login Klien'}
               </h1>
               <p className="text-slate-500">
-                {language === 'en' 
-                  ? 'Access your GTrans account' 
+                {language === 'en'
+                  ? 'Access your GTrans account'
                   : 'Akses akun GTrans Anda'
                 }
               </p>
@@ -107,12 +107,6 @@ export default function GTransLogin() {
                   <Label className="text-slate-700">
                     {language === 'en' ? 'Password' : 'Kata Sandi'}
                   </Label>
-                  <button
-                    type="button"
-                    className="text-sm text-[#1e3a5f] hover:underline"
-                  >
-                    {language === 'en' ? 'Forgot password?' : 'Lupa kata sandi?'}
-                  </button>
                 </div>
                 <div className="relative">
                   <Input
@@ -133,12 +127,12 @@ export default function GTransLogin() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6"
               >
-                {loading 
+                {loading
                   ? (language === 'en' ? 'Logging in...' : 'Masuk...')
                   : (language === 'en' ? 'Login' : 'Masuk')
                 }
@@ -150,8 +144,8 @@ export default function GTransLogin() {
               <p className="text-slate-500 text-sm">
                 {language === 'en' ? "Don't have an account?" : 'Belum punya akun?'}
               </p>
-              <Link 
-                to={createPageUrl('GTransContactSales')} 
+              <Link
+                to={createPageUrl('GTransContactSales')}
                 className="text-[#1e3a5f] font-medium hover:underline text-sm"
               >
                 {language === 'en' ? 'Contact Sales to Get Started' : 'Hubungi Sales untuk Memulai'}
@@ -175,8 +169,8 @@ export default function GTransLogin() {
         </div>
 
         <div className="mt-6 text-center">
-          <Link 
-            to={createPageUrl('GTrans')} 
+          <Link
+            to={createPageUrl('GTrans')}
             className="text-slate-500 hover:text-[#1e3a5f] text-sm"
           >
             ← {language === 'en' ? 'Back to Home' : 'Kembali ke Beranda'}
