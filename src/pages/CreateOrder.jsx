@@ -15,7 +15,7 @@ import InvoiceInfoModal from '../components/remittance/InvoiceInfoModal';
 import { generateCSVData, downloadCSV } from '../components/remittance/utils/csvGenerator';
 import { validateLatinText } from '../components/remittance/utils/validators';
 
-const INVOICE_EMAIL = 'sales@garudar.id';
+const INVOICE_EMAIL = 'info@garudar.id';
 
 export default function CreateOrder() {
   const navigate = useNavigate();

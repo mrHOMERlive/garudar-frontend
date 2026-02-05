@@ -19,7 +19,6 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
 
   const queryClient = useQueryClient();
 
-  // TODO: Заглушка для Payeer Account - эндпоинт еще не создан
   const selectedPayeerAccount = null;
 
   const { data: terms, isLoading: termsLoading } = useQuery({
@@ -301,13 +300,13 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
 
               <div className="bg-white rounded-lg p-3 border border-slate-200">
                 <Label className="text-xs text-slate-700 mb-2 block">Order (from Staff)</Label>
-                {wordOrderSignedStaff ? (
+                {wordOrderUnsigned ? (
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
                     className="w-full"
-                    onClick={() => handleDownloadDocument(wordOrderSignedStaff.doc_id, wordOrderSignedStaff.file_name)}
+                    onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
                   >
                     <Download className="w-3 h-3 mr-2" />
                     Download Signed Order
