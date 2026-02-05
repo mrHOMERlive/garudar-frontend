@@ -240,7 +240,7 @@ export default function StaffClients() {
     setShowPassword(true);
   };
 
-  const filteredClients = clients.filter(c => 
+  const filteredClients = clients.filter(c =>
     c.name?.toLowerCase().includes(search.toLowerCase()) ||
     c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
     c.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -288,9 +288,9 @@ export default function StaffClients() {
                 </Button>
               </Link>
               <Button onClick={openCreateDialog} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Client
-            </Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Client
+              </Button>
             </div>
           </div>
         </div>
@@ -337,8 +337,8 @@ export default function StaffClients() {
                   <TableCell colSpan={4} className="text-center text-slate-500 py-8">No clients found</TableCell>
                 </TableRow>
               ) : paginatedClients.map((client) => (
-                <TableRow 
-                  key={client.client_id} 
+                <TableRow
+                  key={client.client_id}
                   className="border-slate-200 hover:bg-slate-100 cursor-pointer"
                   onClick={() => openEditDialog(client)}
                 >
@@ -350,8 +350,8 @@ export default function StaffClients() {
                   <TableCell>
                     <Badge className={
                       client.status_sign === 'signed' ? 'bg-emerald-600 text-white' :
-                      client.status_sign === 'sent' ? 'bg-amber-500 text-white' :
-                      'bg-slate-400 text-white'
+                        client.status_sign === 'sent' ? 'bg-amber-500 text-white' :
+                          'bg-slate-400 text-white'
                     }>
                       {client.status_sign === 'signed' ? 'Signed' : client.status_sign === 'sent' ? 'Sent' : 'Not Sent'}
                     </Badge>
@@ -369,47 +369,47 @@ export default function StaffClients() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Show:</span>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => { setItemsPerPage(Number(value)); setCurrentPage(1); }}>
-                <SelectTrigger className="w-20 bg-white border-slate-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-slate-600">
-                {startIndex + 1}-{Math.min(startIndex + itemsPerPage, sortedClients.length)} of {sortedClients.length}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="border-slate-300"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm text-slate-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="border-slate-300"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">Show:</span>
+            <Select value={itemsPerPage.toString()} onValueChange={(value) => { setItemsPerPage(Number(value)); setCurrentPage(1); }}>
+              <SelectTrigger className="w-20 bg-white border-slate-300">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-slate-600">
+              {startIndex + 1}-{Math.min(startIndex + itemsPerPage, sortedClients.length)} of {sortedClients.length}
+            </span>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="border-slate-300"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-slate-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="border-slate-300"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </main>
 
       {/* Add/Edit Dialog */}
@@ -445,7 +445,7 @@ export default function StaffClients() {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">Alias 1</Label>
@@ -589,15 +589,6 @@ export default function StaffClients() {
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Last ID</Label>
-                  <Input
-                    value={formData.last_id}
-                    onChange={(e) => setFormData({ ...formData, last_id: e.target.value })}
-                    placeholder="Last reference"
-                    className="bg-white border-slate-300 text-sm"
-                  />
-                </div>
               </div>
             </div>
 
@@ -607,7 +598,7 @@ export default function StaffClients() {
                 <Key className="w-4 h-4" />
                 Authorization Credentials
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">Login *</Label>
