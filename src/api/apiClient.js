@@ -581,7 +581,7 @@ class ApiClient {
         if (comment) formData.append('comment', comment);
         formData.append('is_required', isRequired); // Note: server expects boolean string or value
 
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -602,7 +602,7 @@ class ApiClient {
     }
 
     async downloadKycDocument(clientId, docId) {
-        const token = this.getToken();
+        const token = this.getAccessToken();
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
