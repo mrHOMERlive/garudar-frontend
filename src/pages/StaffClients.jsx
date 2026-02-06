@@ -24,8 +24,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Plus, Pencil, Trash2, UserX, UserCheck, Search, Eye, EyeOff, Key, Globe, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
 import moment from 'moment';
 
+import CountrySelector from '../components/kyc/CountrySelector';
+
 export default function StaffClients() {
   const [search, setSearch] = useState('');
+  const [countries, setCountries] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
@@ -58,6 +61,19 @@ export default function StaffClients() {
   });
 
   const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const countriesData = await apiClient.getCountries();
+        setCountries(Array.isArray(countriesData) ? countriesData : []);
+      } catch (error) {
+        console.error('Failed to load countries:', error);
+        setCountries([]);
+      }
+    };
+    fetchCountries();
+  }, []);
 
   const { data: rawClients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -497,11 +513,13 @@ export default function StaffClients() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">Registration Country</Label>
-                  <Input
+                  <CountrySelector
                     value={formData.client_reg_country}
-                    onChange={(e) => setFormData({ ...formData, client_reg_country: e.target.value })}
-                    placeholder="Country"
-                    className="bg-white border-slate-300 text-sm"
+                    onChange={(value) => setFormData({ ...formData, client_reg_country: value })}
+                    language="en"
+                    countries={countries}
+                    saveName={true}
+                    placeholder="Select country"
                   />
                 </div>
               </div>

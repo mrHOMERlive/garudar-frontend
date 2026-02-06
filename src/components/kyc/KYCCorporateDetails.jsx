@@ -1,17 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/apiClient';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import CountrySelector from './CountrySelector';
 
-export default function KYCCorporateDetails({ formData = {}, onChange }) {
+export default function KYCCorporateDetails({ formData = {}, onChange, language }) {
+  const [countries, setCountries] = useState([]);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const countriesData = await apiClient.getCountries();
+        setCountries(Array.isArray(countriesData) ? countriesData : []);
+      } catch (error) {
+        console.error('Failed to load countries:', error);
+        setCountries([]);
+      }
+    };
+    fetchCountries();
+  }, []);
+
   const handleChange = (field, value) => {
     onChange({ [field]: value });
   };
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-[#1e3a5f]">Corporate Details</h3>
-      
+      <h3 className="text-xl font-semibold text-[#1e3a5f]">
+        {language === 'en' ? 'Corporate Details' : 'Detail Perusahaan'}
+      </h3>
+
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label>Company Name *</Label>
@@ -40,9 +59,12 @@ export default function KYCCorporateDetails({ formData = {}, onChange }) {
         </div>
         <div>
           <Label>Incorporation Country</Label>
-          <Input
-            value={formData.incorporation_country || ''}
-            onChange={(e) => handleChange('incorporation_country', e.target.value)}
+          <CountrySelector
+            value={formData.incorporation_country}
+            onChange={(value) => handleChange('incorporation_country', value)}
+            language={language}
+            countries={countries}
+            saveName={true}
           />
         </div>
       </div>

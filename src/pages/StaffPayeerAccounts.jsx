@@ -18,11 +18,14 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Pencil, Trash2, Globe } from 'lucide-react';
 
+import CountrySelector from '../components/kyc/CountrySelector';
+
 const CURRENCIES = ['USD', 'EUR', 'CNY', 'IDR', 'RUB', 'BRL', 'AED', 'INR', 'ARS', 'COP', 'PEN'];
 
 export default function StaffPayeerAccounts() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
+  const [countries, setCountries] = useState([]);
   const [formData, setFormData] = useState({
     currency: 'USD',
     account_number: '',
@@ -35,6 +38,19 @@ export default function StaffPayeerAccounts() {
   });
 
   const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const countriesData = await apiClient.getCountries();
+        setCountries(Array.isArray(countriesData) ? countriesData : []);
+      } catch (error) {
+        console.error('Failed to load countries:', error);
+        setCountries([]);
+      }
+    };
+    fetchCountries();
+  }, []);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['payeer-accounts'],
@@ -305,11 +321,13 @@ export default function StaffPayeerAccounts() {
 
             <div className="space-y-2">
               <Label className="text-slate-700">Bank Country</Label>
-              <Input
+              <CountrySelector
                 value={formData.bank_country}
-                onChange={(e) => setFormData({ ...formData, bank_country: e.target.value })}
-                placeholder="Country"
-                className="bg-white border-slate-300"
+                onChange={(value) => setFormData({ ...formData, bank_country: value })}
+                language="en"
+                countries={countries}
+                saveName={true}
+                placeholder="Select country"
               />
             </div>
 

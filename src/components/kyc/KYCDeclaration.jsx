@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Upload, CheckCircle, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function KYCDeclaration({ formData = {}, onChange, clientId, language = 'en' }) {
+export default function KYCDeclaration({ formData = {}, onChange, clientId, language = 'en', onSave }) {
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -27,8 +27,38 @@ export default function KYCDeclaration({ formData = {}, onChange, clientId, lang
     onChange({ [field]: value });
   };
 
-  const handleDownloadKYC = () => {
-    toast.info(language === 'en' ? 'Generating KYC document...' : 'Membuat dokumen KYC...');
+  const handleDownloadKYC = async () => {
+    if (!clientId) {
+      toast.error('Client ID missing');
+      return;
+    }
+
+    const toastId = toast.loading(language === 'en' ? 'Saving & Generating Document...' : 'Menyimpan & Membuat Dokumen...');
+
+    try {
+      // 1. Trigger save if onSave is provided
+      if (onSave) {
+        await onSave();
+      }
+
+      // 2. Export Excel
+      const blob = await apiClient.exportKycExcel(clientId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `KYC_Form_${clientId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.dismiss(toastId);
+      toast.success(language === 'en' ? 'KYC document downloaded' : 'Dokumen KYC diunduh');
+    } catch (error) {
+      console.error(error);
+      toast.dismiss(toastId);
+      toast.error(language === 'en' ? 'Failed to download KYC document' : 'Gagal mengunduh dokumen KYC');
+    }
   };
 
   const handleFileUpload = async (e) => {

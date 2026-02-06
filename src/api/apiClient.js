@@ -544,6 +544,24 @@ class ApiClient {
         });
     }
 
+    async exportKycExcel(clientId) {
+        const token = this.getAccessToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${this.baseUrl}/clients/${clientId}/kyc/excel`, {
+            method: 'GET',
+            headers,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to export KYC excel');
+        }
+        return response.blob();
+    }
+
     async submitKyc(clientId) {
         return this.request(`/clients/${clientId}/kyc/submit`, {
             method: 'POST',

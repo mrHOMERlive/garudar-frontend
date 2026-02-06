@@ -155,9 +155,9 @@ export default function ClientKYC() {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleSaveProgress = () => {
+  const handleSaveProgress = async () => {
     // Merge current kycData with local formData state
-    saveKYCMutation.mutate({ ...kycData, ...formData });
+    return saveKYCMutation.mutateAsync({ ...kycData, ...formData });
   };
 
   const handleSubmit = () => {
@@ -305,6 +305,7 @@ export default function ClientKYC() {
               clientId={client?.client_id}
               kycProfileId={kycData?.profile_id}
               language={language}
+              onSave={handleSaveProgress}
             />
           </CardContent>
         </Card>
