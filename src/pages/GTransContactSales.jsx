@@ -182,7 +182,13 @@ export default function GTransContactSales() {
                       </div>
                       <div>
                         <div className="font-medium text-slate-700">{language === 'en' ? 'Office' : 'Kantor'}</div>
-                        <div className="text-sm text-slate-500">Batam, Kepulauan Riau, Indonesia</div>
+                        <div className="text-sm text-slate-500">
+                          Ruko Pollux Meisterstadt, Blok SH D-10
+                          Jl. RS Barelang, Batam Center
+                          Kel. Teluk Tering, Kec. Batam Kota
+                          Kota Batam, Kepulauan Riau 29461
+                          Indonesia
+                        </div>
                       </div>
                     </div>
                   </CardContent>

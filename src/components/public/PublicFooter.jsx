@@ -66,7 +66,11 @@ export default function PublicFooter({ language, setLanguage }) {
               </a>
               <div className="flex items-start gap-3 text-slate-300">
                 <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                <span>Batam, Kepulauan Riau, Indonesia</span>
+                <span>Ruko Pollux Meisterstadt, Blok SH D-10
+                  Jl. RS Barelang, Batam Center
+                  Kel. Teluk Tering, Kec. Batam Kota
+                  Kota Batam, Kepulauan Riau 29461
+                  Indonesia</span>
               </div>
             </div>
           </div>
