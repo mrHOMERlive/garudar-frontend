@@ -442,7 +442,11 @@ class ApiClient {
 
     // Dictionaries
     async getCountries() {
-        return this.request('/dicts/countries');
+        const countries = await this.request('/dicts/countries');
+        if (Array.isArray(countries)) {
+            return countries.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        return countries;
     }
 
     async getCurrencies() {
