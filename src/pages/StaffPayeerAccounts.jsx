@@ -73,6 +73,7 @@ export default function StaffPayeerAccounts() {
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       const payload = {
+        account_no: data.account_number,
         currency: data.currency,
         status: data.active ? 'active' : 'inactive',
         bank_name: data.bank_name || null,
@@ -86,11 +87,7 @@ export default function StaffPayeerAccounts() {
         return await apiClient.updatePayeerAccount(editingAccount.account_number, payload);
       }
 
-      const createPayload = {
-        account_no: data.account_number,
-        ...payload
-      };
-      return await apiClient.createPayeerAccount(createPayload);
+      return await apiClient.createPayeerAccount(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });

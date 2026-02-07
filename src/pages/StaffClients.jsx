@@ -603,7 +603,7 @@ export default function StaffClients() {
                   <Input
                     value={formData.group_name}
                     onChange={(e) => setFormData({ ...formData, group_name: e.target.value })}
-                    placeholder="e.g., Rusimpex"
+                    placeholder="e.g., Garuda"
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
