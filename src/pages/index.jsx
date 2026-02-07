@@ -57,6 +57,7 @@ import GTransECommerceCollectSettle from "./GTransECommerceCollectSettle";
 import GTransMerchantPay from "./GTransMerchantPay";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
 
 const PAGES = {
@@ -135,6 +136,11 @@ function _getCurrentPage(url) {
 // Create a wrapper component that uses useLocation inside the Router context
 function PagesContent() {
     const location = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
+
     const currentPage = _getCurrentPage(location.pathname);
 
     return (
