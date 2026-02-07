@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Building2, Banknote } from 'lucide-react';
+import { ArrowRight, ArrowDown, Building2, Banknote } from 'lucide-react';
 
 export function InboundTransferDiagram({ language = 'en' }) {
   return (
@@ -10,12 +10,12 @@ export function InboundTransferDiagram({ language = 'en' }) {
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
           {language === 'en' ? '1. Inbound Transfer world currency' : '1. Inbound Transfer mata uang dunia'}
         </h4>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-3">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -30,10 +30,11 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
           </motion.div>
 
           <motion.div
@@ -41,7 +42,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
@@ -54,9 +55,10 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
@@ -65,7 +67,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -91,7 +93,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Service<br/>agreement
+              Service<br />agreement
             </div>
           </div>
           <div className="w-20 h-24 bg-white border-2 border-slate-300 rounded-lg shadow-sm relative overflow-hidden">
@@ -102,7 +104,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Transfer<br/>Order
+              Transfer<br />Order
             </div>
           </div>
         </motion.div>
@@ -113,12 +115,12 @@ export function InboundTransferDiagram({ language = 'en' }) {
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
           {language === 'en' ? '2. Inbound Transfer local currency' : '2. Inbound Transfer mata uang lokal'}
         </h4>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-3">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -133,10 +135,11 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
           </motion.div>
 
           <motion.div
@@ -144,7 +147,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
@@ -157,9 +160,10 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
             <div className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-mono text-xs font-semibold">IDR</div>
           </motion.div>
 
@@ -168,7 +172,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -194,7 +198,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Service<br/>agreement
+              Service<br />agreement
             </div>
           </div>
           <div className="w-20 h-24 bg-white border-2 border-slate-300 rounded-lg shadow-sm relative overflow-hidden">
@@ -205,7 +209,7 @@ export function InboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Transfer<br/>Order
+              Transfer<br />Order
             </div>
           </div>
         </motion.div>
@@ -224,12 +228,12 @@ export function OutboundTransferDiagram({ language = 'en' }) {
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
           {language === 'en' ? '3. Outbound Transfer world currency' : '3. Outbound Transfer mata uang dunia'}
         </h4>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-3">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -244,10 +248,11 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
           </motion.div>
 
           <motion.div
@@ -255,7 +260,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
@@ -268,9 +273,10 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
@@ -279,7 +285,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -305,7 +311,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Service<br/>agreement
+              Service<br />agreement
             </div>
           </div>
           <div className="w-20 h-24 bg-white border-2 border-slate-300 rounded-lg shadow-sm relative overflow-hidden">
@@ -316,7 +322,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Transfer<br/>Order
+              Transfer<br />Order
             </div>
           </div>
         </motion.div>
@@ -327,12 +333,12 @@ export function OutboundTransferDiagram({ language = 'en' }) {
         <h4 className="font-semibold text-[#1e3a5f] mb-4 text-sm">
           {language === 'en' ? '4. Outbound Transfer local currency' : '4. Outbound Transfer mata uang lokal'}
         </h4>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-3">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -347,10 +353,11 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
             <div className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-mono text-xs font-semibold">IDR</div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
           </motion.div>
 
           <motion.div
@@ -358,7 +365,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-[#1e3a5f] rounded-lg p-3 bg-gradient-to-br from-[#1e3a5f]/5 to-[#1e3a5f]/10">
               <Banknote className="w-6 h-6 text-[#1e3a5f] mx-auto mb-2" />
@@ -371,9 +378,10 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="flex items-center gap-2"
+            className="flex flex-col md:flex-row items-center gap-2"
           >
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="hidden md:block w-5 h-5 text-slate-400" />
+            <ArrowDown className="md:hidden w-5 h-5 text-slate-400" />
             <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-xs font-semibold">USD</div>
           </motion.div>
 
@@ -382,7 +390,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            className="flex-1 max-w-[140px]"
+            className="w-full md:flex-1 md:max-w-[140px]"
           >
             <div className="border-2 border-slate-300 rounded-lg p-3 bg-white">
               <Building2 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
@@ -408,7 +416,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Service<br/>agreement
+              Service<br />agreement
             </div>
           </div>
           <div className="w-20 h-24 bg-white border-2 border-slate-300 rounded-lg shadow-sm relative overflow-hidden">
@@ -419,7 +427,7 @@ export function OutboundTransferDiagram({ language = 'en' }) {
               <div className="h-1 bg-slate-200 rounded w-3/4"></div>
             </div>
             <div className="absolute bottom-2 left-2 right-2 text-center text-[9px] font-medium text-slate-600">
-              Transfer<br/>Order
+              Transfer<br />Order
             </div>
           </div>
         </motion.div>
