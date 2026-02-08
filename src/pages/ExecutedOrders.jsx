@@ -36,7 +36,10 @@ export default function ExecutedOrders() {
         const pobo = poboList.find(p => p.orderId === exec.sourceOrderId);
 
         // Only include orders that are explicitly marked as executed
-        if (!pobo || !pobo.executed) return null;
+        // Check both boolean and string 'true' to be safe
+        const isExecuted = pobo && (pobo.executed === true || String(pobo.executed) === 'true');
+
+        if (!isExecuted) return null;
 
         return {
           // Base fields from POBO
