@@ -33,7 +33,10 @@ export default function ExecutedOrders() {
 
       // 3. Join them
       const joined = executedList.map(exec => {
-        const pobo = poboList.find(p => p.orderId === exec.sourceOrderId) || {};
+        const pobo = poboList.find(p => p.orderId === exec.sourceOrderId);
+
+        // Only include orders that are explicitly marked as executed
+        if (!pobo || !pobo.executed) return null;
 
         return {
           // Base fields from POBO
@@ -84,7 +87,7 @@ export default function ExecutedOrders() {
           executed: true,
           status: 'executed',
         };
-      });
+      }).filter(Boolean);
 
       return joined;
     },

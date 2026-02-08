@@ -27,7 +27,7 @@ import StaffOrderDrawer from '@/components/staff/StaffOrderDrawer';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import moment from 'moment';
 
-const ACTIVE_STATUSES = ['created', 'draft', 'check', 'pending_payment', 'on_execution'];
+const ACTIVE_STATUSES = ['created', 'draft', 'check', 'pending_payment', 'on_execution', 'released'];
 const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
 
 export default function StaffActiveOrders() {
