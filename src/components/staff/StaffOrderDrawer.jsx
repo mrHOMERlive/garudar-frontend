@@ -198,8 +198,21 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
           setClientPaymentBankSwift(matchedAccount.bank_bic || '');
         }
       }
+
+
     }
   }, [terms, open, payeerAccounts]);
+
+  useEffect(() => {
+    if (open && order && clientPaymentCurrency && baseCurrency) {
+      const payCur = order.currency;
+
+      if (clientPaymentCurrency === baseCurrency && baseCurrency === payCur) {
+        setConversionMethod('no_conversion');
+        setExchangeRate('1');
+      }
+    }
+  }, [clientPaymentCurrency, baseCurrency, order, open]);
 
   if (!order) return null;
 
@@ -566,7 +579,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div>
                 <Label className="text-xs text-slate-600">Conversion Method</Label>
-                <Select value={conversionMethod} onValueChange={setConversionMethod}>
+                <Select value={conversionMethod} onValueChange={(val) => {
+                  setConversionMethod(val);
+                  if (val === 'no_conversion') {
+                    setExchangeRate('1');
+                  }
+                }}>
                   <SelectTrigger className="mt-1 bg-white border-slate-300">
                     <SelectValue />
                   </SelectTrigger>
@@ -574,6 +592,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectItem value="central_bank">Central Bank Official Rate</SelectItem>
                     <SelectItem value="executing_bank">Executing Bank Rate</SelectItem>
                     <SelectItem value="manual">Manual / Other</SelectItem>
+                    <SelectItem value="no_conversion">No Conversion</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
