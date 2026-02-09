@@ -44,7 +44,7 @@ export default function ClientCancelledDrawer({ order, open, onClose }) {
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Debit Account</div>
-                  <div className="font-semibold text-slate-900">{terms?.executingBank || '-'}</div>
+                  <div className="font-semibold text-slate-900">{terms?.GANBankAccount || '-'}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">

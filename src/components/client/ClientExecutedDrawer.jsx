@@ -33,7 +33,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
   });
 
   const debitAccount = useMemo(() => {
-    return terms?.executingBank || order?.debit_account_no || '-';
+    return terms?.GANBankAccount || order?.debit_account_no || '-';
   }, [terms, order]);
 
   if (!order) return null;
