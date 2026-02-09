@@ -90,7 +90,7 @@ export default function StaffExecutedOrders() {
   }, [rawOrders, clients, executedOrdersList]);
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.status === 'released' || o.executed);
+    return orders.filter(o => o.executed === true || o.executed === 'true');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
