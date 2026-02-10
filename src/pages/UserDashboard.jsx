@@ -36,6 +36,7 @@ export default function UserDashboard() {
   });
 
   const kycApproved = client?.kyc_status === 'approved';
+  const isAccountHold = client?.account_status === 'hold';
 
   const stats = {
     total: orders.length,
@@ -48,11 +49,13 @@ export default function UserDashboard() {
   const modules = [
     {
       title: 'Create Order',
-      description: kycApproved ? 'Initiate new fund transfer' : 'Complete KYC to create orders',
+      description: isAccountHold
+        ? 'Account is on hold. Please contact support.'
+        : (kycApproved ? 'Initiate new fund transfer' : 'Complete KYC to create orders'),
       icon: PlusCircle,
       page: 'CreateOrder',
       color: 'bg-[#1e3a5f]',
-      disabled: !kycApproved
+      disabled: !kycApproved || isAccountHold
     },
     {
       title: 'Current Orders',
@@ -250,6 +253,7 @@ export default function UserDashboard() {
           </div>
           {(() => {
             const otherBadges = [
+              { type: 'kyc', label: 'KYC Verification', icon: FileCheck, link: 'ClientKYC' },
               { type: 'service_agreement', label: 'Service Agreement', icon: FileText },
               { type: 'platform_terms', label: 'Platform Terms & Conditions', icon: FileText },
               { type: 'sla', label: 'Service Level Agreement (SLA)', icon: FileText },

@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Send, Download, Copy, Mail, History, Upload } from 'lucide-react';
+import { Send, Download, Copy, Mail, History, Upload, XCircle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import AmountCurrencySection from '../components/remittance/AmountCurrencySection';
@@ -53,6 +53,11 @@ export default function CreateOrder() {
   const { data: countries = [] } = useQuery({
     queryKey: ['countries'],
     queryFn: () => apiClient.getCountries(),
+  });
+
+  const { data: client } = useQuery({
+    queryKey: ['currentClient'],
+    queryFn: () => apiClient.getMyClient(),
   });
 
   const handleFormChange = (updates) => {
@@ -236,6 +241,28 @@ export default function CreateOrder() {
       setUploadingDocuments(false);
     }
   };
+
+  if (client?.account_status === 'hold') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-slate-200">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Account on Hold</h1>
+          <p className="text-slate-600 mb-6">
+            Your account is currently on hold. You cannot create new orders at this time.
+            Please contact support for assistance.
+          </p>
+          <Link to={createPageUrl('UserDashboard')}>
+            <Button className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">
+              Return to Dashboard
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
