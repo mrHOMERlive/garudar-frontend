@@ -32,7 +32,7 @@ export default function UserDashboard() {
   const { data: clientBadges = [] } = useQuery({
     queryKey: ['client-badges', client?.client_id],
     queryFn: () => apiClient.getClientBadges(client.client_id),
-    enabled: false // TODO: включить когда бэкенд добавит эндпоинт /api/v1/clients/{client_id}/badges
+    enabled: !!client?.client_id
   });
 
   const kycApproved = client?.kyc_status === 'approved';
@@ -211,7 +211,7 @@ export default function UserDashboard() {
               </Link>
             ))}
           </div>
-          
+
           <div className="flex gap-4 text-sm">
             {modules.filter(m => ['CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
               <Link key={module.page + module.title} to={createPageUrl(module.page)}>
@@ -246,7 +246,7 @@ export default function UserDashboard() {
             </Link>
 
 
-            
+
           </div>
           {(() => {
             const otherBadges = [
