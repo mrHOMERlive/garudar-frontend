@@ -1,4 +1,6 @@
 import Layout from "./Layout.jsx";
+import ClientNDA from "./ClientNDA";
+import ClientSubmitNDA from "./ClientSubmitNDA";
 
 import CreateOrder from "./CreateOrder";
 
@@ -69,6 +71,10 @@ const PAGES = {
     CurrentOrders: CurrentOrders,
 
     ClientKYC: ClientKYC,
+
+    ClientNDA: ClientNDA,
+
+    ClientSubmitNDA: ClientSubmitNDA,
 
     ExecutedOrders: ExecutedOrders,
 
@@ -161,6 +167,10 @@ function PagesContent() {
                 <Route path="/cancelledorders" element={<RequireAuth><CancelledOrders /></RequireAuth>} />
 
                 <Route path="/clientkyc" element={<RequireAuth><ClientKYC /></RequireAuth>} />
+
+                <Route path="/clientnda" element={<RequireAuth><ClientNDA /></RequireAuth>} />
+
+                <Route path="/clientsubmitnda" element={<RequireAuth><ClientSubmitNDA /></RequireAuth>} />
 
                 <Route path="/staffkycqueue" element={<RequireAdmin><StaffKYCQueue /></RequireAdmin>} />
 

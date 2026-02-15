@@ -379,9 +379,16 @@ class ApiClient {
         return response.blob();
     }
 
-    async uploadFile(file) {
+    async uploadFile(file, clientId = null, ndaId = null) {
         const formData = new FormData();
         formData.append('file', file);
+
+        const queryParams = new URLSearchParams();
+        if (clientId) queryParams.append('client_id', clientId);
+        if (ndaId) queryParams.append('nda_id', ndaId);
+
+        const queryString = queryParams.toString();
+        const url = `${this.baseUrl}/upload${queryString ? `?${queryString}` : ''}`;
 
         const token = this.getAccessToken();
         const headers = {};
@@ -389,7 +396,7 @@ class ApiClient {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${this.baseUrl}/upload`, {
+        const response = await fetch(url, {
             method: 'POST',
             headers,
             body: formData,
@@ -677,6 +684,48 @@ class ApiClient {
         return this.request('/leads', {
             method: 'POST',
             body: JSON.stringify(leadData),
+        });
+    }
+
+    // NDA
+    async getNdaRequests(params = {}) {
+        const queryParams = new URLSearchParams();
+        if (params.client_id) {
+            queryParams.append('client_id', params.client_id);
+        }
+        const queryString = queryParams.toString();
+        return this.request(`/nda-requests${queryString ? `?${queryString}` : ''}`);
+    }
+
+    async getNdaRequestById(id) {
+        return this.request(`/nda-requests/${id}`);
+    }
+
+    async createNdaRequest(data) {
+        const queryParams = new URLSearchParams();
+        if (data.client_id) {
+            queryParams.append('client_id', data.client_id);
+        }
+        // Remove client_id from body if it's in query, or keep it depending on backend. 
+        // Based on instructions: POST /api/v1/nda-requests?client_id=...
+        return this.request(`/nda-requests?${queryParams.toString()}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateNdaRequest(id, data) {
+        return this.request(`/nda-requests/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    // Badges (General Update)
+    async updateBadge(id, data) {
+        return this.request(`/badges/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
         });
     }
 }
