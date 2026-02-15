@@ -315,7 +315,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   type="file"
                   onChange={(e) => handleFileUpload(e.target.files?.[0], 'attachment_mt103')}
                   className="hidden"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
                 />
                 <Button
                   type="button"
