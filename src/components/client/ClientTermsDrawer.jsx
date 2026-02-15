@@ -309,7 +309,7 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
                     onClick={() => handleDownloadDocument(wordOrderUnsigned.doc_id, wordOrderUnsigned.file_name)}
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download Signed Order
+                    Download Unsigned Order
                   </Button>
                 ) : (
                   <div className="text-xs text-slate-500">No order document available yet</div>
