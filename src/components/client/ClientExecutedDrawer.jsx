@@ -190,7 +190,8 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
             {/* Act Report */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Act Report</h3>
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 mb-3">
+              <div className={`rounded-lg p-3 border mb-3 ${order.act_report_status === 'signed' ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'
+                }`}>
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-xs text-slate-600">Status</Label>
                   <Badge className={
@@ -211,59 +212,78 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     <span className="text-slate-500">Date:</span> {new Date(order.act_report_date).toLocaleDateString()}
                   </div>
                 )}
-                {documents?.find(d => d.doc_type === 'act_report_unsigned') && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-slate-300 mb-2"
-                    onClick={() => handleDownload(
-                      documents.find(d => d.doc_type === 'act_report_unsigned').doc_id,
-                      documents.find(d => d.doc_type === 'act_report_unsigned').file_name
-                    )}
-                  >
-                    <Download className="w-3 h-3 mr-2" />
-                    Download Unsigned Act Report
-                  </Button>
+                {order.act_report_status === 'signed' ? (
+                  documents?.find(d => d.doc_type === 'act_report_signed_staff') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 mb-2"
+                      onClick={() => handleDownload(
+                        documents.find(d => d.doc_type === 'act_report_signed_staff').doc_id,
+                        documents.find(d => d.doc_type === 'act_report_signed_staff').file_name
+                      )}
+                    >
+                      <Download className="w-3 h-3 mr-2" />
+                      Download Act Report
+                    </Button>
+                  )
+                ) : (
+                  documents?.find(d => d.doc_type === 'act_report_unsigned') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-slate-300 mb-2"
+                      onClick={() => handleDownload(
+                        documents.find(d => d.doc_type === 'act_report_unsigned').doc_id,
+                        documents.find(d => d.doc_type === 'act_report_unsigned').file_name
+                      )}
+                    >
+                      <Download className="w-3 h-3 mr-2" />
+                      Download Unsigned Act Report
+                    </Button>
+                  )
                 )}
               </div>
 
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                <Label className="text-xs text-slate-700 mb-2 block font-medium">Upload Signed Act Report</Label>
-                <div className="flex items-center gap-2">
-                  <label className="flex-1">
-                    <input
-                      type="file"
-                      onChange={handleActReportUpload}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-green-300 hover:bg-green-100"
-                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                      disabled={uploadingActReport}
-                    >
-                      <Upload className="w-3 h-3 mr-2" />
-                      {uploadingActReport ? 'Uploading...' : 'Upload Signed Act Report'}
-                    </Button>
-                  </label>
-                  {documents?.find(d => d.doc_type === 'act_report_signed_client') && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-green-300"
-                      onClick={() => handleDownload(
-                        documents.find(d => d.doc_type === 'act_report_signed_client').doc_id,
-                        documents.find(d => d.doc_type === 'act_report_signed_client').file_name
-                      )}
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  )}
+              {order.act_report_status !== 'signed' && (
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                  <Label className="text-xs text-slate-700 mb-2 block font-medium">Upload Signed Act Report</Label>
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        onChange={handleActReportUpload}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-green-300 hover:bg-green-100"
+                        onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                        disabled={uploadingActReport}
+                      >
+                        <Upload className="w-3 h-3 mr-2" />
+                        {uploadingActReport ? 'Uploading...' : 'Upload Signed Act Report'}
+                      </Button>
+                    </label>
+                    {documents?.find(d => d.doc_type === 'act_report_signed_client') && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-green-300"
+                        onClick={() => handleDownload(
+                          documents.find(d => d.doc_type === 'act_report_signed_client').doc_id,
+                          documents.find(d => d.doc_type === 'act_report_signed_client').file_name
+                        )}
+                      >
+                        <Download className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <Separator className="bg-slate-200" />
