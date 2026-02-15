@@ -235,7 +235,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                       type="file"
                       onChange={handleActReportUpload}
                       className="hidden"
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
                     />
                     <Button
                       type="button"
