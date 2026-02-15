@@ -325,24 +325,6 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                   </Button>
                 </div>
               )}
-
-              {documents?.find(d => d.doc_type === 'word_order_unsigned') && (
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">WORD Order</Label>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-slate-300"
-                    onClick={() => handleDownload(
-                      documents.find(d => d.doc_type === 'word_order_unsigned').doc_id,
-                      documents.find(d => d.doc_type === 'word_order_unsigned').file_name
-                    )}
-                  >
-                    <Download className="w-3 h-3 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              )}
             </div>
 
             <Separator className="bg-slate-200" />
