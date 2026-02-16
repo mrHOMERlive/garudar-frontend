@@ -7,6 +7,8 @@ import { apiClient } from '@/api/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck, Shield } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -36,7 +38,8 @@ export default function UserDashboard() {
   });
 
   const kycApproved = client?.kyc_status === 'approved';
-  const isAccountHold = client?.account_status === 'hold';
+  const accountActive = client?.account_status !== 'hold';
+  const canCreateOrders = accountActive;
 
   const stats = {
     total: orders.length,
@@ -48,14 +51,13 @@ export default function UserDashboard() {
 
   const modules = [
     {
-      title: 'Create Order',
-      description: isAccountHold
-        ? 'Account is on hold. Please contact support.'
-        : (kycApproved ? 'Initiate new fund transfer' : 'Complete KYC to create orders'),
+      title: t('createOrder'),
+      description: !accountActive ? t('accountOnHold') : t('initiateFundTransfer'),
       icon: PlusCircle,
       page: 'CreateOrder',
       color: 'bg-[#1e3a5f]',
-      disabled: !kycApproved || isAccountHold
+      disabled: !canCreateOrders,
+      holdMessage: !accountActive ? client?.account_hold_reason : null
     },
     {
       title: 'Current Orders',
@@ -228,32 +230,45 @@ export default function UserDashboard() {
         </div>
 
         <div className="border-t border-slate-200 pt-8 mt-8">
-          <h2 className="text-xl font-bold text-slate-700 mb-6">Requests from GTrans</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('requestsFromGTrans')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link to={createPageUrl('ClientKYC')}>
-              <Card className={`bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full ${client?.kyc_status !== 'approved' ? 'border-amber-300 bg-amber-50' : ''}`}>
-                <CardHeader>
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 ${client?.kyc_status !== 'approved' ? 'bg-amber-600' : 'bg-blue-600'}`}>
-                    <FileCheck className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-[#1e3a5f]">KYC</CardTitle>
-                  <CardDescription className="text-slate-500">
-                    {client?.kyc_status !== 'approved' ? (
-                      <span className="text-amber-700 font-medium">Status: {client?.kyc_status?.replace('_', ' ').toUpperCase()}</span>
-                    ) : (
-                      'Complete KYC verification'
-                    )}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
+            {/* KYC Request - Prominent */}
+            {(() => {
+              const kycBadge = clientBadges.find(b => b.badge_type === 'kyc');
+              const kycActive = kycBadge?.is_active;
+              const kycStatus = kycBadge?.status;
+              const needsAttention = kycStatus === 'needs_fix' || kycStatus === 'in_progress' || kycStatus === 'created';
+
+              if (!kycActive) return null;
+
+              return (
+                <div className="mb-6">
+                  <Link to={createPageUrl('ClientKYC')}>
+                    <Card className={`border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer ${needsAttention ? 'border-red-500 bg-red-50 animate-pulse' : 'bg-white'}`}>
+                      <CardHeader>
+                        <div className="flex items-center gap-4">
+                          <div className={`w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 ${needsAttention ? 'animate-pulse' : ''}`}>
+                            <FileCheck className="w-7 h-7 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-[#1e3a5f] text-xl">{t('kycVerification')}</CardTitle>
+                            <CardDescription className={`text-base mt-1 ${needsAttention ? 'text-red-700 font-medium' : 'text-amber-700 font-medium'}`}>
+                              {t('kycStatus')} {kycStatus?.replace('_', ' ').toUpperCase()}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                </div>
+              );
+            })()}
 
 
 
           </div>
           {(() => {
             const otherBadges = [
-              { type: 'kyc', label: 'KYC Verification', icon: FileCheck, link: 'ClientKYC' },
               { type: 'service_agreement', label: 'Service Agreement', icon: FileText },
               { type: 'platform_terms', label: 'Platform Terms & Conditions', icon: FileText },
               { type: 'sla', label: 'Service Level Agreement (SLA)', icon: FileText },
