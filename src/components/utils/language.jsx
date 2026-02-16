@@ -23,21 +23,21 @@ export const translations = {
     showing: 'Showing',
     noDataFound: 'No data found',
     tryAdjustingFilters: 'Try adjusting your filters',
-    
+
     // Dashboard
     clientDashboard: 'CLIENT',
     staffDashboard: 'STAFF',
     manageYourFundTransfers: 'Manage your fund transfers',
     manageOrdersClientsOperations: 'Manage orders, clients, and operations',
     publicSite: 'Public Site',
-    
+
     // Statistics
     totalOrders: 'Total Orders',
     currentOrders: 'Current Orders',
     executed: 'Executed',
     cancelled: 'Cancelled',
     deleted: 'Deleted',
-    
+
     // Modules
     createOrder: 'Create Order',
     initiateFundTransfer: 'Initiate new fund transfer',
@@ -49,15 +49,14 @@ export const translations = {
     executedOrders: 'Executed Orders',
     cancelledOrders: 'Cancelled Orders',
     deletedOrders: 'Deleted Orders',
-    
+
     // Client Dashboard Sections
     history: 'History',
     requestsFromGTrans: 'Requests from GTrans',
     otherRequests: 'Other Requests',
-    
+
     // Staff Dashboard
     administration: 'Administration',
-    orders: 'Orders',
     kyc: 'KYC',
     clients: 'Clients',
     manageClientAccounts: 'Manage client accounts',
@@ -72,7 +71,7 @@ export const translations = {
     clientRequestsManagement: 'Client Requests Management',
     manageClientBadges: 'Manage Client Badges',
     configureClientRequests: 'Configure which requests are visible to clients and manage account status',
-    
+
     // Orders Page
     searchOrders: 'Search orders...',
     allStatuses: 'All Statuses',
@@ -87,7 +86,7 @@ export const translations = {
     rowsPerPage: 'Rows per page:',
     orders: 'orders',
     order: 'order',
-    
+
     // Order Actions
     viewTerms: 'View Terms',
     review: 'Review',
@@ -95,7 +94,7 @@ export const translations = {
     cancelSelected: 'Cancel Selected',
     deleteSelected: 'Delete Selected',
     terms: 'Terms',
-    
+
     // Status
     created: 'Created',
     draft: 'Draft',
@@ -104,7 +103,7 @@ export const translations = {
     pending_payment: 'Pending Payment',
     on_execution: 'On Execution',
     released: 'Released',
-    
+
     // Staff Actions
     createTxtInstruction: 'Create TXT Instruction',
     markExecuted: 'Mark Executed',
@@ -119,7 +118,7 @@ export const translations = {
     proof: 'Proof',
     nonM: 'Non-M',
     noActiveOrders: 'No active orders',
-    
+
     // Documents
     salesContract: 'Sales Contract',
     invoice: 'Invoice',
@@ -134,15 +133,15 @@ export const translations = {
     downloadDocument: 'Download Document',
     reUpload: 'Re-upload',
     staff: 'Staff',
-    
+
     // Account Status
     accountOnHoldTitle: 'Account On Hold',
     accountOnHoldMessage: 'Your account is temporarily on hold. Please contact support for more information.',
-    
+
     // KYC
     kycVerification: 'KYC Verification',
     kycStatus: 'Status:',
-    
+
     // Other Badges
     serviceAgreement: 'Service Agreement',
     platformTerms: 'Platform Terms & Conditions',
@@ -153,7 +152,7 @@ export const translations = {
     otherRequestSubmit: 'Other Request to Submit',
     comingSoon: 'Coming Soon'
   },
-  
+
   id: {
     // Common
     loading: 'Memuat...',
@@ -176,21 +175,21 @@ export const translations = {
     showing: 'Menampilkan',
     noDataFound: 'Data tidak ditemukan',
     tryAdjustingFilters: 'Coba sesuaikan filter Anda',
-    
+
     // Dashboard
     clientDashboard: 'KLIEN',
     staffDashboard: 'STAF',
     manageYourFundTransfers: 'Kelola transfer dana Anda',
     manageOrdersClientsOperations: 'Kelola pesanan, klien, dan operasi',
     publicSite: 'Situs Publik',
-    
+
     // Statistics
     totalOrders: 'Total Pesanan',
     currentOrders: 'Pesanan Saat Ini',
     executed: 'Selesai',
     cancelled: 'Dibatalkan',
     deleted: 'Dihapus',
-    
+
     // Modules
     createOrder: 'Buat Pesanan',
     initiateFundTransfer: 'Mulai transfer dana baru',
@@ -202,15 +201,14 @@ export const translations = {
     executedOrders: 'Pesanan Selesai',
     cancelledOrders: 'Pesanan Dibatalkan',
     deletedOrders: 'Pesanan Dihapus',
-    
+
     // Client Dashboard Sections
     history: 'Riwayat',
     requestsFromGTrans: 'Permintaan dari GTrans',
     otherRequests: 'Permintaan Lainnya',
-    
+
     // Staff Dashboard
     administration: 'Administrasi',
-    orders: 'Pesanan',
     kyc: 'KYC',
     clients: 'Klien',
     manageClientAccounts: 'Kelola akun klien',
@@ -225,7 +223,7 @@ export const translations = {
     clientRequestsManagement: 'Manajemen Permintaan Klien',
     manageClientBadges: 'Kelola Lencana Klien',
     configureClientRequests: 'Konfigurasi permintaan yang terlihat oleh klien dan kelola status akun',
-    
+
     // Orders Page
     searchOrders: 'Cari pesanan...',
     allStatuses: 'Semua Status',
@@ -240,7 +238,7 @@ export const translations = {
     rowsPerPage: 'Baris per halaman:',
     orders: 'pesanan',
     order: 'pesanan',
-    
+
     // Order Actions
     viewTerms: 'Lihat Ketentuan',
     review: 'Tinjau',
@@ -248,7 +246,7 @@ export const translations = {
     cancelSelected: 'Batalkan Yang Dipilih',
     deleteSelected: 'Hapus Yang Dipilih',
     terms: 'Ketentuan',
-    
+
     // Status
     created: 'Dibuat',
     draft: 'Draf',
@@ -257,7 +255,7 @@ export const translations = {
     pending_payment: 'Menunggu Pembayaran',
     on_execution: 'Dalam Eksekusi',
     released: 'Dirilis',
-    
+
     // Staff Actions
     createTxtInstruction: 'Buat Instruksi TXT',
     markExecuted: 'Tandai Selesai',
@@ -272,7 +270,7 @@ export const translations = {
     proof: 'Bukti',
     nonM: 'Non-M',
     noActiveOrders: 'Tidak ada pesanan aktif',
-    
+
     // Documents
     salesContract: 'Kontrak Penjualan',
     invoice: 'Faktur',
@@ -287,15 +285,15 @@ export const translations = {
     downloadDocument: 'Unduh Dokumen',
     reUpload: 'Unggah Ulang',
     staff: 'Staf',
-    
+
     // Account Status
     accountOnHoldTitle: 'Akun Ditahan',
     accountOnHoldMessage: 'Akun Anda sementara ditahan. Silakan hubungi dukungan untuk informasi lebih lanjut.',
-    
+
     // KYC
     kycVerification: 'Verifikasi KYC',
     kycStatus: 'Status:',
-    
+
     // Other Badges
     serviceAgreement: 'Perjanjian Layanan',
     platformTerms: 'Syarat & Ketentuan Platform',
