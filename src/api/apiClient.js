@@ -727,6 +727,11 @@ class ApiClient {
         return this.request(`/legal/privacy-policy${query}`);
     }
 
+    async getTermsAndConditions(language = 'en') {
+        const query = `?language=${encodeURIComponent(language)}`;
+        return this.request(`/legal/terms-and-conditions${query}`);
+    }
+
     // Badges (General Update)
     async updateBadge(id, data) {
         return this.request(`/badges/${id}`, {

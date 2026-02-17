@@ -7,6 +7,9 @@ import { toast } from 'sonner';
 import { Send, Download, Copy, Mail, History, Upload, XCircle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileText } from 'lucide-react';
 import AmountCurrencySection from '../components/remittance/AmountCurrencySection';
 import BeneficiaryInfoSection from '../components/remittance/BeneficiaryInfoSection';
 import BankDetailsSection from '../components/remittance/BankDetailsSection';
@@ -48,6 +51,7 @@ export default function CreateOrder() {
   const [invoiceFile, setInvoiceFile] = useState(null);
   const [otherDocsFile, setOtherDocsFile] = useState(null);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Загрузка справочника стран (API возвращает {code, name})
   const { data: countries = [] } = useQuery({
@@ -167,6 +171,10 @@ export default function CreateOrder() {
   });
 
   const handleSubmit = () => {
+    if (!termsAccepted) {
+      toast.error('Please accept the Terms & Conditions to proceed');
+      return;
+    }
     if (validateForm()) {
       createOrderMutation.mutate(formData);
     } else {
@@ -239,6 +247,22 @@ export default function CreateOrder() {
       });
     } finally {
       setUploadingDocuments(false);
+    }
+  };
+
+  const handleTermsClick = async (e) => {
+    e.preventDefault();
+    const currentLanguage = 'en'; // Default to English since language context is removed
+    try {
+      const response = await apiClient.getTermsAndConditions(currentLanguage);
+      if (response && (response.presigned_url || response.url)) {
+        window.open(response.presigned_url || response.url, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.error('Could not open Terms & Conditions');
+      }
+    } catch (error) {
+      console.error('Failed to get terms:', error);
+      toast.error('Failed to load Terms & Conditions');
     }
   };
 
@@ -464,12 +488,82 @@ export default function CreateOrder() {
             </div>
           </div>
 
+          {/* Terms & Conditions */}
+          <div className="bg-slate-100 border-2 border-slate-300 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={setTermsAccepted}
+                className="mt-1"
+              />
+              <div className="flex-1">
+                <label htmlFor="terms" className="text-sm font-medium text-slate-900 cursor-pointer">
+                  I accept the{' '}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="text-[#1e3a5f] underline hover:text-[#f5a623] transition-colors">
+                        Terms & Conditions
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-[#1e3a5f]">
+                          Terms & Conditions / Syarat & Ketentuan
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-6 py-4">
+                        <div className="text-center">
+                          <button
+                            type="button"
+                            onClick={handleTermsClick}
+                            className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
+                          >
+                            <FileText className="w-5 h-5" />
+                            <span className="font-medium underline">Open Full Terms & Conditions (PDF)</span>
+                          </button>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-lg p-6 space-y-4">
+                          <h3 className="font-bold text-lg text-[#1e3a5f]">Key Points:</h3>
+                          <ul className="list-disc list-inside space-y-2 text-sm text-slate-700">
+                            <li>All fund transfers comply with Indonesian regulations including Anti-Money Laundering laws</li>
+                            <li>PT GARUDA ARMA NUSA will execute transfers as mandated in signed Fund Transfer Orders</li>
+                            <li>Orders must be submitted at least 1 hour before currency cut-off time</li>
+                            <li>Payment must be received 30 minutes before cut-off time</li>
+                            <li>Orders are valid only once on the stated date</li>
+                            <li>Authorized signatories must be documented per Customer Data Form</li>
+                          </ul>
+                        </div>
+
+                        <div className="text-xs text-slate-600 leading-relaxed space-y-2">
+                          <p><strong>Regulations Applied:</strong></p>
+                          <ul className="list-disc list-inside ml-4">
+                            <li>Law No. 8/2010 - Prevention and Eradication of Money Laundering</li>
+                            <li>Law No. 3/2011 - Fund Transfers</li>
+                            <li>Law No. 9/2013 - Prevention of Terrorism Financing</li>
+                            <li>Law No. 27/2022 - Personal Data Protection</li>
+                            <li>Bank Indonesia Regulations on Payment Services</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  {' '}*
+                </label>
+                <p className="text-xs text-slate-600 mt-1">
+                  By checking this box, you agree to comply with all terms, conditions, and applicable regulations.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Submit Button */}
           <div className="flex justify-end gap-4">
             <Button
               onClick={handleSubmit}
-              disabled={createOrderMutation.isPending}
-              className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold px-8 py-6 text-base shadow-lg"
+              disabled={createOrderMutation.isPending || !termsAccepted}
+              className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold px-8 py-6 text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createOrderMutation.isPending ? (
                 <>Processing...</>
