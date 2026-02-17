@@ -6,9 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/api/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck, Shield } from 'lucide-react';
+import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck, Shield, AlertCircle } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
+import { Badge } from '@/components/ui/badge';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -46,7 +47,14 @@ export default function UserDashboard() {
     current: orders.filter(o => !o.deleted && !o.executed && o.status !== 'canceled' && o.status !== 'released').length,
     executed: orders.filter(o => o.executed || o.status === 'released').length,
     cancelled: orders.filter(o => o.status === 'canceled' && !o.deleted).length,
-    deleted: orders.filter(o => o.deleted).length
+    deleted: orders.filter(o => o.deleted).length,
+    labels: {
+      total: t('totalOrders'),
+      current: t('currentOrders'),
+      executed: t('executed'),
+      cancelled: t('cancelled'),
+      deleted: t('deleted')
+    }
   };
 
   const modules = [
@@ -60,29 +68,29 @@ export default function UserDashboard() {
       holdMessage: !accountActive ? client?.account_hold_reason : null
     },
     {
-      title: 'Current Orders',
-      description: 'View active orders in progress',
+      title: t('currentOrders'),
+      description: t('viewActiveOrders'),
       icon: FileText,
       page: 'CurrentOrders',
       color: 'bg-[#f5a623]'
     },
     {
-      title: 'Executed Orders',
-      description: 'View completed orders',
+      title: t('executedOrders'),
+      description: t('viewCompletedOrders'),
       icon: CheckCircle,
       page: 'ExecutedOrders',
       color: 'bg-emerald-600'
     },
     {
-      title: 'Cancelled Orders',
-      description: 'View cancelled orders',
+      title: t('cancelledOrders'),
+      description: t('viewCancelledOrders'),
       icon: XCircle,
       page: 'CancelledOrders',
       color: 'bg-red-600'
     },
     {
-      title: 'Deleted Orders',
-      description: 'View deleted orders',
+      title: t('deletedOrders'),
+      description: t('viewDeletedOrders'),
       icon: Trash2,
       page: 'DeletedOrders',
       color: 'bg-slate-600'
@@ -105,12 +113,14 @@ export default function UserDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
+                  <Badge variant="secondary" className="bg-emerald-500 text-white hover:bg-emerald-600 border-0">{t('clientDashboard')}</Badge>
                 </div>
-                <p className="text-slate-300 text-sm">Manage your fund transfers</p>
+                <p className="text-slate-300 text-sm">{t('manageYourFundTransfers')}</p>
               </div>
             </Link>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher variant="ghost" />
+
               {user && (
                 <div className="flex items-center gap-2 text-white">
                   <User className="w-4 h-4" />
@@ -120,7 +130,7 @@ export default function UserDashboard() {
               <Link to={createPageUrl('GTrans')}>
                 <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-2" />
-                  Public Site
+                  {t('publicSite')}
                 </Button>
               </Link>
               <Button
@@ -142,34 +152,46 @@ export default function UserDashboard() {
           <Card className="bg-white border-slate-200">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-[#1e3a5f]">{stats.total}</div>
-              <div className="text-sm text-slate-600 mt-1">Total Orders</div>
+              <div className="text-sm text-slate-600 mt-1">{stats.labels.total}</div>
             </CardContent>
           </Card>
           <Card className="bg-white border-slate-200">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-[#f5a623]">{stats.current}</div>
-              <div className="text-sm text-slate-600 mt-1">Current Orders</div>
+              <div className="text-sm text-slate-600 mt-1">{stats.labels.current}</div>
             </CardContent>
           </Card>
           <Card className="bg-white border-slate-200">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-emerald-600">{stats.executed}</div>
-              <div className="text-sm text-slate-600 mt-1">Executed</div>
+              <div className="text-sm text-slate-600 mt-1">{stats.labels.executed}</div>
             </CardContent>
           </Card>
           <Card className="bg-white border-slate-200">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-red-600">{stats.cancelled}</div>
-              <div className="text-sm text-slate-600 mt-1">Cancelled</div>
+              <div className="text-sm text-slate-600 mt-1">{stats.labels.cancelled}</div>
             </CardContent>
           </Card>
           <Card className="bg-white border-slate-200">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-slate-600">{stats.deleted}</div>
-              <div className="text-sm text-slate-600 mt-1">Deleted</div>
+              <div className="text-sm text-slate-600 mt-1">{stats.labels.deleted}</div>
             </CardContent>
           </Card>
         </div>
+
+        {!accountActive && (
+          <Card className="bg-red-50 border-red-200 mb-8">
+            <CardContent className="flex items-center gap-4 pt-6">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+              <div>
+                <h3 className="text-lg font-semibold text-red-900">{t('accountOnHoldTitle')}</h3>
+                <p className="text-red-700">{t('accountOnHoldMessage')}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {modules.filter(m => !['ExecutedOrders', 'CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
@@ -200,7 +222,7 @@ export default function UserDashboard() {
         </div>
 
         <div className="border-t border-slate-200 pt-8">
-          <h2 className="text-lg font-semibold text-slate-600 mb-4">History</h2>
+          <h2 className="text-lg font-semibold text-slate-600 mb-4">{t('history')}</h2>
           <div className="mb-6">
             {modules.filter(m => m.page === 'ExecutedOrders').map((module) => (
               <Link key={module.page + module.title} to={createPageUrl(module.page)}>
@@ -269,13 +291,13 @@ export default function UserDashboard() {
           </div>
           {(() => {
             const otherBadges = [
-              { type: 'service_agreement', label: 'Service Agreement', icon: FileText },
-              { type: 'platform_terms', label: 'Platform Terms & Conditions', icon: FileText },
-              { type: 'sla', label: 'Service Level Agreement (SLA)', icon: FileText },
-              { type: 'dpa', label: 'Data Processing Agreement (DPA)', icon: FileText },
-              { type: 'aml_kyc_compliance', label: 'AML/KYC & Compliance Annex', icon: Shield },
-              { type: 'other_signing', label: 'Other Request for Signing', icon: FileText },
-              { type: 'other_submit', label: 'Other Request to Submit', icon: FileText, link: 'ClientSubmitNDA' }
+              { type: 'service_agreement', label: t('serviceAgreement'), icon: FileText },
+              { type: 'platform_terms', label: t('platformTerms'), icon: FileText },
+              { type: 'sla', label: t('sla'), icon: FileText },
+              { type: 'dpa', label: t('dpa'), icon: FileText },
+              { type: 'aml_kyc_compliance', label: t('amlKycCompliance'), icon: Shield },
+              { type: 'other_signing', label: t('otherRequestSigning'), icon: FileText },
+              { type: 'other_submit', label: t('otherRequestSubmit'), icon: FileText, link: 'ClientSubmitNDA' }
             ];
 
             const activeBadges = otherBadges.filter(badge => {
@@ -288,7 +310,7 @@ export default function UserDashboard() {
             return (
               <Card className="bg-slate-50 border-slate-200">
                 <CardHeader>
-                  <CardTitle className="text-slate-700 text-base">Other Requests</CardTitle>
+                  <CardTitle className="text-slate-700 text-base">{t('otherRequests')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">

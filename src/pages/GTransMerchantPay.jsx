@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
-import { 
+import {
   ArrowRight, RefreshCw, DollarSign, Globe, Users,
   CheckCircle, Building2, TrendingUp, Shield
 } from 'lucide-react';
@@ -12,14 +12,10 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransMerchantPay() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransMerchantPay() {
+  const language = getLanguage();
 
   const steps = [
     {
@@ -110,7 +106,7 @@ export default function GTransMerchantPay() {
   return (
     <div className="min-h-screen bg-white">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gradient-to-br from-[#f5a623] via-[#e09000] to-[#f5a623]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,7 +162,7 @@ export default function GTransMerchantPay() {
                     : 'Pelanggan asing sekarang dapat membayar supplier Indonesia dalam mata uang asal mereka, tanpa perlu akun IDR.'
                   }
                 </p>
-                
+
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[#f5a623] flex-shrink-0 mt-1" />
@@ -187,7 +183,7 @@ export default function GTransMerchantPay() {
                 </ul>
               </div>
             </div>
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -195,8 +191,8 @@ export default function GTransMerchantPay() {
               className="relative"
             >
               <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80" 
+                <img
+                  src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
                   alt="MerchantPay Illustration"
                   className="w-full h-auto rounded-xl shadow-lg"
                 />
@@ -223,8 +219,8 @@ export default function GTransMerchantPay() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1556742111-a301076d9d18?w=800&q=80" 
+              <img
+                src="https://images.unsplash.com/photo-1556742111-a301076d9d18?w=800&q=80"
                 alt="Payment Process"
                 className="w-full h-auto rounded-2xl shadow-xl"
               />
@@ -268,8 +264,8 @@ export default function GTransMerchantPay() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80" 
+              <img
+                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80"
                 alt="Business Benefits"
                 className="w-full h-auto rounded-2xl shadow-xl"
               />

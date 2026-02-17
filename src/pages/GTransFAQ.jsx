@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  ChevronDown, HelpCircle, ArrowRight, Globe, Shield, 
+import {
+  ChevronDown, HelpCircle, ArrowRight, Globe, Shield,
   AlertTriangle, Search
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
 const DEFAULT_FAQS = {
   currencies: [
@@ -72,19 +73,15 @@ const CATEGORY_CONFIG = {
   }
 };
 
+
+
 export default function GTransFAQ() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+  const language = getLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   const [openItems, setOpenItems] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
-
-  const allFaqs = Object.entries(DEFAULT_FAQS).flatMap(([category, items]) => 
+  const allFaqs = Object.entries(DEFAULT_FAQS).flatMap(([category, items]) =>
     items.map(item => ({ ...item, category }))
   );
 
@@ -112,7 +109,7 @@ export default function GTransFAQ() {
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <main className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -147,8 +144,8 @@ export default function GTransFAQ() {
               onClick={() => setActiveCategory('all')}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                activeCategory === 'all' 
-                  ? "bg-[#1e3a5f] text-white" 
+                activeCategory === 'all'
+                  ? "bg-[#1e3a5f] text-white"
                   : "bg-white text-slate-600 hover:bg-slate-100"
               )}
             >
@@ -160,8 +157,8 @@ export default function GTransFAQ() {
                 onClick={() => setActiveCategory(key)}
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
-                  activeCategory === key 
-                    ? "bg-[#1e3a5f] text-white" 
+                  activeCategory === key
+                    ? "bg-[#1e3a5f] text-white"
                     : "bg-white text-slate-600 hover:bg-slate-100"
                 )}
               >
@@ -185,7 +182,7 @@ export default function GTransFAQ() {
                 const config = CATEGORY_CONFIG[faq.category] || CATEGORY_CONFIG.general;
                 const question = language === 'en' ? faq.question_en : (faq.question_id || faq.question_en);
                 const answer = language === 'en' ? faq.answer_en : (faq.answer_id || faq.answer_en);
-                
+
                 return (
                   <Card key={idx} className="border-slate-200 overflow-hidden">
                     <button

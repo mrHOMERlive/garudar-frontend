@@ -14,10 +14,12 @@ import KYCBankingDetails from '../components/kyc/KYCBankingDetails';
 import KYCOwnership from '../components/kyc/KYCOwnership';
 import KYCDeclaration from '../components/kyc/KYCDeclaration';
 
+import { getLanguage, setLanguage } from '@/components/utils/language';
+
 export default function ClientKYC() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
-  const [language, setLanguage] = useState('en');
+  const language = getLanguage();
 
   // 1. Get Current User
   const { data: user, isLoading: userLoading } = useQuery({

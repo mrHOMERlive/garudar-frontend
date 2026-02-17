@@ -4,8 +4,8 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
-import { 
-  ArrowRight, CheckCircle, CreditCard, Globe, Zap, 
+import {
+  ArrowRight, CheckCircle, CreditCard, Globe, Zap,
   TrendingUp, Shield, Clock, Building2, Factory, Truck,
   Settings, Briefcase, ArrowLeft
 } from 'lucide-react';
@@ -13,14 +13,10 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransB2BPayments() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransB2BPayments() {
+  const language = getLanguage();
 
   const benefits = [
     {
@@ -114,20 +110,20 @@ export default function GTransB2BPayments() {
   return (
     <div className="min-h-screen bg-white">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gradient-to-br from-[#1e3a5f] via-[#2d5a8f] to-[#1e3a5f] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#f5a623] rounded-full blur-3xl" />
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <Link to={createPageUrl('GTrans')} className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             {language === 'en' ? 'Back to Home' : 'Kembali ke Beranda'}
           </Link>
-          
+
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -138,7 +134,7 @@ export default function GTransB2BPayments() {
                 GTrans B2B Payments
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                {language === 'en' 
+                {language === 'en'
                   ? 'Cross-border payments for real-world businesses'
                   : 'Pembayaran lintas batas untuk bisnis dunia nyata'
                 }
@@ -156,15 +152,15 @@ export default function GTransB2BPayments() {
                 </Button>
               </Link>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80" 
-                alt="Business" 
+              <img
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80"
+                alt="Business"
                 className="rounded-2xl shadow-2xl"
               />
             </motion.div>
@@ -317,8 +313,8 @@ export default function GTransB2BPayments() {
               >
                 <Card className="overflow-hidden border-white/20 hover:shadow-2xl transition-all group">
                   <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={industry.image} 
+                    <img
+                      src={industry.image}
                       alt={industry.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

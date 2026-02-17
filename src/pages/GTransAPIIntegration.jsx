@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Code, Zap, Headphones, CheckCircle, ArrowRight,
   FileCode, Blocks, Terminal
 } from 'lucide-react';
@@ -11,20 +11,16 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransAPIIntegration() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransAPIIntegration() {
+  const language = getLanguage();
 
   const benefits = [
     {
       icon: Zap,
       title: language === 'en' ? 'Increase Efficiency' : 'Tingkatkan Efisiensi',
-      description: language === 'en' 
+      description: language === 'en'
         ? 'Use tools you\'re already familiar with. Integrate GTrans directly into your existing workflows and business systems.'
         : 'Gunakan alat yang sudah Anda kenal. Integrasikan GTrans langsung ke dalam alur kerja dan sistem bisnis yang ada.'
     },
@@ -56,7 +52,7 @@ export default function GTransAPIIntegration() {
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <main className="pt-24 pb-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">

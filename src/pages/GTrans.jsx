@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
-import { 
-  ArrowRight, Globe, Shield, Zap, Building2, ShoppingCart, 
+import {
+  ArrowRight, Globe, Shield, Zap, Building2, ShoppingCart,
   CheckCircle, CreditCard, RefreshCw, Eye
 } from 'lucide-react';
 
@@ -13,21 +13,16 @@ import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 import HeroSection from '@/components/public/HeroSection';
 import { CreateOrderAnimation, OrderMonitoringAnimation } from '@/components/public/PlatformAnimations';
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
 export default function GTrans() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+  const language = getLanguage();
 
   const products = [
     {
       icon: CreditCard,
       title: language === 'en' ? 'GTrans B2B Payments' : 'Pembayaran B2B GTrans',
-      description: language === 'en' 
+      description: language === 'en'
         ? 'Cross-border pay-in / pay-out for corporate clients. Inbound and outbound payments across jurisdictions.'
         : 'Pembayaran lintas batas untuk klien korporat. Pembayaran masuk dan keluar antar yurisdiksi.',
       features: [
@@ -101,7 +96,7 @@ export default function GTrans() {
   return (
     <div className="min-h-screen bg-white">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <HeroSection language={language} />
 
       {/* What is GTrans */}
@@ -221,8 +216,8 @@ export default function GTrans() {
               <Link to={createPageUrl('GTransB2BPayments')}>
                 <Card className="h-full border-slate-200 hover:shadow-2xl transition-all bg-white group cursor-pointer overflow-hidden">
                   <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80" 
+                    <img
+                      src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"
                       alt="B2B Payments"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -238,7 +233,7 @@ export default function GTrans() {
                       {language === 'en' ? 'GTrans B2B Payments' : 'Pembayaran B2B GTrans'}
                     </h3>
                     <p className="text-slate-600 mb-4">
-                      {language === 'en' 
+                      {language === 'en'
                         ? 'Cross-border payments for real-world businesses. Let your team focus on core business while we handle fast, compliant settlements worldwide.'
                         : 'Pembayaran lintas batas untuk bisnis dunia nyata. Biarkan tim Anda fokus pada bisnis inti sementara kami menangani penyelesaian yang cepat dan sesuai di seluruh dunia.'
                       }
@@ -261,8 +256,8 @@ export default function GTrans() {
             >
               <Card className="h-full border-slate-200 hover:shadow-2xl transition-all bg-white group overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" 
+                  <img
+                    src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
                     alt="MerchantPay"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -297,8 +292,8 @@ export default function GTrans() {
             >
               <Card className="h-full border-slate-200 hover:shadow-2xl transition-all bg-white group overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1556742111-a301076d9d18?w=800&q=80" 
+                  <img
+                    src="https://images.unsplash.com/photo-1556742111-a301076d9d18?w=800&q=80"
                     alt="eCommerce"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -406,7 +401,7 @@ export default function GTrans() {
 
           <div className="relative">
             <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-slate-200" />
-            
+
             <div className="grid md:grid-cols-7 gap-4">
               {clientJourney.map((item, idx) => (
                 <motion.div

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   FileText, Shield, Globe, ArrowRight, Workflow, HelpCircle,
   CheckCircle, Lock, Download, Eye, FileCheck
 } from 'lucide-react';
@@ -11,14 +11,10 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransDocumentation() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransDocumentation() {
+  const language = getLanguage();
 
   const sections = [
     {
@@ -66,7 +62,7 @@ export default function GTransDocumentation() {
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <main className="pt-24 pb-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">

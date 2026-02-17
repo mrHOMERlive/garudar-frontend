@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
-import { 
+import {
   ArrowRight, ArrowDown, Building2, Globe, RefreshCw,
   CheckCircle, Workflow, Users
 } from 'lucide-react';
@@ -13,21 +13,17 @@ import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 import { InboundTransferDiagram, OutboundTransferDiagram } from '@/components/public/TransferTypesDiagram';
 
-export default function GTransWorkScheme() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransWorkScheme() {
+  const language = getLanguage();
 
   const coreFlow = [
     {
       step: 1,
       icon: Building2,
       title: language === 'en' ? 'Originator' : 'Pengirim',
-      description: language === 'en' 
+      description: language === 'en'
         ? 'Corporate client initiates transfer order through GTrans platform'
         : 'Klien korporat memulai pesanan transfer melalui platform GTrans',
       color: 'bg-[#1e3a5f]'
@@ -87,7 +83,7 @@ export default function GTransWorkScheme() {
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       <main className="pt-24 pb-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -183,8 +179,8 @@ export default function GTransWorkScheme() {
                 <div className="mt-6 pt-6 border-t border-emerald-200">
                   <div className="bg-white rounded-lg p-4 border border-emerald-200">
                     <a href="https://koprabymandiri.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                      <img 
-                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/827953f97_logo512.png" 
+                      <img
+                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/827953f97_logo512.png"
                         alt="Kopra by Mandiri"
                         className="h-8 w-auto object-contain"
                       />
@@ -204,7 +200,7 @@ export default function GTransWorkScheme() {
               <p className="text-slate-600 text-center mb-8">
                 {language === 'en' ? 'The technical flow of funds through the system' : 'Aliran teknis dana melalui sistem'}
               </p>
-              
+
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-2">
                 {coreFlow.map((item, idx) => (
                   <React.Fragment key={idx}>
@@ -224,7 +220,7 @@ export default function GTransWorkScheme() {
                       <h3 className="font-bold text-[#1e3a5f] mb-2">{item.title}</h3>
                       <p className="text-sm text-slate-500 max-w-[180px]">{item.description}</p>
                     </motion.div>
-                    
+
                     {idx < coreFlow.length - 1 && (
                       <div className="hidden md:block">
                         <ArrowRight className="w-8 h-8 text-slate-300" />
@@ -246,12 +242,12 @@ export default function GTransWorkScheme() {
               {language === 'en' ? 'Transfer Types' : 'Jenis Transfer'}
             </h2>
             <p className="text-slate-600 text-center mb-12 max-w-3xl mx-auto">
-              {language === 'en' 
+              {language === 'en'
                 ? 'GTrans supports both Inbound and Outbound transfers. Indonesian companies transfer funds to foreign entities through GAN which acts as the Successor Organizer in the agreed currency. For Inbound transfers, GAN acts as the Successor Operator for Companies in Indonesia that accept payments from overseas partners and send funds to the Customer in the agreed currency (e.g., USD, EUR, CNY).'
                 : 'GTrans mendukung transfer Masuk dan Keluar. Perusahaan Indonesia mentransfer dana ke entitas asing melalui GAN yang bertindak sebagai Penyelenggara Penerus dalam mata uang yang disepakati. Untuk transfer Masuk, GAN bertindak sebagai Operator Penerus untuk Perusahaan di Indonesia yang menerima pembayaran dari mitra luar negeri dan mengirim dana ke Pelanggan dalam mata uang yang disepakati (misalnya, USD, EUR, CNY).'
               }
             </p>
-            
+
             <div className="grid md:grid-cols-2 gap-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

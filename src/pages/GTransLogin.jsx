@@ -11,12 +11,12 @@ import { Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png";
 
+import { getLanguage, setLanguage } from '@/components/utils/language';
+
 export default function GTransLogin() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+  const language = getLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,10 +32,6 @@ export default function GTransLogin() {
       }
     }
   }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

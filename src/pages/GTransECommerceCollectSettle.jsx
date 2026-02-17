@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
-import { 
+import {
   ArrowRight, ShoppingCart, Globe, DollarSign, FileText,
   CheckCircle, Users, Building2, TrendingUp
 } from 'lucide-react';
@@ -12,20 +12,16 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransECommerceCollectSettle() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransECommerceCollectSettle() {
+  const language = getLanguage();
 
   const steps = [
     {
       step: 1,
       title: language === 'en' ? 'Customer selects goods/services' : 'Pelanggan memilih barang/jasa',
-      description: language === 'en' 
+      description: language === 'en'
         ? 'Customer selects goods or services on the merchant\'s website.'
         : 'Pelanggan memilih barang atau jasa di website merchant.'
     },
@@ -62,7 +58,7 @@ export default function GTransECommerceCollectSettle() {
   return (
     <div className="min-h-screen bg-white">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,7 +114,7 @@ export default function GTransECommerceCollectSettle() {
                     : 'GTrans memungkinkan penjual marketplace Indonesia untuk berkembang ke e-commerce luar negeri dengan mengumpulkan dan menyelesaikan pembayaran dalam mata uang non-IDR, dengan dukungan penuh untuk transaksi internasional.'
                   }
                 </p>
-                
+
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
@@ -135,7 +131,7 @@ export default function GTransECommerceCollectSettle() {
                 </ul>
               </div>
             </div>
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -143,8 +139,8 @@ export default function GTransECommerceCollectSettle() {
               className="relative"
             >
               <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80" 
+                <img
+                  src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80"
                   alt="eCommerce Illustration"
                   className="w-full h-auto rounded-xl shadow-lg"
                 />
@@ -160,7 +156,7 @@ export default function GTransECommerceCollectSettle() {
           <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-12 text-center">
             {language === 'en' ? 'Two Core Services' : 'Dua Layanan Inti'}
           </h2>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -255,20 +251,20 @@ export default function GTransECommerceCollectSettle() {
               }
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" 
+              <img
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
                 alt="Global eCommerce"
                 className="w-full h-auto rounded-2xl shadow-xl"
               />
             </motion.div>
-            
+
             <div className="space-y-6">
               <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
                 <CardContent className="p-6">
@@ -285,7 +281,7 @@ export default function GTransECommerceCollectSettle() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -301,7 +297,7 @@ export default function GTransECommerceCollectSettle() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -339,8 +335,8 @@ export default function GTransECommerceCollectSettle() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" 
+              <img
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
                 alt="Collection Flow"
                 className="w-full h-auto rounded-2xl shadow-xl"
               />

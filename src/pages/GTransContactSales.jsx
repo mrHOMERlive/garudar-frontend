@@ -29,14 +29,10 @@ const VOLUME_OPTIONS = [
   { value: 'over_1m', label: '> $1,000,000 / month' }
 ];
 
-export default function GTransContactSales() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransContactSales() {
+  const language = getLanguage();
 
   const [formData, setFormData] = useState({
     company_name: '',

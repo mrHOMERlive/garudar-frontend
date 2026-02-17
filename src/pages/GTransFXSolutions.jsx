@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
-import { 
+import {
   ArrowRight, TrendingUp, Shield, Zap, Globe, DollarSign,
   CheckCircle, RefreshCw, Clock
 } from 'lucide-react';
@@ -12,14 +12,10 @@ import {
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 
-export default function GTransFXSolutions() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('gtrans_language') || 'en';
-  });
+import { getLanguage, setLanguage } from '@/components/utils/language';
 
-  useEffect(() => {
-    localStorage.setItem('gtrans_language', language);
-  }, [language]);
+export default function GTransFXSolutions() {
+  const language = getLanguage();
 
   const currencies = ['AUD', 'CAD', 'CHF', 'DKK', 'EUR', 'GBP', 'JPY', 'MYR', 'NOK', 'NZD', 'SAR', 'THB', 'SEK', 'SGD', 'USD', 'HKD', 'CNY', 'IDR'];
 
@@ -27,7 +23,7 @@ export default function GTransFXSolutions() {
     {
       icon: TrendingUp,
       title: language === 'en' ? 'Competitive FX Rates' : 'Kurs FX Kompetitif',
-      description: language === 'en' 
+      description: language === 'en'
         ? 'Access wholesale FX rates with transparent pricing. No hidden markups or surprise fees.'
         : 'Akses kurs FX grosir dengan harga transparan. Tanpa markup tersembunyi atau biaya kejutan.'
     },
@@ -79,7 +75,7 @@ export default function GTransFXSolutions() {
   return (
     <div className="min-h-screen bg-white">
       <PublicHeader language={language} setLanguage={setLanguage} />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gradient-to-br from-[#1e3a5f] via-[#2d5a8f] to-[#1e3a5f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
