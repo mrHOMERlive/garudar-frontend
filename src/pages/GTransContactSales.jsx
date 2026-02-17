@@ -10,8 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Mail, Phone, MessageCircle, MapPin, CheckCircle,
-  ArrowRight, Send
+  ArrowRight, Send, FileText
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
@@ -28,6 +29,8 @@ const VOLUME_OPTIONS = [
   { value: '500k_1m', label: '$500,000 - $1,000,000 / month' },
   { value: 'over_1m', label: '> $1,000,000 / month' }
 ];
+
+const PRIVACY_POLICY_API = '/api/v1/legal/privacy-policy';
 
 import { getLanguage, setLanguage } from '@/components/utils/language';
 
@@ -356,24 +359,89 @@ export default function GTransContactSales() {
                         />
                       </div>
 
-                      <div className="flex items-start gap-3">
-                        <Checkbox
-                          id="consent"
-                          checked={formData.consent_given}
-                          onCheckedChange={(checked) => setFormData({ ...formData, consent_given: checked })}
-                        />
-                        <Label htmlFor="consent" className="text-sm text-slate-600 cursor-pointer">
-                          {language === 'en'
-                            ? 'I agree to the Terms of Service and Privacy Policy'
-                            : 'Saya setuju dengan Syarat Layanan dan Kebijakan Privasi'
-                          }
-                        </Label>
+                      <div className="bg-slate-100 border-2 border-slate-300 rounded-xl p-6">
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            id="consent"
+                            checked={formData.consent_given}
+                            onCheckedChange={(checked) => setFormData({ ...formData, consent_given: checked })}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <label htmlFor="consent" className="text-sm font-medium text-slate-900 cursor-pointer">
+                              {language === 'en' ? 'I accept the ' : 'Saya menerima '}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button type="button" className="text-[#1e3a5f] underline hover:text-[#f5a623] transition-colors">
+                                    {language === 'en' ? 'Privacy Policy' : 'Kebijakan Privasi'}
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                  <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold text-[#1e3a5f]">
+                                      {language === 'en' ? 'Privacy Policy' : 'Kebijakan Privasi'}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-6 py-4">
+                                    <div className="text-center">
+                                      <a
+                                        href={`${PRIVACY_POLICY_API}?language=${language}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
+                                      >
+                                        <FileText className="w-5 h-5" />
+                                        <span className="font-medium underline">
+                                          {language === 'en' ? 'Open Full Privacy Policy (PDF)' : 'Buka Kebijakan Privasi Lengkap (PDF)'}
+                                        </span>
+                                      </a>
+                                    </div>
+
+                                    <div className="bg-slate-50 rounded-lg p-6 space-y-4">
+                                      <h3 className="font-bold text-lg text-[#1e3a5f]">
+                                        {language === 'en' ? 'Key Points:' : 'Poin Penting:'}
+                                      </h3>
+                                      <ul className="list-disc list-inside space-y-2 text-sm text-slate-700">
+                                        {language === 'en' ? (
+                                          <>
+                                            <li>We collect IP address, contact information, email, interests, and online behavior data</li>
+                                            <li>Data is used to understand needs, improve services, and send promotional materials</li>
+                                            <li>PT Garuda Arma Nusa is committed to securing your data with latest technologies</li>
+                                            <li>We use cookies to customize website experience and analyze web traffic</li>
+                                            <li>We will not sell or distribute your personal information to third parties without permission</li>
+                                            <li>You can restrict data collection by contacting us via email</li>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <li>Kami mengumpulkan alamat IP, informasi kontak, email, minat, dan data perilaku online</li>
+                                            <li>Data digunakan untuk memahami kebutuhan, meningkatkan layanan, dan mengirim materi promosi</li>
+                                            <li>PT Garuda Arma Nusa berkomitmen mengamankan data Anda dengan teknologi terbaru</li>
+                                            <li>Kami menggunakan cookie untuk menyesuaikan pengalaman website dan menganalisis lalu lintas web</li>
+                                            <li>Kami tidak akan menjual atau mendistribusikan informasi pribadi Anda tanpa izin</li>
+                                            <li>Anda dapat membatasi pengumpulan data dengan menghubungi kami via email</li>
+                                          </>
+                                        )}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              {' '}*
+                            </label>
+                            <p className="text-xs text-slate-600 mt-1">
+                              {language === 'en'
+                                ? 'By checking this box, you agree to our data collection and usage practices.'
+                                : 'Dengan mencentang kotak ini, Anda setuju dengan praktik pengumpulan dan penggunaan data kami.'
+                              }
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
                       <Button
                         type="submit"
-                        disabled={submitMutation.isPending}
-                        className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6 text-lg"
+                        disabled={submitMutation.isPending || !formData.consent_given}
+                        className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {submitMutation.isPending ? (
                           language === 'en' ? 'Submitting...' : 'Mengirim...'
