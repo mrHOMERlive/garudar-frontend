@@ -721,17 +721,18 @@ class ApiClient {
         });
     }
 
+    // Legal
+    async getPrivacyPolicy(language = 'en') {
+        const query = `?language=${encodeURIComponent(language)}`;
+        return this.request(`/legal/privacy-policy${query}`);
+    }
+
     // Badges (General Update)
     async updateBadge(id, data) {
         return this.request(`/badges/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
-    }
-    // Legal Documents
-    async getPrivacyPolicy(language = 'en') {
-        // Returns object with presigned_url
-        return this.request(`/legal/privacy-policy?language=${language}`);
     }
 }
 

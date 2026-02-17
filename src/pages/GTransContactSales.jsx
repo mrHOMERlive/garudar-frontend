@@ -34,21 +34,6 @@ import { getLanguage, setLanguage } from '@/components/utils/language';
 
 export default function GTransContactSales() {
   const language = getLanguage();
-  const [privacyPolicyUrl, setPrivacyPolicyUrl] = useState('');
-
-  useEffect(() => {
-    const fetchPolicy = async () => {
-      try {
-        const data = await apiClient.getPrivacyPolicy(language);
-        if (data && data.presigned_url) {
-          setPrivacyPolicyUrl(data.presigned_url);
-        }
-      } catch (error) {
-        console.error('Failed to fetch privacy policy:', error);
-      }
-    };
-    fetchPolicy();
-  }, [language]);
 
   const [formData, setFormData] = useState({
     company_name: '',
@@ -117,6 +102,22 @@ export default function GTransContactSales() {
       return;
     }
     submitMutation.mutate(formData);
+    submitMutation.mutate(formData);
+  };
+
+  const handlePrivacyPolicyClick = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await apiClient.getPrivacyPolicy(language);
+      if (response && (response.presigned_url || response.url)) {
+        window.open(response.presigned_url || response.url, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.error(language === 'en' ? 'Could not open Privacy Policy' : 'Tidak dapat membuka Kebijakan Privasi');
+      }
+    } catch (error) {
+      console.error('Failed to get privacy policy:', error);
+      toast.error(language === 'en' ? 'Failed to load Privacy Policy' : 'Gagal memuat Kebijakan Privasi');
+    }
   };
 
   return (
@@ -397,26 +398,16 @@ export default function GTransContactSales() {
                                   </DialogHeader>
                                   <div className="space-y-6 py-4">
                                     <div className="text-center">
-                                      {privacyPolicyUrl ? (
-                                        <a
-                                          href={privacyPolicyUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
-                                        >
-                                          <FileText className="w-5 h-5" />
-                                          <span className="font-medium underline">
-                                            {language === 'en' ? 'Open Full Privacy Policy (PDF)' : 'Buka Kebijakan Privasi Lengkap (PDF)'}
-                                          </span>
-                                        </a>
-                                      ) : (
-                                        <div className="flex justify-center items-center gap-2 text-slate-400">
-                                          <FileText className="w-5 h-5" />
-                                          <span className="font-medium">
-                                            {language === 'en' ? 'Loading document...' : 'Memuat dokumen...'}
-                                          </span>
-                                        </div>
-                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={handlePrivacyPolicyClick}
+                                        className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
+                                      >
+                                        <FileText className="w-5 h-5" />
+                                        <span className="font-medium underline">
+                                          {language === 'en' ? 'Open Full Privacy Policy (PDF)' : 'Buka Kebijakan Privasi Lengkap (PDF)'}
+                                        </span>
+                                      </button>
                                     </div>
 
                                     <div className="bg-slate-50 rounded-lg p-6 space-y-4">
