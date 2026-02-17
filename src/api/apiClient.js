@@ -728,6 +728,11 @@ class ApiClient {
             body: JSON.stringify(data),
         });
     }
+    // Legal Documents
+    async getPrivacyPolicy(language = 'en') {
+        // Returns object with presigned_url
+        return this.request(`/legal/privacy-policy?language=${language}`);
+    }
 }
 
 export const apiClient = new ApiClient();
