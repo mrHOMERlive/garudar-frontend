@@ -155,71 +155,61 @@ export default function StaffDashboard() {
         <div>
           <h2 className="text-xl font-bold text-slate-700 mb-6">KYC</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {kycModules.map((module) => (
-              <Link key={module.page} to={createPageUrl(module.page)}>
-                <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
-                  <CardHeader>
-                    <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center mb-3`}>
-                      <module.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <CardTitle className="text-[#1e3a5f]">{module.title}</CardTitle>
-                    <CardDescription className="text-slate-500">{module.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
+            <Link to={createPageUrl('StaffKYC')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-[#f5a623] rounded-lg flex items-center justify-center mb-3">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">KYC Database</CardTitle>
+                  <CardDescription className="text-slate-500">Know Your Customer verification database</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
           </div>
         </div>
 
-        <div className="mt-12">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Client Requests Management</h2>
+        {/* Requests Section */}
+        <div>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">Requests</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link to={createPageUrl('StaffKYCQueue')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center mb-3">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">KYC Onboarding Queue</CardTitle>
+                  <CardDescription className="text-slate-500">Review client KYC submissions</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-            {/* Main Action Card */}
-            <div className="mb-6">
-              <Link to={createPageUrl('StaffClientRequests')}>
-                <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-[#1e3a5f] rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FileCheck className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-[#1e3a5f] text-xl">Manage Client Badges</CardTitle>
-                        <CardDescription className="text-slate-500 text-base mt-1">Configure which requests are visible to clients and manage account status</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-            </div>
+            <Link to={createPageUrl('StaffServiceAgreement')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-[#1e3a5f] rounded-lg flex items-center justify-center mb-3">
+                    <FileSignature className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">Service Agreement</CardTitle>
+                  <CardDescription className="text-slate-500">Manage master documents and client submissions</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-            {/* Other Request Types - Compact List */}
-            <Card className="bg-slate-50 border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-slate-700 text-base">Other Request Types (Coming Soon)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {[
-                    { icon: FileSignature, label: 'Service Agreement' },
-                    { icon: FileText, label: 'Platform Terms & Conditions' },
-                    { icon: FileCheck, label: 'Service Level Agreement (SLA)' },
-                    { icon: FileText, label: 'Data Processing Agreement (DPA)' },
-                    { icon: Shield, label: 'AML/KYC & Compliance Annex' },
-                    { icon: FileSignature, label: 'Other Request for Signing' },
-                    { icon: FileText, label: 'Other Request to Submit' }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-200">
-                      <div className="w-8 h-8 bg-slate-200 rounded flex items-center justify-center flex-shrink-0">
-                        <item.icon className="w-4 h-4 text-slate-500" />
-                      </div>
-                      <span className="text-sm text-slate-600">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <Link to={createPageUrl('StaffClientRequests')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-slate-600 rounded-lg flex items-center justify-center mb-3">
+                    <FileCheck className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">Manage Badges</CardTitle>
+                  <CardDescription className="text-slate-500">Account status, KYC, and Service Agreement badges</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
           </div>
+        </div>
       </main>
     </div>
   );

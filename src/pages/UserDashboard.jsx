@@ -113,7 +113,7 @@ export default function UserDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <Badge variant="secondary" className="bg-emerald-500 text-white hover:bg-emerald-600 border-0">{t('clientDashboard')}</Badge>
+                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">{t('clientDashboard')}</span>
                 </div>
                 <p className="text-slate-300 text-sm">{t('manageYourFundTransfers')}</p>
               </div>
@@ -253,108 +253,62 @@ export default function UserDashboard() {
 
         <div className="border-t border-slate-200 pt-8 mt-8">
           <h2 className="text-xl font-bold text-slate-700 mb-6">{t('requestsFromGTrans')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* KYC Request - Prominent */}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* KYC Request */}
             {(() => {
               const kycBadge = clientBadges.find(b => b.badge_type === 'kyc');
-              const kycActive = kycBadge?.is_active;
-              const kycStatus = kycBadge?.status;
+              if (!kycBadge?.is_active) return null;
+
+              const kycStatus = client?.kyc_status;
               const needsAttention = kycStatus === 'needs_fix' || kycStatus === 'in_progress' || kycStatus === 'created';
 
-              if (!kycActive) return null;
-
               return (
-                <div className="mb-6">
-                  <Link to={createPageUrl('ClientKYC')}>
-                    <Card className={`border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer ${needsAttention ? 'border-red-500 bg-red-50 animate-pulse' : 'bg-white'}`}>
-                      <CardHeader>
-                        <div className="flex items-center gap-4">
-                          <div className={`w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 ${needsAttention ? 'animate-pulse' : ''}`}>
-                            <FileCheck className="w-7 h-7 text-white" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-[#1e3a5f] text-xl">{t('kycVerification')}</CardTitle>
-                            <CardDescription className={`text-base mt-1 ${needsAttention ? 'text-red-700 font-medium' : 'text-amber-700 font-medium'}`}>
-                              {t('kycStatus')} {kycStatus?.replace('_', ' ').toUpperCase()}
-                            </CardDescription>
-                          </div>
+                <Link to={createPageUrl('ClientKYC')}>
+                  <div className={`relative rounded-xl p-6 border transition-all hover:shadow-md group h-full ${needsAttention ? 'bg-red-50 border-red-300' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
+                    {needsAttention && (
+                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
+                    )}
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${needsAttention ? 'bg-red-100 group-hover:bg-red-200' : 'bg-slate-100 group-hover:bg-slate-200'}`}>
+                        <FileCheck className="w-6 h-6 text-slate-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-slate-900 mb-1">{t('kycVerification')}</div>
+                        <div className="text-sm text-slate-600">
+                          {t('kycStatus')} {kycStatus?.replace('_', ' ')}
                         </div>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               );
             })()}
 
+            {/* Service Agreement */}
+            {(() => {
+              const serviceAgreementBadge = clientBadges.find(b => b.badge_type === 'service_agreement');
+              if (!serviceAgreementBadge?.is_active) return null;
 
-
-          </div>
-          {(() => {
-            const otherBadges = [
-              { type: 'service_agreement', label: t('serviceAgreement'), icon: FileText },
-              { type: 'platform_terms', label: t('platformTerms'), icon: FileText },
-              { type: 'sla', label: t('sla'), icon: FileText },
-              { type: 'dpa', label: t('dpa'), icon: FileText },
-              { type: 'aml_kyc_compliance', label: t('amlKycCompliance'), icon: Shield },
-              { type: 'other_signing', label: t('otherRequestSigning'), icon: FileText },
-              { type: 'other_submit', label: t('otherRequestSubmit'), icon: FileText, link: 'ClientSubmitNDA' }
-            ];
-
-            const activeBadges = otherBadges.filter(badge => {
-              const badgeData = clientBadges.find(b => b.badge_type === badge.type);
-              return badgeData?.is_active || false;
-            });
-
-            if (activeBadges.length === 0) return null;
-
-            return (
-              <Card className="bg-slate-50 border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-slate-700 text-base">{t('otherRequests')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {activeBadges.map((badge) => {
-                      const badgeData = clientBadges.find(b => b.badge_type === badge.type);
-                      const status = badgeData?.status;
-                      const needsAttention = status === 'need_signing' || status === 'pending';
-                      const BadgeIcon = badge.icon;
-
-                      const itemClasses = `
-                        flex items-center gap-3 p-3 rounded-lg bg-white border transition-all
-                        ${needsAttention ? 'border-red-300 bg-red-50 animate-pulse' : 'border-slate-200'}
-                        ${badge.link ? 'cursor-pointer hover:border-[#1e3a5f] hover:shadow-sm' : ''}
-                      `;
-
-                      const content = (
-                        <div className={itemClasses}>
-                          <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${needsAttention ? 'bg-red-600 animate-pulse' : 'bg-slate-600'}`}>
-                            <BadgeIcon className="w-4 h-4 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className={`text-sm font-medium ${needsAttention ? 'text-red-900' : 'text-slate-900'}`}>{badge.label}</div>
-                            {badgeData?.staff_comment && (
-                              <div className={`text-xs mt-0.5 ${needsAttention ? 'text-red-700' : 'text-slate-600'}`}>
-                                {badgeData.staff_comment}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-
-                      return badge.link ? (
-                        <Link key={badge.type} to={createPageUrl(badge.link)}>
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={badge.type}>{content}</div>
-                      );
-                    })}
+              return (
+                <Link to={createPageUrl('ClientServiceAgreement')}>
+                  <div className="bg-white rounded-xl p-6 border border-slate-200 transition-all hover:border-slate-300 hover:shadow-md group h-full">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-slate-200 transition-colors">
+                        <FileText className="w-6 h-6 text-slate-700" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-slate-900 mb-1">{t('serviceAgreement')}</div>
+                        {serviceAgreementBadge?.staff_comment && (
+                          <div className="text-sm text-slate-600">{serviceAgreementBadge.staff_comment}</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })()}
+                </Link>
+              );
+            })()}
+          </div>
         </div>
       </main>
     </div>

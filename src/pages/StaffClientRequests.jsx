@@ -20,23 +20,11 @@ import {
 import { ArrowLeft, Search, FileCheck, FileText, Shield, FileSignature, AlertCircle, CheckCircle, Clock, Globe } from 'lucide-react';
 
 const BADGE_TYPES = [
-  { value: 'kyc', label: 'KYC', icon: FileCheck, color: 'bg-blue-600' },
-  { value: 'service_agreement', label: 'Service Agreement', icon: FileSignature, color: 'bg-indigo-600' },
-  { value: 'platform_terms', label: 'Platform Terms & Conditions', icon: FileText, color: 'bg-purple-600' },
-  { value: 'sla', label: 'Service Level Agreement (SLA)', icon: FileCheck, color: 'bg-emerald-600' },
-  { value: 'dpa', label: 'Data Processing Agreement (DPA)', icon: FileText, color: 'bg-teal-600' },
-  { value: 'aml_kyc_compliance', label: 'AML/KYC & Compliance Annex', icon: Shield, color: 'bg-cyan-600' },
-  { value: 'other_signing', label: 'Other Request for Signing', icon: FileSignature, color: 'bg-orange-600' },
-  { value: 'other_submit', label: 'Other Request to Submit', icon: FileText, color: 'bg-amber-600' }
+  { value: 'kyc', label: 'KYC Verification', icon: FileCheck },
+  { value: 'service_agreement', label: 'Service Agreement', icon: FileSignature }
 ];
 
-const STATUS_CONFIG = {
-  not_required: { label: 'Not Required', color: 'bg-slate-400', icon: null },
-  pending: { label: 'Pending', color: 'bg-orange-500', icon: Clock },
-  need_signing: { label: 'Need Signing', color: 'bg-red-600', icon: AlertCircle },
-  submitted: { label: 'Submitted', color: 'bg-blue-600', icon: CheckCircle },
-  completed: { label: 'Completed', color: 'bg-emerald-600', icon: CheckCircle }
-};
+
 
 export default function StaffClientRequests() {
   const [search, setSearch] = useState('');
@@ -112,7 +100,7 @@ export default function StaffClientRequests() {
                 <TableHead className="text-[#1e3a5f] font-semibold">Client</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Email</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Active Badges</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Need Attention</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">Account Status</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -122,6 +110,8 @@ export default function StaffClientRequests() {
                   <TableCell colSpan={5} className="text-center text-slate-500 py-8">No clients found</TableCell>
                 </TableRow>
               ) : filteredClients.map((client) => {
+                const isOnHold = client.account_status === 'hold';
+
                 return (
                   <TableRow key={client.user_id} className="border-slate-200 hover:bg-slate-50">
                     <TableCell>
@@ -137,13 +127,16 @@ export default function StaffClientRequests() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {(client.attention_required_count || 0) > 0 ? (
-                        <Badge className="bg-red-600 text-white">
+                      {isOnHold ? (
+                        <Badge className="bg-red-100 text-red-800 border border-red-300">
                           <AlertCircle className="w-3 h-3 mr-1" />
-                          {client.attention_required_count}
+                          On Hold
                         </Badge>
                       ) : (
-                        <span className="text-slate-400 text-sm">-</span>
+                        <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Active
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -221,9 +214,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
     return edited || existing || {
       client_id: client.client_id,
       badge_type: badgeType,
-      status: 'not_required',
-      is_active: false,
-      staff_comment: ''
+      is_active: false
     };
   };
 
@@ -255,9 +246,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
     Object.entries(editedBadges).forEach(([badgeType, data]) => {
       // Clean up data for submission (remove unnecessary fields if needed, but API usually handles it)
       const payload = {
-        status: data.status,
-        is_active: data.is_active,
-        staff_comment: data.staff_comment
+        is_active: data.is_active
       };
 
       promises.push(saveBadgeMutation.mutateAsync({ badgeType, data: payload }));
@@ -284,115 +273,66 @@ function ClientBadgeDrawer({ client, open, onClose }) {
           <p className="text-sm text-slate-500">{client.client_id}</p>
         </SheetHeader>
 
-        <div className="space-y-6 py-6">
+        <div className="space-y-4 py-6">
           {/* Account Status Section */}
-          <div className="border-2 border-slate-300 rounded-lg p-4 bg-slate-50">
-            <div className="flex items-start gap-4">
-              <div className={`w-12 h-12 ${accountStatus === 'hold' ? 'bg-red-600' : 'bg-emerald-600'} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                {accountStatus === 'hold' ? (
-                  <AlertCircle className="w-6 h-6 text-white" />
-                ) : (
-                  <CheckCircle className="w-6 h-6 text-white" />
-                )}
-              </div>
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-[#1e3a5f]">Account Status</h3>
-                  <Badge className={accountStatus === 'hold' ? 'bg-red-600' : 'bg-emerald-600'}>
-                    {accountStatus === 'hold' ? 'ON HOLD' : 'ACTIVE'}
-                  </Badge>
-                </div>
+          <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-900">Account Status</h3>
+              <Badge variant="outline" className={accountStatus === 'hold' ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}>
+                {accountStatus === 'hold' ? 'On Hold' : 'Active'}
+              </Badge>
+            </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm text-slate-700">Status</Label>
-                  <Select value={accountStatus} onValueChange={setAccountStatus}>
-                    <SelectTrigger className="bg-white border-slate-300">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active - Can create orders</SelectItem>
-                      <SelectItem value="hold">Hold - Cannot create orders</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-3">
+              <Select value={accountStatus} onValueChange={setAccountStatus}>
+                <SelectTrigger className="bg-white border-slate-300">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active - Can create orders</SelectItem>
+                  <SelectItem value="hold">Hold - Cannot create orders</SelectItem>
+                </SelectContent>
+              </Select>
 
-                {accountStatus === 'hold' && (
-                  <div className="space-y-2">
-                    <Label className="text-sm text-slate-700">Hold Reason</Label>
-                    <Textarea
-                      value={holdReason}
-                      onChange={(e) => setHoldReason(e.target.value)}
-                      placeholder="Explain why the account is on hold..."
-                      className="bg-white border-slate-300"
-                      rows={2}
-                    />
-                  </div>
-                )}
-              </div>
+              {accountStatus === 'hold' && (
+                <Textarea
+                  value={holdReason}
+                  onChange={(e) => setHoldReason(e.target.value)}
+                  placeholder="Reason for hold..."
+                  className="bg-white border-slate-300"
+                  rows={2}
+                />
+              )}
             </div>
           </div>
 
+          {/* Badges */}
           {BADGE_TYPES.map((badgeType) => {
             const badgeData = getBadgeData(badgeType.value);
-            const statusConfig = STATUS_CONFIG[badgeData.status];
+
             const Icon = badgeType.icon;
 
             return (
-              <div key={badgeType.value} className={`border rounded-lg p-4 ${badgeData.is_active && badgeData.status === 'need_signing' ? 'border-red-500 bg-red-50' : 'border-slate-200'}`}>
-                <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 ${badgeType.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-[#1e3a5f]">{badgeType.label}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-600">Active</span>
-                        <Switch
-                          checked={badgeData.is_active}
-                          onCheckedChange={(checked) => updateBadge(badgeType.value, { is_active: checked })}
-                        />
+              <div key={badgeType.value} className="bg-white rounded-xl p-5 border border-slate-200 hover:border-slate-300 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${badgeData.is_active ? 'bg-[#1e3a5f]' : 'bg-slate-200'}`}>
+                      <Icon className={`w-5 h-5 ${badgeData.is_active ? 'text-white' : 'text-slate-400'}`} />
+                    </div>
+                    <div>
+                      <div className="font-medium text-slate-900">{badgeType.label}</div>
+                      <div className="text-sm text-slate-500">
+                        {badgeData.is_active ? 'Visible to client' : 'Hidden from client'}
                       </div>
                     </div>
-
-                    {badgeData.is_active && (
-                      <>
-                        <div className="space-y-2">
-                          <Label className="text-sm text-slate-700">Status</Label>
-                          <Select
-                            value={badgeData.status}
-                            onValueChange={(value) => updateBadge(badgeType.value, { status: value })}
-                          >
-                            <SelectTrigger className="bg-white border-slate-300">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                                <SelectItem key={key} value={key}>
-                                  <div className="flex items-center gap-2">
-                                    {config.icon && <config.icon className="w-3 h-3" />}
-                                    {config.label}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-sm text-slate-700">Staff Comment</Label>
-                          <Textarea
-                            value={badgeData.staff_comment || ''}
-                            onChange={(e) => updateBadge(badgeType.value, { staff_comment: e.target.value })}
-                            placeholder="Add notes or instructions for the client..."
-                            className="bg-white border-slate-300"
-                            rows={2}
-                          />
-                        </div>
-                      </>
-                    )}
                   </div>
+                  <Switch
+                    checked={badgeData.is_active}
+                    onCheckedChange={(checked) => updateBadge(badgeType.value, { is_active: checked })}
+                  />
                 </div>
+
+
               </div>
             );
           })}
