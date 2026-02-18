@@ -28,7 +28,7 @@ export default function CancelledOrders() {
   const cancelledOrders = useMemo(() => {
     // Map API camelCase to UI snake_case
     return orders
-      .filter(o => o.status === 'canceled' || o.status === 'cancelled') // Handle both spellings
+      .filter(o => o.status === 'canceled' || o.status === 'cancelled' || o.status === 'client_canceled') // Handle both spellings
       .map(o => ({
         ...o,
         // UI fields mapping

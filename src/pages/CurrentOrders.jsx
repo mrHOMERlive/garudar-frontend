@@ -46,10 +46,11 @@ export default function CurrentOrders() {
         return false;
       }
       // Only show active orders
-      return o.status !== 'canceled' && 
-             !o.executed && 
-             !o.deleted &&
-             o.status !== 'released';
+      return o.status !== 'cancelled' &&
+        o.status !== 'client_canceled' &&
+        !o.executed &&
+        !o.deleted &&
+        o.status !== 'released';
     });
   }, [orders, myClient]);
 
@@ -59,7 +60,7 @@ export default function CurrentOrders() {
       if (search) {
         const s = search.toLowerCase();
         return order.orderId?.toLowerCase().includes(s) ||
-               order.beneficiaryName?.toLowerCase().includes(s);
+          order.beneficiaryName?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -88,8 +89,8 @@ export default function CurrentOrders() {
   };
 
   const toggleOrderSelection = (orderId) => {
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
@@ -107,7 +108,7 @@ export default function CurrentOrders() {
     if (!selectedOrders.length) return;
     try {
       await Promise.all(
-        selectedOrders.map(id => 
+        selectedOrders.map(id =>
           apiClient.updateOrder(id, { status: 'canceled' })
         )
       );
@@ -123,7 +124,7 @@ export default function CurrentOrders() {
     if (!selectedOrders.length) return;
     try {
       await Promise.all(
-        selectedOrders.map(id => 
+        selectedOrders.map(id =>
           apiClient.updateOrder(id, { deleted: true })
         )
       );
@@ -147,9 +148,9 @@ export default function CurrentOrders() {
                 </Button>
               </Link>
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                  alt="Logo" 
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -238,7 +239,7 @@ export default function CurrentOrders() {
                 </TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3">Order ID</TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3">
-                  <button 
+                  <button
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-slate-700 transition-colors"
                   >
@@ -272,8 +273,8 @@ export default function CurrentOrders() {
                   </TableCell>
                 </TableRow>
               ) : paginatedOrders.map((order) => (
-                <TableRow 
-                  key={order.orderId} 
+                <TableRow
+                  key={order.orderId}
                   className="hover:bg-blue-50/50 transition-colors border-b border-slate-100 last:border-0"
                 >
                   <TableCell className="pl-6 py-4" onClick={(e) => e.stopPropagation()}>

@@ -44,9 +44,9 @@ export default function UserDashboard() {
 
   const stats = {
     total: orders.length,
-    current: orders.filter(o => !o.deleted && !o.executed && o.status !== 'canceled' && o.status !== 'released').length,
+    current: orders.filter(o => !o.deleted && !o.executed && o.status !== 'canceled' && o.status !== 'client_canceled' && o.status !== 'released').length,
     executed: orders.filter(o => o.executed || o.status === 'released').length,
-    cancelled: orders.filter(o => o.status === 'canceled' && !o.deleted).length,
+    cancelled: orders.filter(o => (o.status === 'canceled' || o.status === 'client_canceled') && !o.deleted).length,
     deleted: orders.filter(o => o.deleted).length,
     labels: {
       total: t('totalOrders'),
@@ -261,7 +261,7 @@ export default function UserDashboard() {
               if (!kycBadge?.is_active) return null;
 
               const kycStatus = client?.kyc_status;
-              const needsAttention = kycStatus === 'needs_fix' || kycStatus === 'in_progress' || kycStatus === 'created';
+              const needsAttention = kycStatus === 'needs_fix' || kycStatus === 'in_progress' || kycStatus === 'created' || kycStatus === 'rejected';
 
               return (
                 <Link to={createPageUrl('ClientKYC')}>

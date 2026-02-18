@@ -62,9 +62,19 @@ export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycPr
 
   const handleUpdateUBO = async (uboId, field, value) => {
     try {
-      await apiClient.updateUbo(clientId, uboId, { [field]: value });
+      const currentUbo = ubos.find(u => u.id === uboId);
+      const payload = {
+        ubo_name: currentUbo?.ubo_name,
+        shareholding_percent: currentUbo?.shareholding_percent,
+        nationality: currentUbo?.nationality,
+        residence_country: currentUbo?.residence_country,
+        [field]: value
+      };
+
+      await apiClient.updateUbo(clientId, uboId, payload);
       queryClient.invalidateQueries(['ubos']);
     } catch (error) {
+      console.error('Update failed:', error);
       toast.error(language === 'en' ? 'Failed to update' : 'Gagal memperbarui');
     }
   };
@@ -163,8 +173,19 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
                 min="0"
                 max="100"
                 value={localState.shareholding_percent}
-                onChange={(e) => handleChange('shareholding_percent', parseFloat(e.target.value))}
-                onBlur={(e) => handleBlur('shareholding_percent', parseFloat(e.target.value))}
+                onChange={(e) => {
+                  let val = e.target.value;
+                  if (parseFloat(val) > 100) val = "100";
+                  if (parseFloat(val) < 0) val = "0";
+                  handleChange('shareholding_percent', val);
+                }}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  const finalVal = isNaN(val) ? 0 : val;
+                  handleBlur('shareholding_percent', finalVal);
+                  // Normalize display value
+                  handleChange('shareholding_percent', finalVal);
+                }}
               />
             </div>
             <div>
@@ -179,8 +200,14 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
                 <CountrySelector
                   value={localState.residence_country}
                   onChange={(value) => {
-                    handleChange('residence_country', value);
-                    handleBlur('residence_country', value); // Select updates immediately usually
+                    // Ensure we send the code, not the name
+                    let finalValue = value;
+                    const countryObj = countries.find(c => c.name === value || c.code === value);
+                    if (countryObj) {
+                      finalValue = countryObj.code;
+                    }
+                    handleChange('residence_country', finalValue);
+                    handleBlur('residence_country', finalValue);
                   }}
                   language={language}
                   countries={countries}

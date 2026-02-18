@@ -289,7 +289,7 @@ class ApiClient {
     }
 
     async cancelOrder(orderId) {
-        return this.updateOrder(orderId, { status: 'canceled' });
+        return this.updateOrder(orderId, { status: 'client_canceled' });
     }
 
     async createOrUpdateOrderTerms(orderId, termsData) {

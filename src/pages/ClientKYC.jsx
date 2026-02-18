@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // client import
 import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,6 +20,7 @@ export default function ClientKYC() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
   const language = getLanguage();
+  const navigate = useNavigate();
 
   // 1. Get Current User
   const { data: user, isLoading: userLoading } = useQuery({
@@ -147,6 +148,7 @@ export default function ClientKYC() {
       queryClient.invalidateQueries(['kycProfile']);
       queryClient.invalidateQueries(['currentClient']);
       toast.success('KYC submitted for review!');
+      navigate(createPageUrl('UserDashboard'));
     },
     onError: (err) => {
       toast.error('Failed to submit: ' + err.message);
@@ -160,6 +162,11 @@ export default function ClientKYC() {
   const handleSaveProgress = async () => {
     // Merge current kycData with local formData state
     return saveKYCMutation.mutateAsync({ ...kycData, ...formData });
+  };
+
+  const handleStepChange = (step) => {
+    handleSaveProgress();
+    setCurrentStep(step);
   };
 
   const handleSubmit = () => {
@@ -287,7 +294,7 @@ export default function ClientKYC() {
           {steps.map((step, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrentStep(idx)}
+              onClick={() => handleStepChange(idx)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${idx === currentStep
                 ? 'bg-[#1e3a5f] text-white'
                 : 'bg-white text-slate-600 hover:bg-slate-100'
@@ -315,7 +322,7 @@ export default function ClientKYC() {
         <div className="flex justify-between mt-6">
           <Button
             variant="outline"
-            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+            onClick={() => handleStepChange(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
           >
             {language === 'en' ? 'Previous' : 'Sebelumnya'}
@@ -332,7 +339,7 @@ export default function ClientKYC() {
 
             {currentStep < steps.length - 1 ? (
               <Button
-                onClick={() => setCurrentStep(currentStep + 1)}
+                onClick={() => handleStepChange(currentStep + 1)}
                 className="bg-[#1e3a5f] hover:bg-[#152a45]"
               >
                 {language === 'en' ? 'Next' : 'Selanjutnya'}
@@ -340,7 +347,7 @@ export default function ClientKYC() {
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={submitKYCMutation.isPending || (!kycData?.profile_id && !saveKYCMutation.isSuccess)}
+                disabled={submitKYCMutation.isPending || (!kycData?.profile_id && !saveKYCMutation.isSuccess) || !formData.declaration_confirmed}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Send className="w-4 h-4 mr-2" />
