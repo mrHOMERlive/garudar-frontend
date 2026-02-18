@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, Upload, Download, CheckCircle, AlertCircle,
-  Clock, FileText, Users
+  Clock, FileText, Users, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -26,6 +26,7 @@ const DEFAULT_MASTER_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/
 
 export default function StaffServiceAgreement() {
   const [uploadingMaster, setUploadingMaster] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [editingComment, setEditingComment] = useState('');
   const queryClient = useQueryClient();
@@ -66,13 +67,13 @@ export default function StaffServiceAgreement() {
 
     setUploadingMaster(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await apiClient.uploadFile(file);
       toast.success('Master document uploaded');
 
       // Update all active badges with new master document
       const activeBadges = badges.filter(b => b.is_active);
       for (const badge of activeBadges) {
-        await base44.entities.ClientRequestBadge.update(badge.id, {
+        await apiClient.updateBadge(badge.id, {
           document_url: file_url
         });
       }
@@ -81,6 +82,32 @@ export default function StaffServiceAgreement() {
       toast.error('Failed to upload master document');
     } finally {
       setUploadingMaster(false);
+    }
+  };
+
+  const handleDownloadMaster = async () => {
+    setIsGenerating(true);
+    try {
+      // Generate empty template
+      const blob = await apiClient.generateServiceAgreement({
+        fields: {},
+        upload_to_s3: false
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Service_Agreement_Master.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success('Master Agreement generated successfully');
+    } catch (error) {
+      console.error('Failed to generate agreement:', error);
+      toast.error('Failed to generate Master Agreement');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -201,32 +228,19 @@ export default function StaffServiceAgreement() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <label className="flex-1">
-                <input
-                  type="file"
-                  onChange={handleUploadMaster}
-                  className="hidden"
-                  accept=".pdf,.doc,.docx"
-                  disabled={uploadingMaster}
-                />
-                <Button
-                  variant="outline"
-                  disabled={uploadingMaster}
-                  onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                  className="w-full"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploadingMaster ? 'Uploading...' : 'Upload New Master Document'}
-                </Button>
-              </label>
-              <a href={DEFAULT_MASTER_URL} download>
-                <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={handleDownloadMaster}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
                   <Download className="w-4 h-4 mr-2" />
-                  Download Current
-                </Button>
-              </a>
+                )}
+                {isGenerating ? 'Generating...' : 'Download Current Template'}
+              </Button>
             </div>
-            <p className="text-xs text-slate-600 mt-2">Upload a new master document to replace the current one for all active badges</p>
           </CardContent>
         </Card>
 
@@ -250,27 +264,7 @@ export default function StaffServiceAgreement() {
                           <div className="text-sm text-slate-600">{client.client_mail}</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {badge ? (
-                          <>
-                            {getStatusBadge(badge.status)}
-                            <Button
-                              size="sm"
-                              variant={badge.is_active ? "default" : "outline"}
-                              onClick={() => handleToggleActive(badge.id, badge.is_active)}
-                            >
-                              {badge.is_active ? 'Active' : 'Inactive'}
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => handleCreateForClient(client.client_id)}
-                          >
-                            Create Badge
-                          </Button>
-                        )}
-                      </div>
+
                     </div>
 
                     {badge && (
@@ -297,14 +291,6 @@ export default function StaffServiceAgreement() {
                           <div>
                             <Label className="text-xs text-slate-600">Documents</Label>
                             <div className="flex gap-2 mt-1">
-                              {badge.document_url && (
-                                <a href={badge.document_url} target="_blank" rel="noopener noreferrer">
-                                  <Button size="sm" variant="outline">
-                                    <Download className="w-3 h-3 mr-1" />
-                                    Master
-                                  </Button>
-                                </a>
-                              )}
                               {badge.submitted_document_url && (
                                 <a href={badge.submitted_document_url} target="_blank" rel="noopener noreferrer">
                                   <Button size="sm" variant="outline">

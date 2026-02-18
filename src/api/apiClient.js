@@ -749,6 +749,36 @@ class ApiClient {
         // Uses the upsert endpoint
         return this.updateClientBadge(clientId, 'service_agreement', data);
     }
+
+    async generateServiceAgreement(data, clientId = null) {
+        const queryParams = new URLSearchParams();
+        if (clientId) {
+            queryParams.append('client_id', clientId);
+        }
+        const queryString = queryParams.toString();
+
+        const token = this.getAccessToken();
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${this.baseUrl}/service-agreement/generate${queryString ? `?${queryString}` : ''}`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to generate Service Agreement');
+        }
+
+        // Return blob for download
+        return response.blob();
+    }
 }
 
 export const apiClient = new ApiClient();

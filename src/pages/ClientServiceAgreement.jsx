@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Download, Upload, CheckCircle, AlertCircle, FileText, ArrowLeft } from 'lucide-react';
+import { Download, Upload, CheckCircle, AlertCircle, FileText, ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SERVICE_AGREEMENT_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/3d1a5e4fc_ServiceAgreement-GAN02022026.docx';
 
 export default function ClientServiceAgreement() {
   const [uploading, setUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: client } = useQuery({
@@ -62,6 +63,34 @@ export default function ClientServiceAgreement() {
       await uploadMutation.mutateAsync(file);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!client) return;
+    setIsGenerating(true);
+    try {
+      // We pass empty fields because the backend should have logic to fill them
+      // based on the client_id, or we might need to update this later if specific fields are required frontend-side.
+      const blob = await apiClient.generateServiceAgreement({
+        fields: {},
+        upload_to_s3: false
+      }, client.client_id);
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Service_Agreement_${client.client_name?.replace(/\s+/g, '_') || 'Client'}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success('Service Agreement generated successfully');
+    } catch (error) {
+      console.error('Failed to generate agreement:', error);
+      toast.error('Failed to generate Service Agreement');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -179,12 +208,18 @@ export default function ClientServiceAgreement() {
                   <div className="text-sm text-slate-600">DOCX Document</div>
                 </div>
               </div>
-              <a href={SERVICE_AGREEMENT_URL} download>
-                <Button className="bg-[#1e3a5f] hover:bg-[#152a45]">
+              <Button
+                onClick={handleDownload}
+                disabled={isGenerating}
+                className="bg-[#1e3a5f] hover:bg-[#152a45]"
+              >
+                {isGenerating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
                   <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-              </a>
+                )}
+                {isGenerating ? 'Generating...' : 'Download'}
+              </Button>
             </div>
             {badge?.document_url && badge.document_url !== SERVICE_AGREEMENT_URL && (
               <div className="mt-4">
