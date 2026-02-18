@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png";
+const LOGO_URL = "/gan.png";
 
 export default function PublicHeader({ language, setLanguage }) {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function PublicHeader({ language, setLanguage }) {
   const handleStaffClick = (e) => {
     e.preventDefault();
     const savedUser = localStorage.getItem('gtrans_user');
-    
+
     if (savedUser) {
       const userData = JSON.parse(savedUser);
       if (userData.role === 'ADMIN') {

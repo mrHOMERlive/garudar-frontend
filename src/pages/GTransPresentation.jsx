@@ -3,14 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from 'framer-motion';
-import { 
-  Lock, ArrowRight, ArrowLeft, Building2, Globe, Workflow, 
+import {
+  Lock, ArrowRight, ArrowLeft, Building2, Globe, Workflow,
   Users, Shield, Zap, CreditCard, ShoppingCart, RefreshCw,
   CheckCircle, MapPin, Calendar, FileText, Code, Mail, Phone
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png";
+const LOGO_URL = "/gan.png";
 const PRESENTATION_PASSWORD = 'gtrans2026';
 
 export default function GTransPresentation() {
@@ -24,12 +24,12 @@ export default function GTransPresentation() {
     if (sessionAuth === 'true') {
       setAuthenticated(true);
     }
-    
+
     const meta = document.createElement('meta');
     meta.name = 'robots';
     meta.content = 'noindex, nofollow';
     document.head.appendChild(meta);
-    
+
     return () => {
       document.head.removeChild(meta);
     };
@@ -161,7 +161,7 @@ export default function GTransPresentation() {
         <div className="min-h-screen bg-slate-50 p-8 md:p-16">
           <h2 className="text-4xl font-bold text-[#1e3a5f] mb-4">Product Portfolio</h2>
           <p className="text-slate-600 mb-12">Operating under Bank Indonesia's PSP licensing framework</p>
-          
+
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
               {
@@ -217,7 +217,7 @@ export default function GTransPresentation() {
               <img src={LOGO_URL} alt="GTrans" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-4xl font-bold mb-8">Let's Connect</h2>
-            
+
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               <div className="bg-white/10 rounded-xl p-6">
                 <Mail className="w-8 h-8 mx-auto mb-4" />
@@ -235,7 +235,7 @@ export default function GTransPresentation() {
                 <div className="text-slate-300">Batam, Indonesia</div>
               </div>
             </div>
-            
+
             <p className="text-slate-400 text-sm">
               PRIVATE & CONFIDENTIAL • PT Garuda Arma Nusa • 2026
             </p>

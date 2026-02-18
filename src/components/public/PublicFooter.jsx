@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Mail, Phone, MessageCircle, MapPin, Linkedin, Globe } from 'lucide-react';
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png";
+const LOGO_URL = "/gan.png";
 
 export default function PublicFooter({ language, setLanguage }) {
   const currentYear = new Date().getFullYear();

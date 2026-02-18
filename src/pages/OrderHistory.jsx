@@ -45,7 +45,7 @@ export default function OrderHistory() {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        const matchesSearch = 
+        const matchesSearch =
           order.orderId?.toLowerCase().includes(searchLower) ||
           order.beneficiaryName?.toLowerCase().includes(searchLower) ||
           order.bankBic?.toLowerCase().includes(searchLower) ||
@@ -143,9 +143,9 @@ export default function OrderHistory() {
                 </Button>
               </Link>
               <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2.5 shadow-lg">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                  alt="Logo" 
+                <img
+                  src="/gan.png"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -212,7 +212,7 @@ export default function OrderHistory() {
             </div>
             <h3 className="text-lg font-semibold text-slate-800 mb-2">No orders yet</h3>
             <p className="text-slate-600 mb-6">
-              {orders.length === 0 
+              {orders.length === 0
                 ? "Create your first remittance order to get started."
                 : "No orders match your current filters."}
             </p>
@@ -231,8 +231,8 @@ export default function OrderHistory() {
           </div>
         ) : (
           <>
-            <OrdersTable 
-              orders={paginatedOrders} 
+            <OrdersTable
+              orders={paginatedOrders}
               onViewDetails={handleViewDetails}
               onDelete={handleDelete}
             />
@@ -242,12 +242,12 @@ export default function OrderHistory() {
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
-                  
+
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
                     // Show first, last, and pages around current
@@ -279,7 +279,7 @@ export default function OrderHistory() {
                   })}
 
                   <PaginationItem>
-                    <PaginationNext 
+                    <PaginationNext
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />

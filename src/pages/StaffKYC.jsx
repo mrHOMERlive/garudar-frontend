@@ -22,7 +22,7 @@ export default function StaffKYC() {
   const { data: searchResults = [], isLoading, refetch } = useQuery({
     queryKey: ['kycSearch', searchQuery, activeTab, searchAllData],
     queryFn: () => apiClient.searchEntries(
-      searchQuery, 
+      searchQuery,
       activeTab === 'individual' ? 1 : 2,
       searchAllData ? '1' : '0'
     ),
@@ -46,9 +46,9 @@ export default function StaffKYC() {
                   </Button>
                 </Link>
                 <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                    alt="Logo" 
+                  <img
+                    src="/gan.png"
+                    alt="Logo"
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -71,8 +71,8 @@ export default function StaffKYC() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setSelectedRecord(null)}
             className="mb-6"
           >
@@ -97,8 +97,8 @@ export default function StaffKYC() {
                   <div>
                     <h2 className="text-3xl font-bold text-[#1e3a5f] mb-2">{selectedRecord.fullName}</h2>
                     <p className="text-slate-600">
-                      Type: {selectedRecord.entryType === '1' ? 'Individual' : 'Corporate'} | 
-                      Source: {selectedRecord.sourceList} | 
+                      Type: {selectedRecord.entryType === '1' ? 'Individual' : 'Corporate'} |
+                      Source: {selectedRecord.sourceList} |
                       Load Date: {selectedRecord.loadDate ? new Date(selectedRecord.loadDate).toLocaleDateString() : '-'}
                     </p>
                   </div>
@@ -218,9 +218,9 @@ export default function StaffKYC() {
                 </Button>
               </Link>
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png" 
-                  alt="Logo" 
+                <img
+                  src="/gan.png"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -246,7 +246,7 @@ export default function StaffKYC() {
         <Card className="border-slate-200 mb-8">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-[#1e3a5f] mb-6">Search...</h2>
-            
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
               <TabsList className="bg-slate-100">
                 <TabsTrigger value="individual" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
@@ -268,7 +268,7 @@ export default function StaffKYC() {
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 className="flex-1 border-slate-300"
               />
-              <Button 
+              <Button
                 onClick={handleSearch}
                 className="bg-[#1e3a5f] hover:bg-[#152a45]"
               >
@@ -278,8 +278,8 @@ export default function StaffKYC() {
             </div>
 
             <div className="flex items-center gap-2 mt-4">
-              <Checkbox 
-                id="searchAll" 
+              <Checkbox
+                id="searchAll"
                 checked={searchAllData}
                 onCheckedChange={setSearchAllData}
               />
@@ -306,8 +306,8 @@ export default function StaffKYC() {
               </Card>
             ) : (
               searchResults.map((record) => (
-                <Card 
-                  key={record.id} 
+                <Card
+                  key={record.id}
                   className={cn(
                     "border-slate-200 hover:shadow-lg transition-all cursor-pointer",
                     activeTab === 'individual' ? "hover:border-[#1e3a5f]" : "hover:border-[#f5a623]"
@@ -329,8 +329,8 @@ export default function StaffKYC() {
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold text-[#1e3a5f] mb-1">{record.fullName}</h3>
                         <p className="text-sm text-slate-600 mb-2">
-                          Type: {activeTab === 'individual' ? 'Individual' : 'Corporate'} | 
-                          Source: {record.sourceList || '-'} | 
+                          Type: {activeTab === 'individual' ? 'Individual' : 'Corporate'} |
+                          Source: {record.sourceList || '-'} |
                           Load Date: {record.loadDate ? new Date(record.loadDate).toLocaleDateString() : '-'}
                         </p>
                         {record.additionalInfo && (

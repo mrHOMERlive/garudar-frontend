@@ -297,7 +297,7 @@ export default function CreateOrder() {
             <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
                 <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/b1a1be267_gan.png"
+                  src="/gan.png"
                   alt="Logo"
                   className="w-full h-full object-contain"
                 />
