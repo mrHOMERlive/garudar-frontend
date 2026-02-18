@@ -530,16 +530,6 @@ export default function ClientTermsDrawer({ order, client, open, onClose, onUpda
               <X className="w-4 h-4 mr-2" />
               Cancel Order
             </Button>
-            <Button
-              type="button"
-              onClick={() => setShowDeleteDialog(true)}
-              variant="outline"
-              className="flex-1 border-red-500 text-red-600 hover:bg-red-50"
-              disabled={order.status !== 'rejected'}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Order
-            </Button>
           </div>
           <Button
             type="button"
