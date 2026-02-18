@@ -204,15 +204,15 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   }, [terms, open, payeerAccounts]);
 
   useEffect(() => {
-    if (open && order && clientPaymentCurrency && baseCurrency) {
-      const payCur = order.currency;
-
-      if (clientPaymentCurrency === baseCurrency && baseCurrency === payCur) {
+    if (open && order && clientPaymentCurrency) {
+      if (clientPaymentCurrency === order.currency) {
         setConversionMethod('no_conversion');
         setExchangeRate('1');
+      } else {
+        setConversionMethod('executing_bank');
       }
     }
-  }, [clientPaymentCurrency, baseCurrency, order, open]);
+  }, [clientPaymentCurrency, order, open]);
 
   if (!order) return null;
 
@@ -552,24 +552,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-600">Reference Currency</Label>
-                  <Select
-                    value={baseCurrency}
-                    onValueChange={setBaseCurrency}
-                  >
-                    <SelectTrigger className="mt-1 bg-white border-slate-300">
-                      <SelectValue placeholder="USD" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.filter(c => (c.code || c) !== 'RUB').map((c) => (
-                        <SelectItem key={c.code || c} value={c.code || c}>
-                          {c.symbol ? c.symbol + ' ' : ''}{c.code || c} {c.name ? `- ${c.name}` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <Label className="text-xs text-slate-600">Payment Currency</Label>
                   <div className="mt-1 bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-700">
                     {order.currency}
@@ -579,22 +561,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div>
                 <Label className="text-xs text-slate-600">Conversion Method</Label>
-                <Select value={conversionMethod} onValueChange={(val) => {
-                  setConversionMethod(val);
-                  if (val === 'no_conversion') {
-                    setExchangeRate('1');
-                  }
-                }}>
-                  <SelectTrigger className="mt-1 bg-white border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="central_bank">Central Bank Official Rate</SelectItem>
-                    <SelectItem value="executing_bank">Executing Bank Rate</SelectItem>
-                    <SelectItem value="manual">Manual / Other</SelectItem>
-                    <SelectItem value="no_conversion">No Conversion</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="mt-1 bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-700">
+                  {conversionMethod === 'no_conversion' ? 'No Conversion' : 'Executing Bank Rate'}
+                </div>
               </div>
 
               <div>
