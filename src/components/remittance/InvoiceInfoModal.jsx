@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Copy, Mail, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const INVOICE_EMAIL = 'sales@garudar.id';
+const INVOICE_EMAIL = 'info@garudar.id';
 
 export default function InvoiceInfoModal({ open, onClose, orderNumber, invoiceNumber }) {
   const emailSubject = `Invoice ${invoiceNumber} for Order #${orderNumber}`;
@@ -99,7 +99,7 @@ export default function InvoiceInfoModal({ open, onClose, orderNumber, invoiceNu
           </div>
 
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-600">
-            💡 Your order is currently in <span className="font-semibold">Draft</span> status. 
+            💡 Your order is currently in <span className="font-semibold">Draft</span> status.
             It will be processed once we receive your invoice.
           </div>
         </div>
