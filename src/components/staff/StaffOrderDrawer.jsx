@@ -667,12 +667,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               )}
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="text-xs text-slate-600 mb-1">Amount Remuneration</div>
-                <div className="text-lg font-bold text-[#1e3a5f]">
-                  {calculateAmountRemuneration().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
-                </div>
-              </div>
 
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
@@ -681,12 +675,18 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               </div>
 
-
-
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                <div className="text-xs text-slate-600 mb-1">Net to Beneficiary ({order.currency})</div>
-                <div className="text-sm font-bold text-emerald-700">
-                  {Number(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <div className="text-xs text-slate-600 mb-1">Transfer Fee ({order.currency})</div>
+                  <div className="text-sm font-bold text-[#1e3a5f]">
+                    {calculateAmountRemuneration().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                  <div className="text-xs text-slate-600 mb-1">Net to Beneficiary ({order.currency})</div>
+                  <div className="text-sm font-bold text-emerald-700">
+                    {Number(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
                 </div>
               </div>
 
