@@ -63,37 +63,57 @@ export default function StaffActiveOrders() {
   // Состояние для хранения данных клиентов
   const [clientsMap, setClientsMap] = useState({});
 
+  const activeOrders = useMemo(() => {
+    return orders.filter(o => ACTIVE_STATUSES.includes(o.status) && !o.deleted && !o.executed);
+  }, [orders]);
+
   // Получить уникальные client_id из заказов
   const uniqueClientIds = useMemo(() => {
-    return [...new Set(orders.map(o => o.clientId).filter(Boolean))];
-  }, [orders]);
+    return [...new Set(activeOrders.map(o => o.clientId).filter(Boolean))];
+  }, [activeOrders]);
+
+  const isClientsReady = useMemo(() => {
+    if (activeOrders.length === 0) return true;
+    if (uniqueClientIds.length === 0) return true;
+    return uniqueClientIds.every(id => clientsMap[id]);
+  }, [activeOrders, uniqueClientIds, clientsMap]);
 
   // Загрузить данные клиентов при изменении списка
   useEffect(() => {
     const loadClients = async () => {
-      const newClientsMap = {};
-
-      for (const clientId of uniqueClientIds) {
+      const promises = uniqueClientIds.map(async (clientId) => {
         try {
           const clientData = await apiClient.getClientById(clientId);
-          newClientsMap[clientId] = {
-            name: clientData.client_name || clientId,
-            clientId: clientId,
-            country: clientData.client_reg_country || '',
-            email: clientData.client_mail || '',
-            status: clientData.status_sign || ''
+          return {
+            id: clientId,
+            data: {
+              name: clientData.client_name || clientId,
+              clientId: clientId,
+              country: clientData.client_reg_country || '',
+              email: clientData.client_mail || '',
+              status: clientData.status_sign || ''
+            }
           };
         } catch (error) {
           console.error(`Failed to load client ${clientId}:`, error);
-          newClientsMap[clientId] = {
-            name: clientId,
-            clientId: clientId,
-            country: '',
-            email: '',
-            status: ''
+          return {
+            id: clientId,
+            data: {
+              name: clientId,
+              clientId: clientId,
+              country: '',
+              email: '',
+              status: ''
+            }
           };
         }
-      }
+      });
+
+      const results = await Promise.all(promises);
+      const newClientsMap = {};
+      results.forEach(res => {
+        newClientsMap[res.id] = res.data;
+      });
 
       setClientsMap(newClientsMap);
     };
@@ -102,10 +122,6 @@ export default function StaffActiveOrders() {
       loadClients();
     }
   }, [uniqueClientIds]);
-
-  const activeOrders = useMemo(() => {
-    return orders.filter(o => ACTIVE_STATUSES.includes(o.status) && !o.deleted && !o.executed);
-  }, [orders]);
 
   const filteredOrders = useMemo(() => {
     return activeOrders.filter(order => {
@@ -406,7 +422,7 @@ export default function StaffActiveOrders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {isLoading || !isClientsReady ? (
                 <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8 text-xs">Loading...</TableCell></TableRow>
               ) : filteredOrders.length === 0 ? (
                 <TableRow><TableCell colSpan={9} className="text-center text-slate-500 py-8 text-xs">No active orders</TableCell></TableRow>
