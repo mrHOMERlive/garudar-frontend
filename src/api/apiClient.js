@@ -739,6 +739,16 @@ class ApiClient {
             body: JSON.stringify(data),
         });
     }
+
+    // Service Agreements (Staff)
+    async getBadgesByType(type) {
+        return this.request(`/badges?type=${encodeURIComponent(type)}`);
+    }
+
+    async createServiceAgreementBadge(clientId, data) {
+        // Uses the upsert endpoint
+        return this.updateClientBadge(clientId, 'service_agreement', data);
+    }
 }
 
 export const apiClient = new ApiClient();

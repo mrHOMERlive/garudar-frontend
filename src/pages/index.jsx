@@ -58,6 +58,9 @@ import GTransECommerceCollectSettle from "./GTransECommerceCollectSettle";
 
 import GTransMerchantPay from "./GTransMerchantPay";
 
+import StaffServiceAgreement from "./StaffServiceAgreement";
+import ClientServiceAgreement from "./ClientServiceAgreement";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
@@ -123,6 +126,11 @@ const PAGES = {
     GTransECommerceCollectSettle: GTransECommerceCollectSettle,
 
     GTransMerchantPay: GTransMerchantPay,
+
+    StaffServiceAgreement: StaffServiceAgreement,
+
+    ClientServiceAgreement: ClientServiceAgreement,
+
 
 }
 
@@ -215,6 +223,10 @@ function PagesContent() {
                 <Route path="/gtransecommercecollectsettle" element={<GTransECommerceCollectSettle />} />
 
                 <Route path="/gtransmerchantpay" element={<GTransMerchantPay />} />
+
+                <Route path="/staffserviceagreement" element={<RequireAdmin><StaffServiceAgreement /></RequireAdmin>} />
+
+                <Route path="/clientserviceagreement" element={<RequireAuth><ClientServiceAgreement /></RequireAuth>} />
 
             </Routes>
         </Layout>
