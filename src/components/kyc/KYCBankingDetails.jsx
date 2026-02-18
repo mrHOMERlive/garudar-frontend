@@ -18,7 +18,7 @@ export default function KYCBankingDetails({ formData = {}, onChange, language = 
           {language === 'en' ? 'Please provide the full banking details' : 'Harap sediakan detail perbankan lengkap'}
         </p>
       </div>
-      
+
       <div className="grid gap-4">
         <div>
           <Label>3.1 {language === 'en' ? 'Principal Bankers (Name of the Bank)' : 'Bank Utama (Nama Bank)'} *</Label>
@@ -50,7 +50,7 @@ export default function KYCBankingDetails({ formData = {}, onChange, language = 
           />
         </div>
         <div>
-          <Label>3.5 {language === 'en' ? 'Bank Account Name (Beneficiary Name)' : 'Nama Rekening Bank (Nama Penerima)'}</Label>
+          <Label>3.5 {language === 'en' ? 'Bank Account Name' : 'Nama Rekening Bank'}</Label>
           <Input
             value={formData.bank_account_name || ''}
             onChange={(e) => handleChange('bank_account_name', e.target.value)}
