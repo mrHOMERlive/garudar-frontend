@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, CheckCircle, Database, Globe, LogOut, User, FileCheck, Shield, FileSignature } from 'lucide-react';
+import { Users, FileText, CheckCircle, Database, Globe, LogOut, User, FileCheck, Shield, FileSignature, BarChart2 } from 'lucide-react';
 
 const modules = [
   {
@@ -163,6 +163,35 @@ export default function StaffDashboard() {
                   </div>
                   <CardTitle className="text-[#1e3a5f]">KYC Database</CardTitle>
                   <CardDescription className="text-slate-500">Know Your Customer verification database</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* Reports Section */}
+        <div>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">Reports</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link to={createPageUrl('StaffTransactionReport')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-[#1e3a5f] rounded-lg flex items-center justify-center mb-3">
+                    <BarChart2 className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">Transaction Data</CardTitle>
+                  <CardDescription className="text-slate-500">Full transaction database with sort, filter &amp; Excel export</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+            <Link to={createPageUrl('StaffCustomerReport')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-[#f5a623] rounded-lg flex items-center justify-center mb-3">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">Customer Data</CardTitle>
+                  <CardDescription className="text-slate-500">Client &amp; counterparty data with KYC fields &amp; Excel export</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

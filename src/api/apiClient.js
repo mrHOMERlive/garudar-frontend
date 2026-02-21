@@ -776,8 +776,55 @@ class ApiClient {
             throw new Error(errorText || 'Failed to generate Service Agreement');
         }
 
-        // Return blob for download
         return response.blob();
+    }
+    // Reports
+    async getCustomerReports(sort = '-created_date') {
+        return this.request(`/customer-report?sort=${encodeURIComponent(sort)}`);
+    }
+
+    async createCustomerReport(data) {
+        return this.request('/customer-report', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateCustomerReport(id, data) {
+        return this.request(`/customer-report/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteCustomerReport(id) {
+        return this.request(`/customer-report/${id}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getTransactionReports(sort = '-date') {
+        return this.request(`/transaction-report?sort=${encodeURIComponent(sort)}`);
+    }
+
+    async createTransactionReport(data) {
+        return this.request('/transaction-report', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateTransactionReport(id, data) {
+        return this.request(`/transaction-report/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteTransactionReport(id) {
+        return this.request(`/transaction-report/${id}`, {
+            method: 'DELETE',
+        });
     }
 }
 

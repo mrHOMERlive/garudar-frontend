@@ -60,6 +60,8 @@ import GTransMerchantPay from "./GTransMerchantPay";
 
 import StaffServiceAgreement from "./StaffServiceAgreement";
 import ClientServiceAgreement from "./ClientServiceAgreement";
+import StaffCustomerReport from "./StaffCustomerReport";
+import StaffTransactionReport from "./StaffTransactionReport";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -130,6 +132,10 @@ const PAGES = {
     StaffServiceAgreement: StaffServiceAgreement,
 
     ClientServiceAgreement: ClientServiceAgreement,
+
+    StaffCustomerReport: StaffCustomerReport,
+
+    StaffTransactionReport: StaffTransactionReport,
 
 
 }
@@ -227,6 +233,10 @@ function PagesContent() {
                 <Route path="/staffserviceagreement" element={<RequireAdmin><StaffServiceAgreement /></RequireAdmin>} />
 
                 <Route path="/clientserviceagreement" element={<RequireAuth><ClientServiceAgreement /></RequireAuth>} />
+
+                <Route path="/staffcustomerreport" element={<RequireAdmin><StaffCustomerReport /></RequireAdmin>} />
+
+                <Route path="/stafftransactionreport" element={<RequireAdmin><StaffTransactionReport /></RequireAdmin>} />
 
             </Routes>
         </Layout>
