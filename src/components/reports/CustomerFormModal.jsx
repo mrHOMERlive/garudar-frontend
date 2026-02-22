@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const EMPTY = {
@@ -33,6 +33,9 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{record ? 'Edit Customer Record' : 'Add Customer Record'}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Form to {record ? 'edit' : 'add'} a customer record
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={e => { e.preventDefault(); saveMutation.mutate(form); }} className="grid grid-cols-2 gap-4 pt-2">
           <div className="space-y-1">
@@ -79,15 +82,15 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="space-y-1">
             <Label>Legal/Tax Number</Label>
-            <Input value={form.legal_tax_number} onChange={e => set('legal_tax_number', e.target.value)} />
+            <Input value={form.legal_tax_number || ''} onChange={e => set('legal_tax_number', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Name *</Label>
-            <Input value={form.name} onChange={e => set('name', e.target.value)} required />
+            <Input value={form.name || ''} onChange={e => set('name', e.target.value)} required />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Address</Label>
-            <Input value={form.address} onChange={e => set('address', e.target.value)} />
+            <Input value={form.address || ''} onChange={e => set('address', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Business Area</Label>
@@ -95,7 +98,7 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="space-y-1">
             <Label>Director Name</Label>
-            <Input value={form.director_name} onChange={e => set('director_name', e.target.value)} />
+            <Input value={form.director_name || ''} onChange={e => set('director_name', e.target.value)} />
           </div>
           <div className="flex flex-col gap-3 justify-center">
             <div className="flex items-center gap-2">

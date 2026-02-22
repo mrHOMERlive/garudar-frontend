@@ -49,6 +49,7 @@ export default function StaffCustomerReport() {
   const [editingRecord, setEditingRecord] = useState(null);
 
   const { data: records = [], isLoading } = useQuery({
+    queryKey: ['customer-reports'],
     queryFn: () => apiClient.getCustomerReports('-created_date')
   });
 
@@ -196,7 +197,7 @@ export default function StaffCustomerReport() {
                   <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">No records found</td></tr>
                 ) : paged.map(row => (
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2.5 font-mono text-xs text-slate-400 whitespace-nowrap">{row.id?.substring(0, 8)}…</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-slate-400 whitespace-nowrap">{String(row.id).substring(0, 8)}…</td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
                       <span className={`px-1.5 py-0.5 rounded text-xs font-medium capitalize ${TYPE_BADGE[row.customer_type] || 'bg-slate-100 text-slate-600'}`}>{row.customer_type}</span>
                     </td>
@@ -247,9 +248,11 @@ export default function StaffCustomerReport() {
         </div>
       </div>
 
-      {showModal && (
-        <CustomerFormModal record={editingRecord} onClose={() => setShowModal(false)} onSaved={onSaved} />
-      )}
-    </div>
+      {
+        showModal && (
+          <CustomerFormModal record={editingRecord} onClose={() => setShowModal(false)} onSaved={onSaved} />
+        )
+      }
+    </div >
   );
 }

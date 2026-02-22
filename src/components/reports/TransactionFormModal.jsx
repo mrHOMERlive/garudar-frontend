@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const EMPTY = {
@@ -47,17 +47,20 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{record ? 'Edit Transaction Record' : 'Add Transaction Record'}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Form to {record ? 'edit' : 'add'} a transaction record
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 pt-2">
 
           {/* Basic */}
           <div className="space-y-1">
             <Label>Transaction ID *</Label>
-            <Input value={form.transaction_id} onChange={e => set('transaction_id', e.target.value)} required />
+            <Input value={form.transaction_id || ''} onChange={e => set('transaction_id', e.target.value)} required />
           </div>
           <div className="space-y-1">
             <Label>Date *</Label>
-            <Input type="date" value={form.date} onChange={e => set('date', e.target.value)} required />
+            <Input type="date" value={form.date || ''} onChange={e => set('date', e.target.value)} required />
           </div>
 
           {/* Sender */}
@@ -66,27 +69,27 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="space-y-1">
             <Label>Sender Name</Label>
-            <Input value={form.sender_name} onChange={e => set('sender_name', e.target.value)} />
+            <Input value={form.sender_name || ''} onChange={e => set('sender_name', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Sender Address</Label>
-            <Input value={form.sender_address} onChange={e => set('sender_address', e.target.value)} />
+            <Input value={form.sender_address || ''} onChange={e => set('sender_address', e.target.value)} />
           </div>
           <div className="space-y-1">
             <Label>Sender Bank BIC</Label>
-            <Input value={form.sender_bank_bic} onChange={e => set('sender_bank_bic', e.target.value)} placeholder="e.g. BMRIIDJAXXX" />
+            <Input value={form.sender_bank_bic || ''} onChange={e => set('sender_bank_bic', e.target.value)} placeholder="e.g. BMRIIDJAXXX" />
           </div>
           <div className="space-y-1">
             <Label>Sender Bank Name</Label>
-            <Input value={form.sender_bank_name} onChange={e => set('sender_bank_name', e.target.value)} placeholder="e.g. PT Bank Mandiri" />
+            <Input value={form.sender_bank_name || ''} onChange={e => set('sender_bank_name', e.target.value)} placeholder="e.g. PT Bank Mandiri" />
           </div>
           <div className="space-y-1">
             <Label>Account Holder Name</Label>
-            <Input value={form.account_holder_name} onChange={e => set('account_holder_name', e.target.value)} placeholder="e.g. PT Garuda Arma Nusa" />
+            <Input value={form.account_holder_name || ''} onChange={e => set('account_holder_name', e.target.value)} placeholder="e.g. PT Garuda Arma Nusa" />
           </div>
           <div className="space-y-1">
             <Label>Account Number</Label>
-            <Input value={form.account_number} onChange={e => set('account_number', e.target.value)} />
+            <Input value={form.account_number || ''} onChange={e => set('account_number', e.target.value)} />
           </div>
 
           {/* Transaction */}
@@ -106,11 +109,11 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="space-y-1">
             <Label>Transaction Purpose</Label>
-            <Input value={form.transaction_purpose} onChange={e => set('transaction_purpose', e.target.value)} placeholder="e.g. goods, services, grants…" />
+            <Input value={form.transaction_purpose || ''} onChange={e => set('transaction_purpose', e.target.value)} placeholder="e.g. goods, services, grants…" />
           </div>
           <div className="space-y-1">
             <Label>Currency</Label>
-            <Input value={form.currency} onChange={e => set('currency', e.target.value)} placeholder="USD, EUR, IDR…" />
+            <Input value={form.currency || ''} onChange={e => set('currency', e.target.value)} placeholder="USD, EUR, IDR…" />
           </div>
           <div className="space-y-1">
             <Label>Amount</Label>
@@ -127,11 +130,11 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="space-y-1">
             <Label>Recipient Name</Label>
-            <Input value={form.recipient_name} onChange={e => set('recipient_name', e.target.value)} />
+            <Input value={form.recipient_name || ''} onChange={e => set('recipient_name', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Recipient Address</Label>
-            <Input value={form.recipient_address} onChange={e => set('recipient_address', e.target.value)} />
+            <Input value={form.recipient_address || ''} onChange={e => set('recipient_address', e.target.value)} />
           </div>
 
           {/* Compliance */}
