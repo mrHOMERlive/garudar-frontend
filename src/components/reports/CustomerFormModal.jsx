@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 const EMPTY = {
   customer_type: '', registration_number: '', tax_number: '',
   legal_tax_number_type: '', legal_tax_number: '',
-  name: '', address: '', indonesian_citizenship: false,
-  director_name: '', pep_indicator: false, code_type: '', business_area: ''
+  name: '', birth_place_date: '', address: '', indonesian_citizenship: false,
+  director_name: '', occupation: '', gender: '', phone_number: '',
+  recipient_name: '', recipient_address: '',
+  pep_indicator: false, code_type: '', business_area: ''
 };
 
 export default function CustomerFormModal({ record, onClose, onSaved }) {
@@ -85,12 +87,42 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
             <Input value={form.legal_tax_number || ''} onChange={e => set('legal_tax_number', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>Name *</Label>
+            <Label>Name (Nama Pengirim) *</Label>
             <Input value={form.name || ''} onChange={e => set('name', e.target.value)} required />
           </div>
+          <div className="space-y-1">
+            <Label>Tempat & Tanggal Lahir</Label>
+            <Input value={form.birth_place_date || ''} onChange={e => set('birth_place_date', e.target.value)} placeholder="e.g. Jakarta, 05-01-1990" />
+          </div>
+          <div className="space-y-1">
+            <Label>Pekerjaan (Occupation)</Label>
+            <Input value={form.occupation || ''} onChange={e => set('occupation', e.target.value)} placeholder="e.g. Wiraswasta, PNS…" />
+          </div>
+          <div className="space-y-1">
+            <Label>Jenis Kelamin (Gender)</Label>
+            <Select value={form.gender || ''} onValueChange={v => set('gender', v)}>
+              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="L">L (Laki-laki)</SelectItem>
+                <SelectItem value="P">P (Perempuan)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label>No. Telepon</Label>
+            <Input value={form.phone_number || ''} onChange={e => set('phone_number', e.target.value)} placeholder="e.g. 08123456789" />
+          </div>
           <div className="col-span-2 space-y-1">
-            <Label>Address</Label>
+            <Label>Alamat (Address)</Label>
             <Input value={form.address || ''} onChange={e => set('address', e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label>Nama Penerima (Recipient Name)</Label>
+            <Input value={form.recipient_name || ''} onChange={e => set('recipient_name', e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label>Alamat Penerima (Recipient Address)</Label>
+            <Input value={form.recipient_address || ''} onChange={e => set('recipient_address', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
             <Label>Business Area</Label>
@@ -103,7 +135,7 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
           <div className="flex flex-col gap-3 justify-center">
             <div className="flex items-center gap-2">
               <Checkbox id="indo_cit" checked={!!form.indonesian_citizenship} onCheckedChange={v => set('indonesian_citizenship', v)} />
-              <Label htmlFor="indo_cit">Indonesian Citizenship</Label>
+              <Label htmlFor="indo_cit">Indonesian Citizenship (WNI)</Label>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox id="pep" checked={!!form.pep_indicator} onCheckedChange={v => set('pep_indicator', v)} />

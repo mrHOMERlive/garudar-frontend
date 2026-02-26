@@ -9,19 +9,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Plus, Download, ChevronUp, ChevronDown, Search, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import CustomerFormModal from '@/components/reports/CustomerFormModal';
-import { exportToXLS } from '@/components/reports/exportToXLS';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
   { key: 'customer_type', label: 'Type' },
-  { key: 'registration_number', label: 'Registration Number (e.g. NIB)' },
-  { key: 'tax_number', label: 'Tax Number (e.g. NPWP)' },
+  { key: 'registration_number', label: 'Identity Number' },
+  { key: 'tax_number', label: 'Tax Number (NPWP)' },
   { key: 'legal_tax_number_type', label: 'Legal/Tax Doc Type' },
-  { key: 'legal_tax_number', label: 'Legal/Tax Number' },
-  { key: 'name', label: 'Name' },
+  { key: 'legal_tax_number', label: 'Other Identity Number' },
+  { key: 'name', label: 'Sender Name' },
+  { key: 'birth_place_date', label: 'Birth Place/Date' },
   { key: 'address', label: 'Address' },
-  { key: 'indonesian_citizenship', label: 'Indonesian Citizenship (Y/N)' },
+  { key: 'indonesian_citizenship', label: 'Citizenship' },
   { key: 'director_name', label: 'Director Name' },
+  { key: 'occupation', label: 'Occupation' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'phone_number', label: 'Phone Number' },
+  { key: 'recipient_name', label: 'Recipient Name' },
+  { key: 'recipient_address', label: 'Recipient Address' },
   { key: 'pep_indicator', label: 'PEP Indicator' },
   { key: 'code_type', label: 'Code Type' },
   { key: 'business_area', label: 'Business Area' },
@@ -108,7 +113,19 @@ export default function StaffCustomerReport() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => exportToXLS(filtered, COLUMNS, 'customer_report')} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Button onClick={async () => {
+              try {
+                const blob = await apiClient.exportCustomerReportExcel();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'CustomerReport.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+              } catch (e) {
+                toast.error('Failed to export: ' + e.message);
+              }
+            }} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
               <Download className="w-4 h-4 mr-2" /> Download Excel
             </Button>
             <Button onClick={openAdd} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
@@ -206,11 +223,17 @@ export default function StaffCustomerReport() {
                     <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.legal_tax_number_type}</td>
                     <td className="px-3 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap">{row.legal_tax_number}</td>
                     <td className="px-3 py-2.5 text-xs font-medium text-slate-800 whitespace-nowrap">{row.name}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.birth_place_date}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-500 max-w-[150px] truncate" title={row.address}>{row.address}</td>
                     <td className="px-3 py-2.5 text-center">
-                      <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${row.indonesian_citizenship ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{row.indonesian_citizenship ? 'Y' : 'N'}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${row.indonesian_citizenship ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{row.indonesian_citizenship ? 'WNI' : 'WNA'}</span>
                     </td>
                     <td className="px-3 py-2.5 text-xs text-slate-700 whitespace-nowrap">{row.director_name}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.occupation}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.gender}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.phone_number}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.recipient_name}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500 max-w-[150px] truncate" title={row.recipient_address}>{row.recipient_address}</td>
                     <td className="px-3 py-2.5 text-center">
                       <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${row.pep_indicator ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{row.pep_indicator ? 'Yes' : 'No'}</span>
                     </td>

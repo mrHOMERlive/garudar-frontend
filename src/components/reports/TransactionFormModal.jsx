@@ -10,9 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from 'sonner';
 
 const EMPTY = {
-  transaction_id: '', date: '', sender_name: '', sender_address: '',
+  transaction_id: '', date: '', customer_report_id: '',
+  sender_name: '', sender_address: '',
   sender_bank_bic: '', sender_bank_name: '', account_holder_name: '', account_number: '',
-  transaction_type: '', transaction_purpose: '', currency: '', amount: '',
+  transaction_type: '', transaction_purpose: '', fund_source: '', transaction_method: '',
+  currency: '', amount: '',
   recipient_name: '', recipient_address: '', transfer_fee: '',
   beneficiary_type: '', risk_level: '', dttot_check: false, dpppspm_check: false
 };
@@ -37,6 +39,7 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
     e.preventDefault();
     saveMutation.mutate({
       ...form,
+      customer_report_id: form.customer_report_id || null,
       amount: form.amount !== '' ? Number(form.amount) : undefined,
       transfer_fee: form.transfer_fee !== '' ? Number(form.transfer_fee) : undefined,
     });
@@ -61,6 +64,10 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
           <div className="space-y-1">
             <Label>Date *</Label>
             <Input type="date" value={form.date || ''} onChange={e => set('date', e.target.value)} required />
+          </div>
+          <div className="space-y-1">
+            <Label>Customer Report ID</Label>
+            <Input type="number" value={form.customer_report_id || ''} onChange={e => set('customer_report_id', e.target.value ? Number(e.target.value) : null)} placeholder="Link to customer" />
           </div>
 
           {/* Sender */}
@@ -108,8 +115,16 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>Transaction Purpose</Label>
+            <Label>Transaction Purpose (Tujuan Transaksi)</Label>
             <Input value={form.transaction_purpose || ''} onChange={e => set('transaction_purpose', e.target.value)} placeholder="e.g. goods, services, grants…" />
+          </div>
+          <div className="space-y-1">
+            <Label>Sumber Dana (Fund Source)</Label>
+            <Input value={form.fund_source || ''} onChange={e => set('fund_source', e.target.value)} placeholder="e.g. Tabungan, Gaji…" />
+          </div>
+          <div className="space-y-1">
+            <Label>Metode Transaksi (Method)</Label>
+            <Input value={form.transaction_method || ''} onChange={e => set('transaction_method', e.target.value)} placeholder="e.g. Transfer, Cash…" />
           </div>
           <div className="space-y-1">
             <Label>Currency</Label>

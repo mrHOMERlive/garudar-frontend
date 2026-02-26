@@ -9,19 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Plus, Download, ChevronUp, ChevronDown, Search, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import TransactionFormModal from '@/components/reports/TransactionFormModal';
-import { exportToXLS } from '@/components/reports/exportToXLS';
 
 const COLUMNS = [
   { key: 'transaction_id', label: 'Transaction ID' },
   { key: 'date', label: 'Date' },
+  { key: 'customer_report_id', label: 'Customer Report ID' },
   { key: 'sender_name', label: 'Sender Name' },
   { key: 'sender_address', label: 'Sender Address' },
   { key: 'sender_bank_bic', label: 'Sender Bank BIC' },
   { key: 'sender_bank_name', label: 'Sender Bank Name' },
-  { key: 'account_holder_name', label: 'Account Holder Name' },
+  { key: 'account_holder_name', label: 'Account Holder' },
   { key: 'account_number', label: 'Account Number' },
   { key: 'transaction_type', label: 'Transaction Type' },
   { key: 'transaction_purpose', label: 'Transaction Purpose' },
+  { key: 'fund_source', label: 'Fund Source' },
+  { key: 'transaction_method', label: 'Transaction Method' },
   { key: 'currency', label: 'Currency' },
   { key: 'amount', label: 'Amount' },
   { key: 'recipient_name', label: 'Recipient Name' },
@@ -124,7 +126,19 @@ export default function StaffTransactionReport() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => exportToXLS(filtered, COLUMNS, 'transaction_report')} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Button onClick={async () => {
+              try {
+                const blob = await apiClient.exportTransactionReportExcel();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'TransactionReport.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+              } catch (e) {
+                toast.error('Failed to export: ' + e.message);
+              }
+            }} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
               <Download className="w-4 h-4 mr-2" /> Download Excel
             </Button>
             <Button onClick={openAdd} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
@@ -222,6 +236,7 @@ export default function StaffTransactionReport() {
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-3 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap">{String(row.transaction_id || row.id).substring(0, 8)}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.date}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500 whitespace-nowrap">{row.customer_report_id}</td>
                     <td className="px-3 py-2.5 text-xs font-medium text-slate-800 whitespace-nowrap">{row.sender_name}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-500 max-w-[120px] truncate" title={row.sender_address}>{row.sender_address}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.sender_bank_bic}</td>
@@ -232,6 +247,8 @@ export default function StaffTransactionReport() {
                       <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${TYPE_BADGE[row.transaction_type] || 'bg-slate-100 text-slate-600'}`}>{row.transaction_type}</span>
                     </td>
                     <td className="px-3 py-2.5 text-xs text-slate-600 max-w-[120px] truncate" title={row.transaction_purpose}>{row.transaction_purpose}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.fund_source}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.transaction_method}</td>
                     <td className="px-3 py-2.5 text-xs font-medium text-slate-700">{row.currency}</td>
                     <td className="px-3 py-2.5 text-xs text-right font-medium text-slate-800 whitespace-nowrap">{row.amount != null ? row.amount.toLocaleString() : ''}</td>
                     <td className="px-3 py-2.5 text-xs font-medium text-slate-800 whitespace-nowrap">{row.recipient_name}</td>

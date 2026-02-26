@@ -803,6 +803,23 @@ class ApiClient {
         });
     }
 
+    async exportCustomerReportExcel() {
+        const token = this.getAccessToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${this.baseUrl}/customer-report/export/excel`, {
+            method: 'GET',
+            headers,
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to export customer report');
+        }
+        return response.blob();
+    }
+
     async getTransactionReports(sort = '-date') {
         return this.request(`/transaction-report?sort=${encodeURIComponent(sort)}`);
     }
@@ -825,6 +842,23 @@ class ApiClient {
         return this.request(`/transaction-report/${id}`, {
             method: 'DELETE',
         });
+    }
+
+    async exportTransactionReportExcel() {
+        const token = this.getAccessToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${this.baseUrl}/transaction-report/export/excel`, {
+            method: 'GET',
+            headers,
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to export transaction report');
+        }
+        return response.blob();
     }
 }
 
