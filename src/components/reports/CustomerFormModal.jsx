@@ -87,41 +87,41 @@ export default function CustomerFormModal({ record, onClose, onSaved }) {
             <Input value={form.legal_tax_number || ''} onChange={e => set('legal_tax_number', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>Name (Nama Pengirim) *</Label>
+            <Label>Sender Name *</Label>
             <Input value={form.name || ''} onChange={e => set('name', e.target.value)} required />
           </div>
           <div className="space-y-1">
-            <Label>Tempat & Tanggal Lahir</Label>
+            <Label>Birth Place & Date</Label>
             <Input value={form.birth_place_date || ''} onChange={e => set('birth_place_date', e.target.value)} placeholder="e.g. Jakarta, 05-01-1990" />
           </div>
           <div className="space-y-1">
-            <Label>Pekerjaan (Occupation)</Label>
+            <Label>Occupation</Label>
             <Input value={form.occupation || ''} onChange={e => set('occupation', e.target.value)} placeholder="e.g. Wiraswasta, PNS…" />
           </div>
           <div className="space-y-1">
-            <Label>Jenis Kelamin (Gender)</Label>
+            <Label>Gender</Label>
             <Select value={form.gender || ''} onValueChange={v => set('gender', v)}>
               <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="L">L (Laki-laki)</SelectItem>
-                <SelectItem value="P">P (Perempuan)</SelectItem>
+                <SelectItem value="L">Male</SelectItem>
+                <SelectItem value="P">Female</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>No. Telepon</Label>
+            <Label>Phone Number</Label>
             <Input value={form.phone_number || ''} onChange={e => set('phone_number', e.target.value)} placeholder="e.g. 08123456789" />
           </div>
           <div className="col-span-2 space-y-1">
-            <Label>Alamat (Address)</Label>
+            <Label>Address</Label>
             <Input value={form.address || ''} onChange={e => set('address', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Nama Penerima (Recipient Name)</Label>
+            <Label>Recipient Name</Label>
             <Input value={form.recipient_name || ''} onChange={e => set('recipient_name', e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Alamat Penerima (Recipient Address)</Label>
+            <Label>Recipient Address</Label>
             <Input value={form.recipient_address || ''} onChange={e => set('recipient_address', e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1">

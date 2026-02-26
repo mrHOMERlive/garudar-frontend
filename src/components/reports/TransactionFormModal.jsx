@@ -115,15 +115,15 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>Transaction Purpose (Tujuan Transaksi)</Label>
+            <Label>Transaction Purpose</Label>
             <Input value={form.transaction_purpose || ''} onChange={e => set('transaction_purpose', e.target.value)} placeholder="e.g. goods, services, grants…" />
           </div>
           <div className="space-y-1">
-            <Label>Sumber Dana (Fund Source)</Label>
+            <Label>Fund Source</Label>
             <Input value={form.fund_source || ''} onChange={e => set('fund_source', e.target.value)} placeholder="e.g. Tabungan, Gaji…" />
           </div>
           <div className="space-y-1">
-            <Label>Metode Transaksi (Method)</Label>
+            <Label>Transaction Method</Label>
             <Input value={form.transaction_method || ''} onChange={e => set('transaction_method', e.target.value)} placeholder="e.g. Transfer, Cash…" />
           </div>
           <div className="space-y-1">
@@ -181,11 +181,11 @@ export default function TransactionFormModal({ record, onClose, onSaved }) {
           </div>
           <div className="flex items-center gap-2 pt-1">
             <Checkbox id="dttot" checked={!!form.dttot_check} onCheckedChange={v => set('dttot_check', v)} />
-            <Label htmlFor="dttot">DTTOT CHECK (Yes)</Label>
+            <Label htmlFor="dttot">DTTOT Check</Label>
           </div>
           <div className="flex items-center gap-2 pt-1">
             <Checkbox id="dpppspm" checked={!!form.dpppspm_check} onCheckedChange={v => set('dpppspm_check', v)} />
-            <Label htmlFor="dpppspm">DPPPSPM CHECK (Yes)</Label>
+            <Label htmlFor="dpppspm">DPPPSPM Check</Label>
           </div>
 
           <div className="col-span-2 flex justify-end gap-2 pt-2 border-t">
