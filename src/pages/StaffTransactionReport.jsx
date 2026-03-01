@@ -234,7 +234,7 @@ export default function StaffTransactionReport() {
                   <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">No records found</td></tr>
                 ) : paged.map(row => (
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap">{String(row.transaction_id || row.id).substring(0, 8)}</td>
+                    <td className="px-3 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap">{String(row.transaction_id || row.id)}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">{row.date}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-500 whitespace-nowrap">{row.customer_report_id}</td>
                     <td className="px-3 py-2.5 text-xs font-medium text-slate-800 whitespace-nowrap">{row.sender_name}</td>
