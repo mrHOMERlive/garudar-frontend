@@ -37,6 +37,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [datePaymentProof, setDatePaymentProof] = useState('');
   const [attachmentTransactionStatus, setAttachmentTransactionStatus] = useState('');
   const [nonMandiriExecution, setNonMandiriExecution] = useState(false);
+  const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [uploadingProof, setUploadingProof] = useState(false);
   const [uploadingSalesContract, setUploadingSalesContract] = useState(false);
@@ -284,22 +285,27 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         termsData.amount_paid_target_cur = parseFloat(amountPaidTargetCur);
       }
 
+      // Validate required fields
+      const newErrors = {};
+      if (!clientPaymentAccountId) newErrors.paymentAccount = true;
+      if (conversionMethod !== 'none' && !exchangeRate) newErrors.exchangeRate = true;
+      if (remunerationType === 'PERCENT' && !remunerationPercentage && remunerationPercentage !== 0) newErrors.remunerationPercentage = true;
+      if (remunerationType === 'FIXED' && !remunerationFixed && remunerationFixed !== 0) newErrors.remunerationFixed = true;
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error('Please fill in all required fields');
+        setSaving(false);
+        return;
+      }
+      setErrors({});
+
       if (remunerationType === 'PERCENT') {
-        if (!remunerationPercentage && remunerationPercentage !== 0) {
-          toast.error('Please enter Remuneration Percentage');
-          setSaving(false);
-          return;
-        }
         termsData.remuneration_percentage = parseFloat(remunerationPercentage);
-        termsData.remuneration_fixed = null; // Clear fixed if switching to percent
+        termsData.remuneration_fixed = null;
       } else if (remunerationType === 'FIXED') {
-        if (!remunerationFixed && remunerationFixed !== 0) {
-          toast.error('Please enter Remuneration Fixed Amount');
-          setSaving(false);
-          return;
-        }
         termsData.remuneration_fixed = parseFloat(remunerationFixed);
-        termsData.remuneration_percentage = null; // Clear percent if switching to fixed
+        termsData.remuneration_percentage = null;
       }
 
       console.log('Sending Terms Payload:', termsData);
@@ -447,6 +453,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <Label className="text-xs text-slate-600 font-bold">Select Payment Account *</Label>
                 <Select value={clientPaymentAccountId} onValueChange={(val) => {
                   setClientPaymentAccountId(val);
+                  setErrors(prev => ({ ...prev, paymentAccount: false }));
                   const account = payeerAccounts.find(a => a.account_no === val);
                   if (account) {
                     setClientPaymentAccountName(account.account_no || account.currency);
@@ -462,7 +469,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     setGanBankAccount(account.account_no || '');
                   }
                 }}>
-                  <SelectTrigger className="mt-1 bg-white border-slate-300">
+                  <SelectTrigger className={`mt-1 bg-white ${errors.paymentAccount ? 'border-red-500' : 'border-slate-300'}`}>
                     <SelectValue placeholder="Select account from Payeer Accounts..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -574,8 +581,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   type="number"
                   step="0.0001"
                   value={exchangeRate}
-                  onChange={(e) => setExchangeRate(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
+                  onChange={(e) => { setExchangeRate(e.target.value); setErrors(prev => ({ ...prev, exchangeRate: false })); }}
+                  className={`mt-1 bg-white ${errors.exchangeRate ? 'border-red-500' : 'border-slate-300'}`}
                   placeholder={conversionMethod === 'central_bank' ? '5.4' : '1.0000'}
                 />
               </div>
@@ -614,24 +621,24 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {remunerationType === 'PERCENT' ? (
                 <div>
-                  <Label className="text-xs text-slate-600">Remuneration Percentage (%)</Label>
+                  <Label className="text-xs text-slate-600">Remuneration Percentage (%) *</Label>
                   <Input
                     type="number"
                     step="0.01"
                     value={remunerationPercentage}
-                    onChange={(e) => setRemunerationPercentage(e.target.value)}
-                    className="mt-1 bg-white border-slate-300"
+                    onChange={(e) => { setRemunerationPercentage(e.target.value); setErrors(prev => ({ ...prev, remunerationPercentage: false })); }}
+                    className={`mt-1 bg-white ${errors.remunerationPercentage ? 'border-red-500' : 'border-slate-300'}`}
                   />
                 </div>
               ) : (
                 <div>
-                  <Label className="text-xs text-slate-600">Remuneration Fixed Amount</Label>
+                  <Label className="text-xs text-slate-600">Remuneration Fixed Amount *</Label>
                   <Input
                     type="number"
                     step="0.01"
                     value={remunerationFixed}
-                    onChange={(e) => setRemunerationFixed(e.target.value)}
-                    className="mt-1 bg-white border-slate-300"
+                    onChange={(e) => { setRemunerationFixed(e.target.value); setErrors(prev => ({ ...prev, remunerationFixed: false })); }}
+                    className={`mt-1 bg-white ${errors.remunerationFixed ? 'border-red-500' : 'border-slate-300'}`}
                   />
                 </div>
               )}
