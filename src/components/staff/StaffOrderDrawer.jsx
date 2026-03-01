@@ -568,7 +568,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div>
                 <Label className="text-xs text-slate-600">
-                  {conversionMethod === 'central_bank' ? 'Central Bank Rate Applied' : 'Exchange Rate'}
+                  {conversionMethod === 'central_bank' ? 'Central Bank Rate Applied *' : 'Exchange Rate *'}
                 </Label>
                 <Input
                   type="number"
