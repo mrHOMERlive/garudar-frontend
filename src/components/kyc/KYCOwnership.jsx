@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Label } from '@/components/ui/label';
@@ -53,7 +53,7 @@ export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycPr
       return;
     }
     addUBOMutation.mutate({
-      ubo_name: 'New Shareholder',
+      ubo_name: '',
       shareholding_percent: 0,
       nationality: '',
       residence_country: ''
@@ -125,9 +125,12 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
     nationality: ubo.nationality || '',
     residence_country: ubo.residence_country || ''
   });
+  const isDirty = useRef(false);
 
   // Sync local state when prop updates (e.g. initial load or external update)
+  // Skip sync if user has unsaved local changes
   useEffect(() => {
+    if (isDirty.current) return;
     setLocalState({
       ubo_name: ubo.ubo_name || '',
       shareholding_percent: ubo.shareholding_percent || 0,
@@ -137,15 +140,15 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
   }, [ubo.ubo_name, ubo.shareholding_percent, ubo.nationality, ubo.residence_country]);
 
   const handleChange = (field, value) => {
+    isDirty.current = true;
     setLocalState(prev => ({ ...prev, [field]: value }));
   };
 
   const handleBlur = (field, value) => {
-    // Only update if value matches what's in local state (it should)
-    // and is different from prop (handled by diff check usually, but api call is cheap enough if checked)
     if (value !== ubo[field]) {
       onUpdate(ubo.id, field, value);
     }
+    isDirty.current = false;
   };
 
   return (
@@ -161,6 +164,7 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
             <div>
               <Label>4.1 {language === 'en' ? 'Shareholder and UBO Name (As per Passport or License document)' : 'Nama Pemegang Saham dan UBO (Sesuai Paspor atau Dokumen Izin)'} *</Label>
               <Input
+                placeholder={language === 'en' ? 'Enter shareholder name' : 'Masukkan nama pemegang saham'}
                 value={localState.ubo_name}
                 onChange={(e) => handleChange('ubo_name', e.target.value)}
                 onBlur={(e) => handleBlur('ubo_name', e.target.value)}
