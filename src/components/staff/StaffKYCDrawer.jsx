@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
-export default function StaffKYCDrawer({ open, onClose, kycProfile, client, isLoading }) {
+export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos = [], isLoading }) {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
 
@@ -145,6 +145,29 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, isLo
                 <div><span className="font-medium text-slate-800">Account Currency:</span> {banking.bank_account_currency}</div>
                 <div><span className="font-medium text-slate-800">Bank Address:</span> {banking.bank_branch_address}, {banking.bank_city_country}</div>
               </div>
+            </CardBox>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2 text-[#1e3a5f]">Ownership / UBO</h4>
+            <CardBox>
+              {ubos.length === 0 ? (
+                <div className="text-sm text-slate-500 italic">No shareholders/UBOs provided.</div>
+              ) : (
+                <div className="space-y-3">
+                  {ubos.map((ubo, idx) => (
+                    <div key={ubo.id} className="p-3 bg-slate-50 rounded border border-slate-100">
+                      <div className="font-medium text-slate-800 mb-1">Shareholder {idx + 1}</div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600">
+                        <div><span className="font-medium text-slate-800">Name:</span> {ubo.ubo_name || '-'}</div>
+                        <div><span className="font-medium text-slate-800">Shareholding:</span> {ubo.shareholding_percent != null ? `${ubo.shareholding_percent}%` : '-'}</div>
+                        <div><span className="font-medium text-slate-800">Nationality:</span> {ubo.nationality || '-'}</div>
+                        <div><span className="font-medium text-slate-800">Residence:</span> {ubo.residence_country || '-'}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardBox>
           </div>
 

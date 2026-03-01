@@ -34,6 +34,12 @@ export default function StaffKYCQueue() {
     enabled: !!selectedQueueItem?.client_id,
   });
 
+  const { data: ubos = [], isLoading: isUbosLoading } = useQuery({
+    queryKey: ['ubos', selectedQueueItem?.client_id],
+    queryFn: () => apiClient.listUbos(selectedQueueItem.client_id),
+    enabled: !!selectedQueueItem?.client_id,
+  });
+
   // Filter logic on the client side (search by company name or client name)
   const filteredQueue = kycQueue.filter(item => {
     if (!searchTerm) return true;
@@ -162,7 +168,8 @@ export default function StaffKYCQueue() {
           // However, react-query caches, so subsequent opens are fast.
           kycProfile={fullKycProfile}
           client={fullClient}
-          isLoading={isProfileLoading || isClientLoading}
+          ubos={ubos}
+          isLoading={isProfileLoading || isClientLoading || isUbosLoading}
         />
       )}
     </div>
