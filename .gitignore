@@ -25,3 +25,9 @@ dist-ssr
 
 .env
 .env.*
+
+# Test files and artifacts
+tests/
+test-results/
+playwright-report/
+playwright.config.js
