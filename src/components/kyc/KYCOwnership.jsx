@@ -125,12 +125,12 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
     nationality: ubo.nationality || '',
     residence_country: ubo.residence_country || ''
   });
-  const isDirty = useRef(false);
+  const dirtyFields = useRef(new Set());
 
   // Sync local state when prop updates (e.g. initial load or external update)
-  // Skip sync if user has unsaved local changes
+  // Skip sync if user has unsaved local changes in any field
   useEffect(() => {
-    if (isDirty.current) return;
+    if (dirtyFields.current.size > 0) return;
     setLocalState({
       ubo_name: ubo.ubo_name || '',
       shareholding_percent: ubo.shareholding_percent || 0,
@@ -140,7 +140,7 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
   }, [ubo.ubo_name, ubo.shareholding_percent, ubo.nationality, ubo.residence_country]);
 
   const handleChange = (field, value) => {
-    isDirty.current = true;
+    dirtyFields.current.add(field);
     setLocalState(prev => ({ ...prev, [field]: value }));
   };
 
@@ -148,7 +148,7 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
     if (value !== ubo[field]) {
       onUpdate(ubo.id, field, value);
     }
-    isDirty.current = false;
+    dirtyFields.current.delete(field);
   };
 
   return (
