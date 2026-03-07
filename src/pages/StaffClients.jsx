@@ -22,7 +22,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Pencil, Trash2, UserX, UserCheck, Search, Eye, EyeOff, Key, Globe, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
-import moment from 'moment';
 
 import CountrySelector from '../components/kyc/CountrySelector';
 

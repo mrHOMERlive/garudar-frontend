@@ -12,7 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
-import moment from 'moment';
+import { format } from 'date-fns';
 import StaffExecutedDrawer from '@/components/staff/StaffExecutedDrawer';
 
 export default function StaffExecutedOrders() {
@@ -236,7 +236,7 @@ export default function StaffExecutedOrders() {
                 >
                   <TableCell className="text-[#1e3a5f] font-mono text-sm py-4">{order.order_number}</TableCell>
                   <TableCell className="text-sm text-slate-900 py-4">
-                    {moment(order.updated_date).format('DD/MM/YYYY')}
+                    {format(new Date(order.updated_date), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell className="text-sm font-semibold text-blue-600 tabular-nums py-4">
                     {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}

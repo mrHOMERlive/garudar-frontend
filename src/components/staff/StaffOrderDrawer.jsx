@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
 
@@ -1218,7 +1218,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             <div>
               <Label className="text-xs text-slate-600">Last Instruction Export</Label>
               <div className="mt-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded p-2">
-                {lastInstructionExport?.last_export_date ? moment(lastInstructionExport.last_export_date).format('DD/MM/YYYY HH:mm') : 'Not exported yet'}
+                {lastInstructionExport?.last_export_date ? format(new Date(lastInstructionExport.last_export_date), 'dd/MM/yyyy HH:mm') : 'Not exported yet'}
               </div>
             </div>
 

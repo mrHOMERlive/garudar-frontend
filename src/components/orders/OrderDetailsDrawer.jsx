@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Download, Copy, CheckCircle2, Circle } from 'lucide-react';
 import { toast } from 'sonner';
-import moment from 'moment';
+import { format } from 'date-fns';
 import OrderStatusBadge, { STATUS_CONFIG } from './OrderStatusBadge';
 import { generateCSVData, downloadCSV } from '../remittance/utils/csvGenerator';
 
@@ -61,7 +61,7 @@ function StatusTimeline({ order }) {
               </div>
               {historyEntry && (
                 <span className="text-xs text-slate-400">
-                  {moment(historyEntry.timestamp).format('DD/MM/YY HH:mm')}
+                  {format(new Date(historyEntry.timestamp), 'dd/MM/yy HH:mm')}
                 </span>
               )}
             </div>
@@ -113,7 +113,7 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
             <OrderStatusBadge status={order.status} />
           </div>
           <SheetDescription>
-            Created {order.createdAt ? moment(order.createdAt).format('DD MMM YYYY, HH:mm') : '-'}
+            Created {order.createdAt ? format(new Date(order.createdAt), 'dd MMM yyyy, HH:mm') : '-'}
           </SheetDescription>
         </SheetHeader>
 

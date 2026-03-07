@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientExecutedDrawer from '@/components/client/ClientExecutedDrawer';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 export default function ExecutedOrders() {
   const [search, setSearch] = useState('');
@@ -229,7 +229,7 @@ export default function ExecutedOrders() {
                     <span className="text-sm text-slate-900">{order.order_number}</span>
                   </TableCell>
                   <TableCell className="py-4">
-                    <span className="text-sm text-slate-900">{moment(order.updated_date).format('DD/MM/YYYY')}</span>
+                    <span className="text-sm text-slate-900">{format(new Date(order.updated_date), 'dd/MM/yyyy')}</span>
                   </TableCell>
                   <TableCell className="py-4">
                     <span className="text-sm font-semibold text-blue-600 tabular-nums">

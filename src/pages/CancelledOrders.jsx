@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientCancelledDrawer from '@/components/client/ClientCancelledDrawer';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 export default function CancelledOrders() {
   const [search, setSearch] = useState('');
@@ -176,7 +176,7 @@ export default function CancelledOrders() {
                 >
                   <TableCell className="font-mono text-sm text-red-700 font-semibold py-4">{order.order_number}</TableCell>
                   <TableCell className="text-sm text-slate-600 py-4">
-                    {moment(order.updated_date).format('DD/MM/YYYY')}
+                    {format(new Date(order.updated_date), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell className="font-medium text-slate-700 py-4 tabular-nums">
                     {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}

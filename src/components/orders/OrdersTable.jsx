@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import moment from 'moment';
+import { format } from 'date-fns';
 import OrderStatusBadge from './OrderStatusBadge';
 
 function maskAccount(account) {
@@ -67,7 +67,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                   {order.orderId}
                 </TableCell>
                 <TableCell className="text-sm text-slate-600">
-                  {order.createdAt ? moment(order.createdAt).format('DD/MM/YY') : '-'}
+                  {order.createdAt ? format(new Date(order.createdAt), 'dd/MM/yy') : '-'}
                 </TableCell>
                 <TableCell className="font-medium">
                   {order.amount?.toLocaleString()} {order.currency}
@@ -89,7 +89,7 @@ export default function OrdersTable({ orders, onViewDetails, onDelete, onCancel 
                   <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="text-sm text-slate-600">
-                  {order.updatedAt ? moment(order.updatedAt).format('DD/MM/YY') : '-'}
+                  {order.updatedAt ? format(new Date(order.updatedAt), 'dd/MM/yy') : '-'}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

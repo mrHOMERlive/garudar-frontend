@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientDeletedDrawer from '@/components/client/ClientDeletedDrawer';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 export default function DeletedOrders() {
   const [search, setSearch] = useState('');
@@ -180,7 +180,7 @@ export default function DeletedOrders() {
                 >
                   <TableCell className="font-mono text-sm text-slate-600 font-semibold py-4">{order.order_number}</TableCell>
                   <TableCell className="text-sm text-slate-600 py-4">
-                    {moment(order.created_date).format('DD/MM/YYYY')}
+                    {format(new Date(order.created_date), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell className="font-medium text-slate-600 py-4 tabular-nums">
                     {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}

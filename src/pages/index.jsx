@@ -1,71 +1,42 @@
-import Layout from "./Layout.jsx";
-import ClientNDA from "./ClientNDA";
-import ClientSubmitNDA from "./ClientSubmitNDA";
-
-import CreateOrder from "./CreateOrder";
-
-import OrderHistory from "./OrderHistory";
-
-import ClientKYC from "./ClientKYC";
-
-import CurrentOrders from "./CurrentOrders";
-
-import ExecutedOrders from "./ExecutedOrders";
-
-import CancelledOrders from "./CancelledOrders";
-
-import DeletedOrders from "./DeletedOrders";
-
-import StaffDashboard from "./StaffDashboard";
-
-import StaffKYC from "./StaffKYC";
-
-import StaffKYCQueue from "./StaffKYCQueue";
-
-import StaffClients from "./StaffClients";
-
-import StaffClientRequests from "./StaffClientRequests";
-
-import StaffActiveOrders from "./StaffActiveOrders";
-
-import StaffExecutedOrders from "./StaffExecutedOrders";
-
-import StaffPayeerAccounts from "./StaffPayeerAccounts";
-
-import GTrans from "./GTrans";
-
-import GTransContactSales from "./GTransContactSales";
-
-import GTransWorkScheme from "./GTransWorkScheme";
-
-import GTransDocumentation from "./GTransDocumentation";
-
-import GTransFAQ from "./GTransFAQ";
-
-import GTransLogin from "./GTransLogin";
-
-import GTransPresentation from "./GTransPresentation";
-
-import UserDashboard from "./UserDashboard";
-
-import GTransAPIIntegration from "./GTransAPIIntegration";
-
-import GTransB2BPayments from "./GTransB2BPayments";
-
-import GTransFXSolutions from "./GTransFXSolutions";
-
-import GTransECommerceCollectSettle from "./GTransECommerceCollectSettle";
-
-import GTransMerchantPay from "./GTransMerchantPay";
-
-import StaffServiceAgreement from "./StaffServiceAgreement";
-import ClientServiceAgreement from "./ClientServiceAgreement";
-import StaffCustomerReport from "./StaffCustomerReport";
-import StaffTransactionReport from "./StaffTransactionReport";
-
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
+import Layout from "./Layout.jsx";
+
+const ClientNDA = lazy(() => import("./ClientNDA"));
+const ClientSubmitNDA = lazy(() => import("./ClientSubmitNDA"));
+const CreateOrder = lazy(() => import("./CreateOrder"));
+const OrderHistory = lazy(() => import("./OrderHistory"));
+const ClientKYC = lazy(() => import("./ClientKYC"));
+const CurrentOrders = lazy(() => import("./CurrentOrders"));
+const ExecutedOrders = lazy(() => import("./ExecutedOrders"));
+const CancelledOrders = lazy(() => import("./CancelledOrders"));
+const DeletedOrders = lazy(() => import("./DeletedOrders"));
+const StaffDashboard = lazy(() => import("./StaffDashboard"));
+const StaffKYC = lazy(() => import("./StaffKYC"));
+const StaffKYCQueue = lazy(() => import("./StaffKYCQueue"));
+const StaffClients = lazy(() => import("./StaffClients"));
+const StaffClientRequests = lazy(() => import("./StaffClientRequests"));
+const StaffActiveOrders = lazy(() => import("./StaffActiveOrders"));
+const StaffExecutedOrders = lazy(() => import("./StaffExecutedOrders"));
+const StaffPayeerAccounts = lazy(() => import("./StaffPayeerAccounts"));
+const GTrans = lazy(() => import("./GTrans"));
+const GTransContactSales = lazy(() => import("./GTransContactSales"));
+const GTransWorkScheme = lazy(() => import("./GTransWorkScheme"));
+const GTransDocumentation = lazy(() => import("./GTransDocumentation"));
+const GTransFAQ = lazy(() => import("./GTransFAQ"));
+const GTransLogin = lazy(() => import("./GTransLogin"));
+const GTransPresentation = lazy(() => import("./GTransPresentation"));
+const UserDashboard = lazy(() => import("./UserDashboard"));
+const GTransAPIIntegration = lazy(() => import("./GTransAPIIntegration"));
+const GTransB2BPayments = lazy(() => import("./GTransB2BPayments"));
+const GTransFXSolutions = lazy(() => import("./GTransFXSolutions"));
+const GTransECommerceCollectSettle = lazy(() => import("./GTransECommerceCollectSettle"));
+const GTransMerchantPay = lazy(() => import("./GTransMerchantPay"));
+const StaffServiceAgreement = lazy(() => import("./StaffServiceAgreement"));
+const ClientServiceAgreement = lazy(() => import("./ClientServiceAgreement"));
+const StaffCustomerReport = lazy(() => import("./StaffCustomerReport"));
+const StaffTransactionReport = lazy(() => import("./StaffTransactionReport"));
 
 const PAGES = {
 
@@ -165,6 +136,7 @@ function PagesContent() {
 
     return (
         <Layout currentPageName={currentPage}>
+            <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>}>
             <Routes>
 
                 <Route path="/" element={<GTrans />} />
@@ -239,6 +211,7 @@ function PagesContent() {
                 <Route path="/stafftransactionreport" element={<RequireAdmin><StaffTransactionReport /></RequireAdmin>} />
 
             </Routes>
+            </Suspense>
         </Layout>
     );
 }

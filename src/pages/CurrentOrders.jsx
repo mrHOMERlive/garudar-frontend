@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from "@/components/ui/checkbox";
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import ClientTermsDrawer from '@/components/client/ClientTermsDrawer';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 const ACTIVE_STATUSES = ['created', 'DRAFT', 'CHECK', 'ON_EXECUTION'];
 
@@ -287,7 +287,7 @@ export default function CurrentOrders() {
                     <span className="text-sm text-slate-900">{order.orderId}</span>
                   </TableCell>
                   <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm text-slate-900">{moment(order.createdAt).format('DD/MM/YYYY')}</span>
+                    <span className="text-sm text-slate-900">{format(new Date(order.createdAt), 'dd/MM/yyyy')}</span>
                   </TableCell>
                   <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
                     <span className="text-sm font-semibold text-blue-600 tabular-nums">
@@ -415,7 +415,7 @@ export default function CurrentOrders() {
                   <p className="text-sm font-medium text-slate-900 truncate">{order.beneficiaryName}</p>
                   <p className="text-sm text-slate-600 truncate">{order.bankName}</p>
                   <p className="text-xs text-slate-500">
-                    {moment(order.createdAt).format('DD/MM/YYYY')} • {order.orderId}
+                    {format(new Date(order.createdAt), 'dd/MM/yyyy')} • {order.orderId}
                   </p>
                 </div>
                 <Button
