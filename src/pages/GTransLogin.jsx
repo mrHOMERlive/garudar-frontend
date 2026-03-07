@@ -15,7 +15,7 @@ import { getLanguage, setLanguage } from '@/components/utils/language';
 
 export default function GTransLogin() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const language = getLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,15 +23,11 @@ export default function GTransLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const savedUser = localStorage.getItem('gtrans_user');
-      if (savedUser) {
-        const userData = JSON.parse(savedUser);
-        const targetPage = userData.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
-        navigate(createPageUrl(targetPage), { replace: true });
-      }
+    if (isAuthenticated && user) {
+      const targetPage = user.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
+      navigate(createPageUrl(targetPage), { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

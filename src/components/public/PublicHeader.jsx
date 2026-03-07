@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import {
   ChevronDown, Menu, X, Globe, ArrowRight,
@@ -13,6 +14,7 @@ const LOGO_URL = "/gan.png";
 
 export default function PublicHeader({ language, setLanguage }) {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -25,15 +27,8 @@ export default function PublicHeader({ language, setLanguage }) {
 
   const handleStaffClick = (e) => {
     e.preventDefault();
-    const savedUser = localStorage.getItem('gtrans_user');
-
-    if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      if (userData.role === 'ADMIN') {
-        navigate(createPageUrl('StaffDashboard'));
-      } else {
-        navigate(createPageUrl('GTrans'));
-      }
+    if (isAuthenticated && user?.role === 'ADMIN') {
+      navigate(createPageUrl('StaffDashboard'));
     } else {
       navigate(createPageUrl('GTrans'));
     }

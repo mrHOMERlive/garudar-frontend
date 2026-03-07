@@ -14,35 +14,24 @@ export function AuthProvider({ children }) {
   }, []);
 
   const checkAuth = async () => {
-    if (apiClient.isAuthenticated()) {
-      try {
-        const userData = await apiClient.getCurrentUser();
-        setUser(userData);
-        setIsAuthenticated(true);
-        localStorage.setItem('gtrans_user', JSON.stringify(userData));
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        apiClient.removeTokens();
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-    } else {
+    try {
+      const userData = await apiClient.getCurrentUser(true);
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
     }
+    apiClient.cleanupLegacyTokens();
     setLoading(false);
   };
 
   const login = async (username, password) => {
-    const response = await apiClient.login(username, password);
-    if (response.access_token || response.token) {
-      const userData = await apiClient.getCurrentUser();
-      setUser(userData);
-      setIsAuthenticated(true);
-      localStorage.setItem('gtrans_user', JSON.stringify(userData));
-      return userData;
-    }
-    throw new Error('Login failed');
+    await apiClient.login(username, password);
+    const userData = await apiClient.getCurrentUser();
+    setUser(userData);
+    setIsAuthenticated(true);
+    return userData;
   };
 
   const logout = () => {

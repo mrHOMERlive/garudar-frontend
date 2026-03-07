@@ -7,33 +7,18 @@ class ApiClient {
         this.failedQueue = [];
     }
 
-    processQueue(error, token = null) {
+    processQueue(error) {
         this.failedQueue.forEach(prom => {
             if (error) {
                 prom.reject(error);
             } else {
-                prom.resolve(token);
+                prom.resolve();
             }
         });
         this.failedQueue = [];
     }
 
-    getAccessToken() {
-        return localStorage.getItem('access_token') || localStorage.getItem('gtrans_token');
-    }
-
-    getRefreshToken() {
-        return localStorage.getItem('refresh_token');
-    }
-
-    setTokens(accessToken, refreshToken) {
-        if (accessToken) localStorage.setItem('access_token', accessToken);
-        if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-        // Clean up legacy token if exists
-        localStorage.removeItem('gtrans_token');
-    }
-
-    removeTokens() {
+    cleanupLegacyTokens() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('gtrans_token');
@@ -48,31 +33,21 @@ class ApiClient {
         }
 
         this.isRefreshing = true;
-        const refreshToken = this.getRefreshToken();
-
-        if (!refreshToken) {
-            this.isRefreshing = false;
-            return Promise.reject(new Error('No refresh token available'));
-        }
 
         try {
             const response = await fetch(`${this.baseUrl}/auth/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh_token: refreshToken })
+                credentials: 'include',
             });
 
             if (!response.ok) {
                 throw new Error('Refresh failed');
             }
 
-            const data = await response.json();
-            this.setTokens(data.access_token, data.refresh_token);
-            this.processQueue(null, data.access_token);
-            return data.access_token;
+            this.processQueue(null);
         } catch (error) {
-            this.processQueue(error, null);
-            this.logout(true); // Force logout locally if refresh fails
+            this.processQueue(error);
             throw error;
         } finally {
             this.isRefreshing = false;
@@ -81,22 +56,16 @@ class ApiClient {
 
     async request(endpoint, options = {}, skipAuthRedirect = false) {
         const url = `${this.baseUrl}${endpoint}`;
-        let token = this.getAccessToken();
 
-        const getHeaders = (t) => {
-            const h = {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            };
-            if (t) {
-                h['Authorization'] = `Bearer ${t}`;
-            }
-            return h;
-        };
+        const getHeaders = () => ({
+            'Content-Type': 'application/json',
+            ...options.headers,
+        });
 
         let response = await fetch(url, {
             ...options,
-            headers: getHeaders(token),
+            headers: getHeaders(),
+            credentials: 'include',
         });
 
         // Handle 401 Unauthorized
@@ -104,7 +73,6 @@ class ApiClient {
             // Don't retry if it's a login or refresh request
             if (endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh')) {
                 if (!skipAuthRedirect && !endpoint.includes('/auth/login')) {
-                    this.logout(true);
                     window.location.href = '/gtranslogin';
                 }
                 const errorData = await response.json().catch(() => ({}));
@@ -112,15 +80,15 @@ class ApiClient {
             }
 
             try {
-                const newToken = await this.refreshToken();
-                // Retry original request with new token
+                await this.refreshToken();
+                // Retry original request (cookies updated automatically)
                 response = await fetch(url, {
                     ...options,
-                    headers: getHeaders(newToken),
+                    headers: getHeaders(),
+                    credentials: 'include',
                 });
             } catch (refreshError) {
                 if (!skipAuthRedirect) {
-                    this.logout(true);
                     window.location.href = '/gtranslogin';
                 }
                 throw refreshError;
@@ -157,41 +125,26 @@ class ApiClient {
             method: 'POST',
             body: JSON.stringify({ username, password }),
         }, true);
-
-        if (data.access_token) {
-            this.setTokens(data.access_token, data.refresh_token);
-        } else if (data.token) {
-            // Legacy fallback support
-            this.setTokens(data.token, null);
-        }
-
+        this.cleanupLegacyTokens();
         return data;
     }
 
     async logout(forceLocal = false) {
         if (!forceLocal) {
-            const refreshToken = this.getRefreshToken();
-            if (refreshToken) {
-                try {
-                    await this.request('/auth/logout', {
-                        method: 'POST',
-                        body: JSON.stringify({ refresh_token: refreshToken })
-                    }, true);
-                } catch (e) {
-                    console.error('Logout API call failed', e);
-                }
+            try {
+                await this.request('/auth/logout', {
+                    method: 'POST',
+                }, true);
+            } catch (e) {
+                console.error('Logout API call failed', e);
             }
         }
-        this.removeTokens();
-    }
-
-    isAuthenticated() {
-        return !!this.getAccessToken();
+        this.cleanupLegacyTokens();
     }
 
     // Users
-    async getCurrentUser() {
-        return this.request('/users/me');
+    async getCurrentUser(skipAuthRedirect = false) {
+        return this.request('/users/me', {}, skipAuthRedirect);
     }
 
     async updateCurrentUser(userData) {
@@ -323,14 +276,9 @@ class ApiClient {
     }
 
     async generateExecutedOrderActReport(sourceOrderId) {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         const response = await fetch(`${this.baseUrl}/orders/executed-orders/${sourceOrderId}/act-report`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
         if (!response.ok) {
             const errorText = await response.text();
@@ -340,14 +288,9 @@ class ApiClient {
     }
 
     async exportOrderExcel(orderId) {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         const response = await fetch(`${this.baseUrl}/orders/orders/${orderId}/excel`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
         if (!response.ok) {
             const errorText = await response.text();
@@ -357,17 +300,10 @@ class ApiClient {
     }
 
     async exportTxtInstructions(orderIds) {
-        const token = this.getAccessToken();
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(`${this.baseUrl}/orders/pobo/export-txt`, {
             method: 'POST',
-            headers,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ order_ids: orderIds }),
         });
 
@@ -390,15 +326,9 @@ class ApiClient {
         const queryString = queryParams.toString();
         const url = `${this.baseUrl}/upload${queryString ? `?${queryString}` : ''}`;
 
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(url, {
             method: 'POST',
-            headers,
+            credentials: 'include',
             body: formData,
         });
 
@@ -419,15 +349,9 @@ class ApiClient {
             formData.append('replace_reason', replaceReason);
         }
 
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(`${this.baseUrl}/orders/${orderId}/documents`, {
             method: 'POST',
-            headers,
+            credentials: 'include',
             body: formData,
         });
 
@@ -556,14 +480,9 @@ class ApiClient {
     }
 
     async exportKycExcel(clientId) {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         const response = await fetch(`${this.baseUrl}/clients/${clientId}/kyc/excel`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
 
         if (!response.ok) {
@@ -610,15 +529,9 @@ class ApiClient {
         if (comment) formData.append('comment', comment);
         formData.append('is_required', isRequired); // Note: server expects boolean string or value
 
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(`${this.baseUrl}/clients/${clientId}/documents`, {
             method: 'POST',
-            headers,
+            credentials: 'include',
             body: formData,
         });
 
@@ -631,15 +544,10 @@ class ApiClient {
     }
 
     async downloadKycDocument(clientId, docId) {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         // 1. Get document metadata / presigned url
         const response = await fetch(`${this.baseUrl}/clients/${clientId}/documents/${docId}/download`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
 
         if (!response.ok) {
@@ -757,17 +665,10 @@ class ApiClient {
         }
         const queryString = queryParams.toString();
 
-        const token = this.getAccessToken();
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(`${this.baseUrl}/service-agreement/generate${queryString ? `?${queryString}` : ''}`, {
             method: 'POST',
-            headers,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify(data),
         });
 
@@ -804,14 +705,9 @@ class ApiClient {
     }
 
     async exportCustomerReportExcel() {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         const response = await fetch(`${this.baseUrl}/customer-report/export/excel`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
         if (!response.ok) {
             const errorText = await response.text();
@@ -845,14 +741,9 @@ class ApiClient {
     }
 
     async exportTransactionReportExcel() {
-        const token = this.getAccessToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         const response = await fetch(`${this.baseUrl}/transaction-report/export/excel`, {
             method: 'GET',
-            headers,
+            credentials: 'include',
         });
         if (!response.ok) {
             const errorText = await response.text();
