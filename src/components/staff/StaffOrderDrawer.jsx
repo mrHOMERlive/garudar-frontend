@@ -308,8 +308,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         termsData.remuneration_percentage = null;
       }
 
-      console.log('Sending Terms Payload:', termsData);
-
       await apiClient.createOrUpdateOrderTerms(order.orderId, termsData);
 
       // 2. Update Order

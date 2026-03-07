@@ -140,7 +140,7 @@ class ApiClient {
                 }
             }
 
-            console.error('API Request Failed:', url, response.status, errorData);
+            console.error('API request failed with status:', response.status);
             throw new Error(errorMessage);
         }
 

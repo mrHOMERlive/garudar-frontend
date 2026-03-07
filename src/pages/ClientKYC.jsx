@@ -127,8 +127,6 @@ export default function ClientKYC() {
         signed_kyc_document_url: dataToSave.signed_kyc_document_url
       };
 
-      console.log('Sending KYC Update Payload:', payload);
-
       return await apiClient.updateKycProfile(client.client_id, payload);
     },
     onSuccess: () => {
