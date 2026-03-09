@@ -13,18 +13,20 @@ export default function HeroSection({ language }) {
         {/* Animated circles */}
         <motion.div
           className="absolute top-20 right-20 w-96 h-96 rounded-full bg-[#1e3a5f]/5"
-          animate={{ 
+          whileInView={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3]
           }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute bottom-20 left-10 w-64 h-64 rounded-full bg-[#f5a623]/10"
-          animate={{ 
+          whileInView={{
             scale: [1, 1.3, 1],
             opacity: [0.2, 0.4, 0.2]
           }}
+          viewport={{ once: false, amount: 0.1 }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
         
@@ -38,10 +40,11 @@ export default function HeroSection({ language }) {
                 left: `${10 + idx * 20}%`,
                 top: `${20 + (idx % 3) * 25}%`
               }}
-              animate={{
+              whileInView={{
                 y: [0, -30, 0],
                 opacity: [0.1, 0.3, 0.1]
               }}
+              viewport={{ once: false, amount: 0.1 }}
               transition={{
                 duration: 4 + idx,
                 repeat: Infinity,
@@ -63,7 +66,8 @@ export default function HeroSection({ language }) {
             fill="none"
             strokeOpacity="0.1"
             initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: false, amount: 0.1 }}
             transition={{ duration: 3, repeat: Infinity, repeatType: "loop" }}
           />
           <motion.path
@@ -73,7 +77,8 @@ export default function HeroSection({ language }) {
             fill="none"
             strokeOpacity="0.15"
             initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: false, amount: 0.1 }}
             transition={{ duration: 4, repeat: Infinity, repeatType: "loop", delay: 1 }}
           />
         </svg>

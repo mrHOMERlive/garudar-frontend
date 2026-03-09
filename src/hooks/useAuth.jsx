@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/apiClient';
 
@@ -26,28 +26,28 @@ export function AuthProvider({ children }) {
     setLoading(false);
   };
 
-  const login = async (username, password) => {
+  const login = useCallback(async (username, password) => {
     await apiClient.login(username, password);
     const userData = await apiClient.getCurrentUser();
     setUser(userData);
     setIsAuthenticated(true);
     return userData;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     apiClient.logout();
     setUser(null);
     setIsAuthenticated(false);
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     isAuthenticated,
     login,
     logout,
     checkAuth,
-  };
+  }), [user, loading, isAuthenticated, login, logout, checkAuth]);
 
   return (
     <AuthContext.Provider value={value}>

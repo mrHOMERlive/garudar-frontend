@@ -34,6 +34,18 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router'))
+              return 'react-vendor';
+            if (id.includes('@radix-ui') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('tailwind-merge') || id.includes('lucide-react') || id.includes('cmdk'))
+              return 'ui-vendor';
+            if (id.includes('recharts') || id.includes('d3-'))
+              return 'charts-vendor';
+            if (id.includes('docx') || id.includes('xlsx'))
+              return 'docs-vendor';
+            if (id.includes('framer-motion'))
+              return 'animation-vendor';
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod'))
+              return 'forms-vendor';
             return 'vendor';
           }
         },
