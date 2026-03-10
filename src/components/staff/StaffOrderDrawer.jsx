@@ -200,6 +200,14 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         }
       }
 
+      // Auto-set exchange rate to 1 when currencies match and no rate was saved
+      if (!terms.exchangeRate) {
+        const cpc = terms.clientPaymentCurrency || 'USD';
+        if (cpc === order?.currency) {
+          setExchangeRate('1');
+          setConversionMethod('no_conversion');
+        }
+      }
 
     }
   }, [terms, open, payeerAccounts]);
@@ -288,7 +296,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       // Validate required fields
       const newErrors = {};
       if (!clientPaymentAccountId) newErrors.paymentAccount = true;
-      if (conversionMethod !== 'none' && !exchangeRate) newErrors.exchangeRate = true;
+      if (!exchangeRate) newErrors.exchangeRate = true;
       if (remunerationType === 'PERCENT' && !remunerationPercentage && remunerationPercentage !== 0) newErrors.remunerationPercentage = true;
       if (remunerationType === 'FIXED' && !remunerationFixed && remunerationFixed !== 0) newErrors.remunerationFixed = true;
 
