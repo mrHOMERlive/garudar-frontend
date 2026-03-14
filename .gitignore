@@ -31,3 +31,7 @@ tests/
 test-results/
 playwright-report/
 playwright.config.js
+# Claude Code
+.claude/
+CLAUDE.md
+.playwright-mcp/

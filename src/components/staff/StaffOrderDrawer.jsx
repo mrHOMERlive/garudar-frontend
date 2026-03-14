@@ -18,10 +18,9 @@ import { Download, Upload, FileText } from 'lucide-react';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import { format } from 'date-fns';
 
-const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
 
 export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
-  const [status, setStatus] = useState('created');
+
   const [datePaid, setDatePaid] = useState('');
   const [dataFixing, setDataFixing] = useState('');
   const [remunerationType, setRemunerationType] = useState('PERCENT');
@@ -108,7 +107,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
   useEffect(() => {
     if (order && open) {
-      setStatus(order.status || 'created');
+
       setDatePaid(order.datePaid || '');
       setDataFixing(order.dataFixing || '');
       setInvoiceNumber(order.invoiceNumber || '');
@@ -266,7 +265,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         base_currency: baseCurrency || null,
         executing_bank: executingBank || null,
         FX: !!fxExecutingBank,
-        status: status,
         bank_statement_in_type: bankStatementInType || null,
         bank_statement_in_id: bankStatementInId || null,
         bank_statement_out_type: bankStatementOutType || null,
@@ -320,7 +318,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       // 2. Update Order
       const updates = {
-        status,
         invoice_number: invoiceNumber,
         invocie_received: invoiceReceived,
         payment_proof: paymentProof,
@@ -421,7 +418,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
             #{order.orderId}
-            <OrderStatusBadge status={status} />
+            <OrderStatusBadge status={order.status} />
           </SheetTitle>
           <SheetDescription className="hidden">
             Manage order details, documents, and status.
@@ -430,26 +427,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
           <div className="space-y-6">
-            {/* STATUS MANAGEMENT Section */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Status Management</h3>
-              <div>
-                <Label className="text-xs text-slate-600">Order Status</Label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="mt-1 bg-white border-slate-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_STATUSES.map(s => (
-                      <SelectItem key={s} value={s}>{s.replace('_', ' ').toUpperCase()}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Separator className="bg-slate-200" />
-
             {/* SECTION 1: CLIENT PAYMENT INSTRUCTIONS */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Client Payment Instructions</h3>
@@ -580,7 +557,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               </div>
 
               <div>
-                <Label className="text-xs text-slate-600">
+                <Label className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}>
                   {conversionMethod === 'central_bank' ? 'Central Bank Rate Applied *' : 'Exchange Rate *'}
                 </Label>
                 <Input
@@ -588,18 +565,20 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   step="0.0001"
                   value={exchangeRate}
                   onChange={(e) => { setExchangeRate(e.target.value); setErrors(prev => ({ ...prev, exchangeRate: false })); }}
-                  className={`mt-1 bg-white ${errors.exchangeRate ? 'border-red-500' : 'border-slate-300'}`}
+                  className={`mt-1 ${conversionMethod === 'no_conversion' ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white'} ${errors.exchangeRate ? 'border-red-500' : 'border-slate-300'}`}
                   placeholder={conversionMethod === 'central_bank' ? '5.4' : '1.0000'}
+                  disabled={conversionMethod === 'no_conversion'}
                 />
               </div>
 
               <div>
-                <Label className="text-xs text-slate-600">Data Fixing</Label>
+                <Label className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}>Data Fixing</Label>
                 <Input
                   type="date"
-                  value={dataFixing}
+                  value={conversionMethod === 'no_conversion' ? '' : dataFixing}
                   onChange={(e) => setDataFixing(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
+                  className={`mt-1 ${conversionMethod === 'no_conversion' ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white border-slate-300'}`}
+                  disabled={conversionMethod === 'no_conversion'}
                 />
               </div>
             </div>
