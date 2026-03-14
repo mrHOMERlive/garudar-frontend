@@ -1,33 +1,91 @@
 import React, { useState, useMemo } from 'react';
 import { apiClient } from '@/api/apiClient';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Search, FileText, Globe, MoreVertical, ChevronDown, ArrowUpDown, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Search, Globe, ChevronDown, ChevronUp, ArrowUpDown, X, Clock, CheckCircle2, AlertCircle, Loader2, CreditCard } from 'lucide-react';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import ClientTermsDrawer from '@/components/client/ClientTermsDrawer';
 import { format } from 'date-fns';
 
-const ACTIVE_STATUSES = ['created', 'DRAFT', 'CHECK', 'ON_EXECUTION'];
+const ACTIVE_STATUSES = ['created', 'check', 'pending_payment', 'on_execution'];
+
+const STATUS_CONFIG = {
+  created:         { label: 'Created',         icon: Clock,         color: 'bg-blue-500',   light: 'bg-blue-50 border-blue-200',     text: 'text-blue-700',    dot: 'bg-blue-500',    desc: 'Order placed, awaiting review' },
+  check:           { label: 'Under Review',    icon: AlertCircle,   color: 'bg-amber-500',  light: 'bg-amber-50 border-amber-200',   text: 'text-amber-700',   dot: 'bg-amber-500',   desc: 'Our team is reviewing your order' },
+  pending_payment: { label: 'Pending Payment', icon: CreditCard,    color: 'bg-orange-500', light: 'bg-orange-50 border-orange-200', text: 'text-orange-700',  dot: 'bg-orange-500',  desc: 'Awaiting your payment' },
+  on_execution:    { label: 'In Progress',     icon: Loader2,       color: 'bg-indigo-500', light: 'bg-indigo-50 border-indigo-200', text: 'text-indigo-700',  dot: 'bg-indigo-500',  desc: 'Transfer is being processed' },
+};
+
+function OrderCard({ order, onOpen }) {
+  return (
+    <div
+      onClick={() => onOpen(order)}
+      className="group bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <p className="text-2xl font-bold text-[#1e3a5f] tabular-nums">
+            {parseFloat(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className="text-base font-semibold text-slate-400 ml-1">{order.currency}</span>
+          </p>
+          <p className="text-xs text-slate-400 font-mono mt-0.5">{order.orderId}</p>
+        </div>
+        <OrderStatusBadge status={order.status} />
+      </div>
+      <div className="space-y-1.5 border-t border-slate-100 pt-3">
+        <div className="flex items-center gap-2 text-sm text-slate-700">
+          <span className="font-medium truncate">{order.beneficiaryName}</span>
+        </div>
+        {order.bankName && (
+          <div className="text-xs text-slate-400 truncate">{order.bankName}</div>
+        )}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-slate-400">{order.createdAt ? format(new Date(order.createdAt), 'dd MMM yyyy') : '-'}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderRow({ order, onOpen }) {
+  return (
+    <tr
+      onClick={() => onOpen(order)}
+      className="border-b border-slate-100 last:border-0 hover:bg-blue-50/40 cursor-pointer transition-colors"
+    >
+      <td className="py-3 pl-5 pr-3">
+        <span className="text-xs font-mono text-slate-500">{order.orderId}</span>
+      </td>
+      <td className="py-3 px-3">
+        <span className="text-xs text-slate-500">{order.createdAt ? format(new Date(order.createdAt), 'dd MMM yyyy') : '-'}</span>
+      </td>
+      <td className="py-3 px-3">
+        <span className="font-bold text-[#1e3a5f] tabular-nums text-sm">
+          {parseFloat(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <span className="text-slate-400 font-normal ml-1 text-xs">{order.currency}</span>
+        </span>
+      </td>
+      <td className="py-3 px-3">
+        <span className="text-sm text-slate-700 truncate max-w-[180px] block">{order.beneficiaryName}</span>
+      </td>
+      <td className="py-3 px-3">
+        <span className="text-xs text-slate-400 truncate max-w-[140px] block">{order.bankName || '-'}</span>
+      </td>
+      <td className="py-3 pl-3 pr-5" />
+    </tr>
+  );
+}
 
 export default function CurrentOrders() {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
-  const [selectedOrders, setSelectedOrders] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  const queryClient = useQueryClient();
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [collapsedSections, setCollapsedSections] = useState({});
 
   const { data: myClient } = useQuery({
     queryKey: ['my-client'],
@@ -41,11 +99,7 @@ export default function CurrentOrders() {
 
   const currentOrders = useMemo(() => {
     return orders.filter(o => {
-      // Only show orders for current client
-      if (myClient && o.clientId !== myClient.client_id) {
-        return false;
-      }
-      // Only show active orders
+      if (myClient && o.clientId !== myClient.client_id) return false;
       return o.status !== 'cancelled' &&
         o.status !== 'client_canceled' &&
         !o.executed &&
@@ -55,91 +109,52 @@ export default function CurrentOrders() {
   }, [orders, myClient]);
 
   const filteredOrders = useMemo(() => {
-    const filtered = currentOrders.filter(order => {
-      if (statusFilter !== 'all' && order.status !== statusFilter) return false;
-      if (search) {
-        const s = search.toLowerCase();
-        return order.orderId?.toLowerCase().includes(s) ||
-          order.beneficiaryName?.toLowerCase().includes(s);
-      }
-      return true;
-    });
-
-    // Sort by date
-    return filtered.sort((a, b) => {
+    return currentOrders.filter(order => {
+      if (!search) return true;
+      const s = search.toLowerCase();
+      return order.orderId?.toLowerCase().includes(s) ||
+             order.beneficiaryName?.toLowerCase().includes(s);
+    }).sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
-  }, [currentOrders, statusFilter, search, sortOrder]);
+  }, [currentOrders, search, sortOrder]);
 
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredOrders.slice(startIndex, endIndex);
-  }, [filteredOrders, currentPage, itemsPerPage]);
+  const groupedOrders = useMemo(() => {
+    return ACTIVE_STATUSES.reduce((acc, status) => {
+      acc[status] = filteredOrders.filter(o => o.status === status);
+      return acc;
+    }, {});
+  }, [filteredOrders]);
 
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage + 1;
-  const endIndex = Math.min(currentPage * itemsPerPage, filteredOrders.length);
+  const stats = useMemo(() => {
+    return ACTIVE_STATUSES.reduce((acc, status) => {
+      const group = currentOrders.filter(o => o.status === status);
+      acc[status] = {
+        count: group.length,
+        totalUSD: group.filter(o => o.currency === 'USD').reduce((s, o) => s + (parseFloat(o.amount) || 0), 0),
+        totalEUR: group.filter(o => o.currency === 'EUR').reduce((s, o) => s + (parseFloat(o.amount) || 0), 0),
+        totalCNY: group.filter(o => o.currency === 'CNY').reduce((s, o) => s + (parseFloat(o.amount) || 0), 0),
+      };
+      return acc;
+    }, {});
+  }, [currentOrders]);
 
   const openDrawer = (order) => {
     setSelectedOrder(order);
     setDrawerOpen(true);
   };
 
-  const toggleOrderSelection = (orderId) => {
-    setSelectedOrders(prev =>
-      prev.includes(orderId)
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedOrders.length === filteredOrders.length) {
-      setSelectedOrders([]);
-    } else {
-      setSelectedOrders(filteredOrders.map(o => o.orderId));
-    }
-  };
-
-  const cancelSelected = async () => {
-    if (!selectedOrders.length) return;
-    try {
-      await Promise.all(
-        selectedOrders.map(id =>
-          apiClient.updateOrder(id, { status: 'canceled' })
-        )
-      );
-      toast.success(`${selectedOrders.length} order(s) cancelled`);
-      setSelectedOrders([]);
-      refetch();
-    } catch (error) {
-      toast.error('Failed to cancel orders');
-    }
-  };
-
-  const deleteSelected = async () => {
-    if (!selectedOrders.length) return;
-    try {
-      await Promise.all(
-        selectedOrders.map(id =>
-          apiClient.updateOrder(id, { deleted: true })
-        )
-      );
-      toast.success(`${selectedOrders.length} order(s) deleted`);
-      setSelectedOrders([]);
-      refetch();
-    } catch (error) {
-      toast.error('Failed to delete orders');
-    }
+  const toggleSection = (status) => {
+    setCollapsedSections(prev => ({ ...prev, [status]: !prev[status] }));
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-[#1e3a5f] border-b border-[#1e3a5f]/20 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+      {/* Header */}
+      <header className="bg-[#1e3a5f] shadow-xl sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to={createPageUrl('UserDashboard')}>
@@ -147,333 +162,154 @@ export default function CurrentOrders() {
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               </Link>
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img
-                  src="/gan.png"
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                />
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-lg">
+                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
+                  <h1 className="text-lg font-bold text-white">My Orders</h1>
+                  <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded-full text-white font-medium">{currentOrders.length} active</span>
                 </div>
-                <p className="text-slate-300 text-sm">Current Orders</p>
+                <p className="text-slate-300 text-xs">Track your transfer status</p>
               </div>
             </div>
             <Link to={createPageUrl('GTrans')}>
-              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-2" />
-                Public Site
+              <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex">
+                <Globe className="w-4 h-4 mr-1" /> Site
               </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search orders..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 bg-white border-slate-200 rounded-lg"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 h-10 bg-white border-slate-200 rounded-lg">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="created">Created</SelectItem>
-              <SelectItem value="check">Check</SelectItem>
-              <SelectItem value="pending_payment">Pending Payment</SelectItem>
-              <SelectItem value="on_execution">On Execution</SelectItem>
-            </SelectContent>
-          </Select>
-          {selectedOrders.length > 0 && (
-            <>
-              <Button
-                onClick={cancelSelected}
-                variant="outline"
-                className="border-amber-500 text-amber-600 hover:bg-amber-50"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Cancel Selected ({selectedOrders.length})
-              </Button>
-              <Button
-                onClick={deleteSelected}
-                variant="outline"
-                className="border-red-500 text-red-600 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Selected ({selectedOrders.length})
-              </Button>
-            </>
-          )}
-        </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {filteredOrders.length > 0 && (
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-slate-500">
-              Showing {startIndex}-{endIndex} of {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
-            </p>
-            <p className="text-xs text-slate-400 italic">Click on an order to view details</p>
-          </div>
-        )}
-
-        {/* Desktop Table */}
-        <div className="hidden md:block bg-white rounded-xl overflow-hidden shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-slate-200 bg-slate-50">
-                <TableHead className="w-12 pl-6 py-3">
-                  <Checkbox
-                    checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                </TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Order ID</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">
-                  <button
-                    onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-                    className="flex items-center gap-1 hover:text-slate-700 transition-colors"
-                  >
-                    Date
-                    <ArrowUpDown className="w-4 h-4" />
-                  </button>
-                </TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Amount</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Beneficiary</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Bank</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3 pr-6">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-16 text-slate-500">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                      Loading...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : filteredOrders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-16">
-                    <p className="text-slate-500">No orders found</p>
-                    {(search || statusFilter !== 'all') && (
-                      <p className="text-sm text-slate-400 mt-1">Try adjusting your filters</p>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ) : paginatedOrders.map((order) => (
-                <TableRow
-                  key={order.orderId}
-                  className="hover:bg-blue-50/50 transition-colors border-b border-slate-100 last:border-0"
-                >
-                  <TableCell className="pl-6 py-4" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={selectedOrders.includes(order.orderId)}
-                      onCheckedChange={() => toggleOrderSelection(order.orderId)}
-                    />
-                  </TableCell>
-                  <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm text-slate-900">{order.orderId}</span>
-                  </TableCell>
-                  <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm text-slate-900">{format(new Date(order.createdAt), 'dd/MM/yyyy')}</span>
-                  </TableCell>
-                  <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm font-semibold text-blue-600 tabular-nums">
-                      {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm text-slate-900">{order.beneficiaryName}</span>
-                  </TableCell>
-                  <TableCell className="py-4 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <span className="text-sm text-slate-900">{order.bankName}</span>
-                  </TableCell>
-                  <TableCell className="py-4 pr-6 cursor-pointer" onClick={() => openDrawer(order)}>
-                    <OrderStatusBadge status={order.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {/* Pagination Controls */}
-          {filteredOrders.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-600">Rows per page:</span>
-                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                  setItemsPerPage(Number(val));
-                  setCurrentPage(1);
-                }}>
-                  <SelectTrigger className="w-20 h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="h-9 w-9"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm text-slate-600 min-w-[100px] text-center">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="h-9 w-9"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="md:hidden space-y-3">
-          {isLoading ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
-              <div className="flex items-center justify-center gap-2 text-slate-500">
-                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                Loading...
-              </div>
-            </div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
-              <p className="text-slate-500">No orders found</p>
-              {(search || statusFilter !== 'all') && (
-                <p className="text-sm text-slate-400 mt-1">Try adjusting your filters</p>
-              )}
-            </div>
-          ) : paginatedOrders.map((order) => {
-            const getPrimaryAction = (status) => {
-              if (status === 'created' || status === 'draft') {
-                return { label: 'View Terms', icon: FileText, action: () => openDrawer(order) };
-              }
-              if (status === 'check' || status === 'rejected') {
-                return { label: 'Review', icon: FileText, action: () => openDrawer(order) };
-              }
-              if (status === 'pending_payment') {
-                return { label: 'View Details', icon: FileText, action: () => openDrawer(order) };
-              }
-              return { label: 'View Terms', icon: FileText, action: () => openDrawer(order) };
-            };
-
-            const primaryAction = getPrimaryAction(order.status);
-
+        {/* Summary Status Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {ACTIVE_STATUSES.map(status => {
+            const cfg = STATUS_CONFIG[status];
+            const s = stats[status];
+            const Icon = cfg.icon;
             return (
-              <div key={order.orderId} className="bg-white border border-slate-200 rounded-xl p-4 active:bg-slate-50 transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-semibold text-slate-900 tabular-nums">
-                      {order.currency} {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-3">
-                    <OrderStatusBadge status={order.status} />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex-shrink-0">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem onClick={() => openDrawer(order)}>
-                          <FileText className="w-4 h-4 mr-2" />
-                          Terms
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+              <div key={status} className={`rounded-2xl border-2 ${cfg.light} p-4 shadow-sm`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className={`w-4 h-4 ${cfg.text}`} />
+                  <span className={`text-xs font-semibold ${cfg.text}`}>{cfg.label}</span>
                 </div>
-                <div className="space-y-1.5 mb-3">
-                  <p className="text-sm font-medium text-slate-900 truncate">{order.beneficiaryName}</p>
-                  <p className="text-sm text-slate-600 truncate">{order.bankName}</p>
-                  <p className="text-xs text-slate-500">
-                    {format(new Date(order.createdAt), 'dd/MM/yyyy')} • {order.orderId}
-                  </p>
+                <div className={`text-3xl font-bold ${cfg.text}`}>{s.count}</div>
+                <div className="mt-1 space-y-0.5">
+                  {s.totalUSD > 0 && <div className="text-xs text-slate-500">USD {s.totalUSD.toLocaleString()}</div>}
+                  {s.totalEUR > 0 && <div className="text-xs text-slate-500">EUR {s.totalEUR.toLocaleString()}</div>}
+                  {s.totalCNY > 0 && <div className="text-xs text-slate-500">CNY {s.totalCNY.toLocaleString()}</div>}
+                  {s.count === 0 && <div className="text-xs text-slate-400 italic">None</div>}
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={primaryAction.action}
-                  className="w-full h-9 text-sm font-medium"
-                >
-                  <primaryAction.icon className="w-4 h-4 mr-2" />
-                  {primaryAction.label}
-                </Button>
               </div>
             );
           })}
         </div>
 
-        {/* Mobile Pagination */}
-        {filteredOrders.length > 0 && (
-          <div className="md:hidden mt-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">Rows per page:</span>
-              <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                setItemsPerPage(Number(val));
-                setCurrentPage(1);
-              }}>
-                <SelectTrigger className="w-20 h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-              <span className="text-sm text-slate-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
+        {/* Search + Sort */}
+        <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search orders or beneficiary..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 bg-white border-slate-200 rounded-xl h-10"
+            />
+          </div>
+          <button
+            onClick={() => setSortOrder(s => s === 'desc' ? 'asc' : 'desc')}
+            className="flex items-center gap-1.5 text-xs text-slate-600 border border-slate-200 bg-white px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            <ArrowUpDown className="w-3.5 h-3.5" /> {sortOrder === 'desc' ? 'Newest first' : 'Oldest first'}
+          </button>
+          {search && (
+            <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-700">
+              <X className="w-4 h-4 mr-1" /> Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Segmented Sections */}
+        {isLoading ? (
+          <div className="text-center text-slate-400 py-20 flex flex-col items-center gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+            Loading your orders...
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="text-center text-slate-400 py-20 bg-white rounded-2xl border border-slate-200">
+            <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-slate-200" />
+            <p className="font-medium text-slate-500">No active orders</p>
+            {search && <p className="text-sm mt-1">Try clearing your search</p>}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {ACTIVE_STATUSES.map(status => {
+              const group = groupedOrders[status];
+              const cfg = STATUS_CONFIG[status];
+              const isCollapsed = collapsedSections[status];
+              const Icon = cfg.icon;
+              if (group.length === 0) return null;
+
+              return (
+                <div key={status} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  {/* Section Header */}
+                  <button
+                    className={`w-full flex items-center justify-between px-5 py-3.5 ${cfg.light} border-b hover:opacity-95 transition-opacity`}
+                    onClick={() => toggleSection(status)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={`w-4 h-4 ${cfg.text}`} />
+                      <span className={`font-semibold text-sm ${cfg.text}`}>{cfg.label}</span>
+                      <Badge className={`${cfg.color} text-white text-xs px-2`}>{group.length}</Badge>
+                      <span className={`text-xs hidden sm:block ${cfg.text} opacity-70`}>{cfg.desc}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="hidden sm:flex gap-3 text-xs text-slate-500">
+                        {['USD', 'EUR', 'CNY'].map(cur => {
+                          const total = group.filter(o => o.currency === cur).reduce((s, o) => s + (parseFloat(o.amount) || 0), 0);
+                          return total > 0 ? <span key={cur} className="font-medium">{cur} {total.toLocaleString()}</span> : null;
+                        })}
+                      </div>
+                      {isCollapsed
+                        ? <ChevronDown className={`w-4 h-4 ${cfg.text}`} />
+                        : <ChevronUp className={`w-4 h-4 ${cfg.text}`} />
+                      }
+                    </div>
+                  </button>
+
+                  {!isCollapsed && (
+                    <>
+                      {/* Desktop Table */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-slate-50/60 border-b border-slate-100">
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 pl-5 pr-3">Order ID</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Date</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Amount</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Beneficiary</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Bank</th>
+                              <th className="py-2.5 pl-3 pr-5" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {group.map(order => <OrderRow key={order.orderId} order={order} onOpen={openDrawer} />)}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile Cards */}
+                      <div className="md:hidden p-4 grid grid-cols-1 gap-3">
+                        {group.map(order => <OrderCard key={order.orderId} order={order} onOpen={openDrawer} />)}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>

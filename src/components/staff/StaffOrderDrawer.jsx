@@ -12,15 +12,19 @@ import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 
 // import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper'; // Removed
 import apiClient from '@/api/apiClient';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Download, Upload, FileText } from 'lucide-react';
+import { Download, Upload, FileText, AlertTriangle } from 'lucide-react';
 import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGenerator';
 import { format } from 'date-fns';
+import SuspiciousTransactionAlert from '@/components/orders/SuspiciousTransactionAlert';
+import { isAboveThreshold, formatThreshold } from '@/components/orders/thresholdUtils';
 
+const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
 
 export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
-
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState('created');
   const [datePaid, setDatePaid] = useState('');
   const [dataFixing, setDataFixing] = useState('');
   const [remunerationType, setRemunerationType] = useState('PERCENT');
@@ -105,9 +109,16 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     enabled: !!order?.orderId && open,
   });
 
+  // Reuse cached orders for suspicious transaction analysis
+  const { data: allOrders = [] } = useQuery({
+    queryKey: ['staff-active-orders'],
+    queryFn: () => apiClient.getOrders(),
+    enabled: open,
+  });
+
   useEffect(() => {
     if (order && open) {
-
+      setStatus(order.status || 'created');
       setDatePaid(order.datePaid || '');
       setDataFixing(order.dataFixing || '');
       setInvoiceNumber(order.invoiceNumber || '');
@@ -265,6 +276,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         base_currency: baseCurrency || null,
         executing_bank: executingBank || null,
         FX: !!fxExecutingBank,
+        status: status,
         bank_statement_in_type: bankStatementInType || null,
         bank_statement_in_id: bankStatementInId || null,
         bank_statement_out_type: bankStatementOutType || null,
@@ -318,6 +330,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       // 2. Update Order
       const updates = {
+        status,
         invoice_number: invoiceNumber,
         invocie_received: invoiceReceived,
         payment_proof: paymentProof,
@@ -328,6 +341,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       await onSave(updates);
       toast.success('Order updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['order-terms', order.orderId] });
       refetchDocuments(); // Refresh docs just in case
     } catch (error) {
       console.error(error);
@@ -418,7 +432,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         <SheetHeader className="mb-4 flex-shrink-0">
           <SheetTitle className="text-slate-900 flex items-center gap-3">
             #{order.orderId}
-            <OrderStatusBadge status={order.status} />
+            <OrderStatusBadge status={status} />
           </SheetTitle>
           <SheetDescription className="hidden">
             Manage order details, documents, and status.
@@ -427,6 +441,40 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
           <div className="space-y-6">
+            {/* Compliance Alerts */}
+            {isAboveThreshold(order.amount, order.currency) && (
+              <div className="flex items-start gap-3 bg-red-50 border-2 border-red-300 rounded-lg p-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-red-800">Regulatory Threshold Reached</p>
+                  <p className="text-xs text-red-700 mt-0.5">
+                    {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} meets or exceeds the {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
+                  </p>
+                </div>
+              </div>
+            )}
+            <SuspiciousTransactionAlert order={order} allOrders={allOrders} />
+
+            {/* STATUS MANAGEMENT Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Status Management</h3>
+              <div>
+                <Label className="text-xs text-slate-600">Order Status</Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="mt-1 bg-white border-slate-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_STATUSES.map(s => (
+                      <SelectItem key={s} value={s}>{s.replace('_', ' ').toUpperCase()}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Separator className="bg-slate-200" />
+
             {/* SECTION 1: CLIENT PAYMENT INSTRUCTIONS */}
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Client Payment Instructions</h3>

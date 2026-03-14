@@ -213,6 +213,9 @@ class ApiClient {
         if (params.include_deleted) {
             queryParams.append('include_deleted', 'true');
         }
+        if (params.client_id) {
+            queryParams.append('client_id', params.client_id);
+        }
         const queryString = queryParams.toString();
         return this.request(`/orders/pobo${queryString ? `?${queryString}` : ''}`);
     }

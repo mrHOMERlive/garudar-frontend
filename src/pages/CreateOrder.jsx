@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText } from 'lucide-react';
+import ThresholdBanner from '../components/orders/ThresholdBanner';
+import ThresholdConfirmDialog from '../components/orders/ThresholdConfirmDialog';
+import { isAboveThreshold } from '../components/orders/thresholdUtils';
 import AmountCurrencySection from '../components/remittance/AmountCurrencySection';
 import BeneficiaryInfoSection from '../components/remittance/BeneficiaryInfoSection';
 import BankDetailsSection from '../components/remittance/BankDetailsSection';
@@ -52,6 +55,7 @@ export default function CreateOrder() {
   const [otherDocsFile, setOtherDocsFile] = useState(null);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showThresholdDialog, setShowThresholdDialog] = useState(false);
 
   // Загрузка справочника стран (API возвращает {code, name})
   const { data: countries = [] } = useQuery({
@@ -176,10 +180,19 @@ export default function CreateOrder() {
       return;
     }
     if (validateForm()) {
-      createOrderMutation.mutate(formData);
+      if (isAboveThreshold(formData.amount, formData.currency)) {
+        setShowThresholdDialog(true);
+      } else {
+        createOrderMutation.mutate(formData);
+      }
     } else {
       toast.error('Please fix all errors before submitting');
     }
+  };
+
+  const handleThresholdConfirm = () => {
+    setShowThresholdDialog(false);
+    createOrderMutation.mutate(formData);
   };
 
   const copyInvoiceEmail = () => {
@@ -334,6 +347,10 @@ export default function CreateOrder() {
             errors={errors}
             setErrors={setErrors}
           />
+
+          {formData.amount > 0 && (
+            <ThresholdBanner amount={formData.amount} currency={formData.currency} />
+          )}
 
           <BeneficiaryInfoSection
             formData={formData}
@@ -577,6 +594,14 @@ export default function CreateOrder() {
           </div>
         </div>
       </div>
+
+      <ThresholdConfirmDialog
+        open={showThresholdDialog}
+        onConfirm={handleThresholdConfirm}
+        onCancel={() => setShowThresholdDialog(false)}
+        amount={formData.amount}
+        currency={formData.currency}
+      />
 
       {/* Invoice Modal */}
       {createdOrder && (
