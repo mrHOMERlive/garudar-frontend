@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/api/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, Trash2, FileCheck, Shield, AlertCircle } from 'lucide-react';
+import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircle, FileCheck, Shield, AlertCircle } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
 import { Badge } from '@/components/ui/badge';
@@ -87,13 +87,6 @@ export default function UserDashboard() {
       icon: XCircle,
       page: 'CancelledOrders',
       color: 'bg-red-600'
-    },
-    {
-      title: t('deletedOrders'),
-      description: t('viewDeletedOrders'),
-      icon: Trash2,
-      page: 'DeletedOrders',
-      color: 'bg-slate-600'
     }
   ];
 
@@ -194,7 +187,7 @@ export default function UserDashboard() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {modules.filter(m => !['ExecutedOrders', 'CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
+          {modules.filter(m => !['ExecutedOrders', 'CancelledOrders'].includes(m.page)).map((module) => (
             module.disabled ? (
               <Card key={module.page + module.title} className="bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed h-full">
                 <CardHeader>
@@ -240,7 +233,7 @@ export default function UserDashboard() {
           </div>
 
           <div className="flex gap-4 text-sm">
-            {modules.filter(m => ['CancelledOrders', 'DeletedOrders'].includes(m.page)).map((module) => (
+            {modules.filter(m => ['CancelledOrders'].includes(m.page)).map((module) => (
               <Link key={module.page + module.title} to={createPageUrl(module.page)}>
                 <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors">
                   <module.icon className="w-3.5 h-3.5" />
