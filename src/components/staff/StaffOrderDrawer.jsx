@@ -54,7 +54,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [conversionMethod, setConversionMethod] = useState('none');
   const [baseCurrency, setBaseCurrency] = useState('');
   const [executingBank, setExecutingBank] = useState('');
-  const [fxExecutingBank, setFxExecutingBank] = useState('');
+
   const [bankStatementInType, setBankStatementInType] = useState('');
   const [bankStatementInId, setBankStatementInId] = useState('');
   const [bankStatementOutType, setBankStatementOutType] = useState('');
@@ -134,7 +134,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setConversionMethod(order.conversionMethod || 'none');
       setBaseCurrency(order.baseCurrency || order.currency || '');
       setExecutingBank(order.executingBank || '');
-      setFxExecutingBank(order.fxExecutingBank ?? '');
       setBankStatementInType(order.bankStatementInType || '');
       setBankStatementInId(order.bankStatementInId || '');
       setBankStatementOutType(order.bankStatementOutType || '');
@@ -180,7 +179,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         if (found) exBank = found.account_no;
       }
       setExecutingBank(exBank);
-      setFxExecutingBank(terms.FXExecutingBank ?? '');
       setBankStatementInType(terms.bankStatementInType || '');
       setBankStatementInId(terms.bankStatementInId || '');
       setBankStatementOutType(terms.bankStatementOutType || '');
@@ -271,7 +269,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         conversion_method: conversionMethod === 'none' ? null : conversionMethod,
         base_currency: baseCurrency || null,
         executing_bank: executingBank || null,
-        FX: !!fxExecutingBank,
+        FX: false,
         status: status,
         bank_statement_in_type: bankStatementInType || null,
         bank_statement_in_id: bankStatementInId || null,
@@ -288,9 +286,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       // Conditionally add Decimal fields to avoid sending null
       if (exchangeRate !== '') {
         termsData.exchange_rate = parseFloat(exchangeRate);
-      }
-      if (fxExecutingBank !== '') {
-        termsData.FX_executing_bank = parseFloat(fxExecutingBank);
       }
       if (amountToBePaidTargetCur !== '') {
         termsData.amount_to_be_paid_target_cur = parseFloat(amountToBePaidTargetCur);
@@ -811,18 +806,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </Select>
                 </div>
 
-                <div>
-                  <Label className="text-xs text-slate-600">Bank's FX Rate (if applicable)</Label>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    value={fxExecutingBank}
-                    onChange={(e) => setFxExecutingBank(e.target.value)}
-                    className="mt-1 bg-white border-slate-300"
-                    placeholder="7.15"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">Used when Executing Bank applies FX conversion</p>
-                </div>
               </div>
 
               <Separator className="bg-slate-200" />
