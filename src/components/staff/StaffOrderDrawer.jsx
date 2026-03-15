@@ -448,7 +448,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div>
                   <p className="text-xs font-bold text-red-800">Regulatory Threshold Reached</p>
                   <p className="text-xs text-red-700 mt-0.5">
-                    {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} meets or exceeds the {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
+                    {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} exceeds the {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
                   </p>
                 </div>
               </div>
