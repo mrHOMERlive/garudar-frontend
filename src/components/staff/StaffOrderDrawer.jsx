@@ -25,7 +25,6 @@ const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment'
 export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState('created');
-  const [datePaid, setDatePaid] = useState('');
   const [dataFixing, setDataFixing] = useState('');
   const [remunerationType, setRemunerationType] = useState('PERCENT');
   const [remunerationPercentage, setRemunerationPercentage] = useState('');
@@ -119,7 +118,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   useEffect(() => {
     if (order && open) {
       setStatus(order.status || 'created');
-      setDatePaid(order.datePaid || '');
       setDataFixing(order.dataFixing || '');
       setInvoiceNumber(order.invoiceNumber || '');
 
@@ -166,7 +164,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       setClientPaymentCurrency(terms.clientPaymentCurrency || 'USD');
       setExchangeRate(terms.exchangeRate ? parseFloat(terms.exchangeRate) : '');
       setExchangeRateMode('manual');
-      if (terms.datePaid) setDatePaid(terms.datePaid);
       if (terms.dataFixing) setDataFixing(terms.dataFixing);
       setStaffDescription(terms.description || '');
 
@@ -267,7 +264,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       const termsData = {
         remuneration_type: remunerationType.toLowerCase(),
         client_payment_currency: clientPaymentCurrency || null,
-        date_paid: datePaid || null,
         data_fixing: dataFixing || null,
         GAN_bank_name: ganBankName || null,
         GAN_bank_account: ganBankAccount || null,
@@ -553,15 +549,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               )}
 
-              <div>
-                <Label className="text-xs text-slate-600">Date Received (Date Paid)</Label>
-                <Input
-                  type="date"
-                  value={datePaid}
-                  onChange={(e) => setDatePaid(e.target.value)}
-                  className="mt-1 bg-white border-slate-300"
-                />
-              </div>
             </div>
 
             <Separator className="bg-slate-200" />
