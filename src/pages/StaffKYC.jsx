@@ -86,9 +86,9 @@ export default function StaffKYC() {
                 <div className="flex items-start gap-4">
                   <div className={cn(
                     "w-16 h-16 rounded-full flex items-center justify-center",
-                    selectedRecord.entryType === '1' ? "bg-[#1e3a5f]/10" : "bg-[#f5a623]/10"
+                    selectedRecord.entryType === 'Individual' ? "bg-[#1e3a5f]/10" : "bg-[#f5a623]/10"
                   )}>
-                    {selectedRecord.entryType === '1' ? (
+                    {selectedRecord.entryType === 'Individual' ? (
                       <User className="w-8 h-8 text-[#1e3a5f]" />
                     ) : (
                       <Building2 className="w-8 h-8 text-[#f5a623]" />
@@ -97,7 +97,7 @@ export default function StaffKYC() {
                   <div>
                     <h2 className="text-3xl font-bold text-[#1e3a5f] mb-2">{selectedRecord.fullName}</h2>
                     <p className="text-slate-600">
-                      Type: {selectedRecord.entryType === '1' ? 'Individual' : 'Corporate'} |
+                      Type: {selectedRecord.entryType === 'Individual' ? 'Individual' : 'Corporate'} |
                       Source: {selectedRecord.sourceList} |
                       Load Date: {selectedRecord.loadDate ? new Date(selectedRecord.loadDate).toLocaleDateString() : '-'}
                     </p>
@@ -191,7 +191,7 @@ export default function StaffKYC() {
 
                 <div>
                   <Label className="text-slate-500">Entry Type</Label>
-                  <p className="text-slate-900">{selectedRecord.entryType === '1' ? 'Individual' : 'Corporate'}</p>
+                  <p className="text-slate-900">{selectedRecord.entryType === 'Individual' ? 'Individual' : 'Corporate'}</p>
                 </div>
 
                 <div>
