@@ -57,7 +57,6 @@ export const translations = {
 
     // Staff Dashboard
     administration: 'Administration',
-    orders: 'Orders',
     kyc: 'KYC',
     clients: 'Clients',
     manageClientAccounts: 'Manage client accounts',
@@ -162,7 +161,6 @@ export const translations = {
     notSettled: 'Not Settled',
     clientManagement: 'Client Management',
     addClient: 'Add Client',
-    noClientsFound: 'No clients found',
     clientID: 'Client ID',
     name: 'Name',
     signStatus: 'Sign Status',
@@ -502,7 +500,6 @@ export const translations = {
     previous: 'Sebelumnya',
     page: 'Halaman',
     of: 'dari',
-    showing: 'Menampilkan',
     noDataFound: 'Data tidak ditemukan',
     tryAdjustingFilters: 'Coba sesuaikan filter Anda',
 
@@ -539,7 +536,6 @@ export const translations = {
 
     // Staff Dashboard
     administration: 'Administrasi',
-    orders: 'Pesanan',
     kyc: 'KYC',
     clients: 'Klien',
     manageClientAccounts: 'Kelola akun klien',
@@ -558,7 +554,6 @@ export const translations = {
     // Orders Page
     searchOrders: 'Cari pesanan...',
     allStatuses: 'Semua Status',
-    clickToViewDetails: 'Klik pada pesanan untuk melihat detail',
     orderID: 'ID Pesanan',
     date: 'Tanggal',
     amount: 'Jumlah',
@@ -566,7 +561,6 @@ export const translations = {
     bank: 'Bank',
     status: 'Status',
     noOrdersFound: 'Tidak ada pesanan ditemukan',
-    rowsPerPage: 'Baris per halaman:',
     orders: 'pesanan',
     order: 'pesanan',
 
@@ -589,7 +583,6 @@ export const translations = {
 
     // Staff Actions
     createTxtInstruction: 'Buat Instruksi TXT',
-    markExecuted: 'Tandai Selesai',
     selected: 'dipilih',
     searchByOrderClient: 'Cari berdasarkan pesanan, klien, penerima, BIC...',
     filterByStatus: 'Filter berdasarkan status',
@@ -600,12 +593,9 @@ export const translations = {
     invRcv: 'Inv Terima',
     proof: 'Bukti',
     nonM: 'Non-M',
-    noActiveOrders: 'Tidak ada pesanan aktif',
 
     // Documents
-    salesContract: 'Kontrak Penjualan',
     invoice: 'Faktur',
-    otherDocuments: 'Dokumen Lain',
     paymentProof: 'Bukti Pembayaran',
     wordOrder: 'Pesanan WORD',
     submitted: 'Dikirim',
@@ -629,22 +619,16 @@ export const translations = {
     serviceAgreement: 'Perjanjian Layanan',
 
     // Additional Text
-    clickToViewFullDetails: 'Klik pada pesanan untuk melihat detail lengkap',
     searchDeletedOrders: 'Cari pesanan yang dihapus...',
     searchCancelledOrders: 'Cari pesanan yang dibatalkan...',
     searchClients: 'Cari klien...',
     dateCreated: 'Tanggal Dibuat',
     noDeletedOrders: 'Tidak ada pesanan yang dihapus',
     noCancelledOrders: 'Tidak ada pesanan yang dibatalkan',
-    noExecutedOrders: 'Tidak ada pesanan yang selesai',
     transactionStatus: 'Status Transaksi',
-    actReport: 'Laporan Tindakan',
-    filterBySettled: 'Filter berdasarkan penyelesaian',
     settled: 'Diselesaikan',
     notSettled: 'Belum Diselesaikan',
     clientManagement: 'Manajemen Klien',
-    addClient: 'Tambah Klien',
-    noClientsFound: 'Tidak ada klien ditemukan',
     clientID: 'ID Klien',
     name: 'Nama',
     signStatus: 'Status Tanda Tangan',
@@ -659,10 +643,8 @@ export const translations = {
     reviewProcessClientKYC: 'Tinjau dan proses pengajuan KYC klien',
     searchByCompanyOrClient: 'Cari berdasarkan nama perusahaan atau klien...',
     noKYCSubmissions: 'Tidak ada pengajuan KYC yang menunggu tinjauan',
-    companyNameNotProvided: 'Nama Perusahaan Tidak Diberikan',
     unknown: 'Tidak Diketahui',
     na: 'T/A',
-    backToDashboard: 'Kembali ke Dashboard',
     platformTerms: 'Syarat & Ketentuan Platform',
     sla: 'Perjanjian Tingkat Layanan (SLA)',
     dpa: 'Perjanjian Pemrosesan Data (DPA)',
@@ -690,8 +672,6 @@ export const translations = {
     keyPoints: 'Poin Utama:',
     copy: 'Salin',
     trackYourTransfer: 'Lacak status transfer Anda',
-    newestFirst: 'Terbaru dulu',
-    oldestFirst: 'Terlama dulu',
     noActiveOrders2: 'Tidak ada pesanan aktif',
     tryClearing: 'Coba hapus pencarian Anda',
     searchOrdersOrBeneficiary: 'Cari pesanan atau penerima...',
@@ -699,7 +679,6 @@ export const translations = {
     clickToViewFullDetails: 'Klik pesanan untuk melihat detail lengkap',
     rowsPerPageLabel: 'Baris per halaman:',
     pageOf: 'Halaman',
-    noExecutedOrders: 'Tidak ada pesanan yang selesai',
     noCancelledOrders2: 'Tidak ada pesanan yang dibatalkan',
     noDeletedOrders2: 'Tidak ada pesanan yang dihapus',
     // AmountCurrencySection
@@ -768,7 +747,6 @@ export const translations = {
     beneficiaryLabel: 'Penerima',
     bankLabel: 'Bank',
     clientLabel: 'Klien',
-    pageLabel: 'Halaman',
     ofLabel: 'dari',
     loadingDots: 'Memuat...',
     loadingYourOrders: 'Memuat pesanan Anda...',
@@ -797,7 +775,6 @@ export const translations = {
     clickToViewDetails: 'Klik pesanan mana pun untuk melihat detail lengkap',
     trackTransferStatus: 'Lacak status transfer Anda',
     avgLabel: 'rata-rata',
-    activeLabel: 'aktif',
     clearFilters: 'Hapus',
     orderLabel: 'pesanan',
     ordersLabel: 'pesanan',
