@@ -14,6 +14,8 @@ import {
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import StaffExecutedDrawer from '@/components/staff/StaffExecutedDrawer';
+import { t } from '@/components/utils/language';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 export default function StaffExecutedOrders() {
   const [search, setSearch] = useState('');
@@ -153,17 +155,20 @@ export default function StaffExecutedOrders() {
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
                   <span className="text-white/60">•</span>
-                  <span className="text-white">Executed Orders</span>
+                  <span className="text-white">{t('mod_executedOrders_title')}</span>
                 </div>
-                <Badge className="bg-emerald-600 text-white">{executedOrders.length} orders</Badge>
+                <Badge className="bg-emerald-600 text-white">{executedOrders.length} {t('clientOrdersBadge')}</Badge>
               </div>
             </div>
-            <Link to={createPageUrl('GTrans')}>
-              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-2" />
-                Public Site
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <Link to={createPageUrl('GTrans')}>
+                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-2" />
+                  {t('publicSite')}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -173,7 +178,7 @@ export default function StaffExecutedOrders() {
           <div className="relative w-72">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search orders..."
+              placeholder={t('searchOrdersPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white border-slate-300 text-slate-800 placeholder:text-slate-400"
@@ -181,13 +186,13 @@ export default function StaffExecutedOrders() {
           </div>
           <Select value={settledFilter} onValueChange={setSettledFilter}>
             <SelectTrigger className="w-48 bg-white border-slate-300 text-slate-800">
-              <SelectValue placeholder="Filter by settled" />
+              <SelectValue placeholder={t('filterBySettled')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="Y">Settled</SelectItem>
-              <SelectItem value="N">Not Settled</SelectItem>
-              <SelectItem value="NA">N/A</SelectItem>
+              <SelectItem value="all">{t('allLabel') || 'All'}</SelectItem>
+              <SelectItem value="Y">{t('settledLabel')}</SelectItem>
+              <SelectItem value="N">{t('notSettledLabel')}</SelectItem>
+              <SelectItem value="NA">{t('naLabel')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -195,9 +200,9 @@ export default function StaffExecutedOrders() {
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-slate-500">
-              Showing {startIndex}-{endIndex} of {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+              {t('showing')} {startIndex}-{endIndex} {t('ofLabel')} {filteredOrders.length} {t('ordersLabel')}
             </p>
-            <p className="text-xs text-slate-400 italic">Click on an order to view details</p>
+            <p className="text-xs text-slate-400 italic">{t('clickToViewDetails')}</p>
           </div>
         )}
 
@@ -205,29 +210,29 @@ export default function StaffExecutedOrders() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Order ID</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">{t('orderId')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-sm">
                   <button
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-[#152a45] transition-colors"
                   >
-                    Date
+                    {t('date')}
                     <ArrowUpDown className="w-4 h-4" />
                   </button>
                 </TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Amount</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Beneficiary</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm">Bank</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">Transaction<br />Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">{t('amountLabel')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">{t('beneficiaryLabel')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm">{t('bankLabel')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">{t('txStatus')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">MT103</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center pr-6">Act<br />Report</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center pr-6">{t('actReport')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell></TableRow>
               ) : filteredOrders.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">No executed orders</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">{t('noExecutedOrders')}</TableCell></TableRow>
               ) : paginatedOrders.map((order) => (
                 <TableRow
                   key={order.id}
@@ -279,7 +284,7 @@ export default function StaffExecutedOrders() {
           {filteredOrders.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-600">Rows per page:</span>
+                <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
                 <Select value={itemsPerPage.toString()} onValueChange={(val) => {
                   setItemsPerPage(Number(val));
                   setCurrentPage(1);
@@ -305,7 +310,7 @@ export default function StaffExecutedOrders() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <span className="text-sm text-slate-600 min-w-[100px] text-center">
-                  Page {currentPage} of {totalPages}
+                  {t('pageLabel')} {currentPage} {t('ofLabel')} {totalPages}
                 </span>
                 <Button
                   variant="outline"

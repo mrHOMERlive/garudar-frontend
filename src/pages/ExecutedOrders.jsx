@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientExecutedDrawer from '@/components/client/ClientExecutedDrawer';
 import { format } from 'date-fns';
@@ -141,17 +143,20 @@ export default function ExecutedOrders() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
+                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">{t('clientDashboard')}</span>
                 </div>
-                <p className="text-slate-300 text-sm">Executed Orders</p>
+                <p className="text-slate-300 text-sm">{t('executedOrders')}</p>
               </div>
             </div>
-            <Link to={createPageUrl('GTrans')}>
-              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-2" />
-                Public Site
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher variant="ghost" />
+              <Link to={createPageUrl('GTrans')}>
+                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-2" />
+                  {t('publicSite')}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -161,7 +166,7 @@ export default function ExecutedOrders() {
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search orders..."
+              placeholder={t('searchOrdersPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white"
@@ -172,9 +177,9 @@ export default function ExecutedOrders() {
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-slate-500">
-              Showing {startIndex}-{endIndex} of {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+              {t('showing')} {startIndex}-{endIndex} {t('ofLabel')} {filteredOrders.length} {filteredOrders.length === 1 ? t('orderLabel') : t('ordersLabel')}
             </p>
-            <p className="text-xs text-slate-400 italic">Click on any order to view full details</p>
+            <p className="text-xs text-slate-400 italic">{t('clickToViewDetails')}</p>
           </div>
         )}
 
@@ -182,22 +187,22 @@ export default function ExecutedOrders() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-slate-200 bg-slate-50">
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Order ID</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3">{t('orderId')}</TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3">
                   <button
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-slate-700 transition-colors"
                   >
-                    Date
+                    {t('date')}
                     <ArrowUpDown className="w-4 h-4" />
                   </button>
                 </TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Amount</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Beneficiary</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3">Bank</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">Transaction<br />Status</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3">{t('amountLabel')}</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3">{t('beneficiaryLabel')}</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3">{t('bankLabel')}</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">{t('txStatusHeader')}</TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">MT103</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center pr-6">Act<br />Report</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center pr-6">{t('actReport')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,14 +211,14 @@ export default function ExecutedOrders() {
                   <TableCell colSpan={8} className="text-center py-16 text-slate-500">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                      Loading...
+                      {t('loadingDots')}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : filteredOrders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-16">
-                    <p className="text-slate-500">No executed orders</p>
+                    <p className="text-slate-500">{t('noExecutedOrders')}</p>
                   </TableCell>
                 </TableRow>
               ) : paginatedOrders.map((order) => (
@@ -278,7 +283,7 @@ export default function ExecutedOrders() {
           {filteredOrders.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-600">Rows per page:</span>
+                <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
                 <Select value={itemsPerPage.toString()} onValueChange={(val) => {
                   setItemsPerPage(Number(val));
                   setCurrentPage(1);
@@ -304,7 +309,7 @@ export default function ExecutedOrders() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <span className="text-sm text-slate-600 min-w-[100px] text-center">
-                  Page {currentPage} of {totalPages}
+                  {t('pageLabel')} {currentPage} {t('ofLabel')} {totalPages}
                 </span>
                 <Button
                   variant="outline"

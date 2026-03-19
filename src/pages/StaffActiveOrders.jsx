@@ -17,6 +17,8 @@ import { isAboveThreshold } from '@/components/orders/thresholdUtils';
 import { computeClientAverage } from '@/components/orders/SuspiciousTransactionAlert';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import StaffOrderDrawer from '@/components/staff/StaffOrderDrawer';
+import { t } from '@/components/utils/language';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 const ACTIVE_STATUSES = ['created', 'draft', 'check', 'pending_payment', 'on_execution'];
 const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
@@ -40,7 +42,7 @@ function AlertIcon({ reasons }) {
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3 text-xs shadow-lg border-amber-200" side="right">
         <div className="font-semibold text-amber-700 mb-2 flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5" /> Risk Alert
+          <AlertTriangle className="w-3.5 h-3.5" /> {t('riskAlert')}
         </div>
         <ul className="space-y-1.5">
           {reasons.map((r, i) => (
@@ -332,14 +334,14 @@ export default function StaffActiveOrders() {
         <TableHeader>
           <TableRow className="bg-slate-50/70 hover:bg-slate-50/70 border-slate-100">
             <TableHead className="w-10 pl-4" />
-            <TableHead className="w-36 text-slate-500 font-semibold text-xs">Order ID</TableHead>
-            {showClientColumn && <TableHead className="min-w-[160px] text-slate-500 font-semibold text-xs">Client</TableHead>}
-            <TableHead className="w-44 text-slate-500 font-semibold text-xs">Amount</TableHead>
+            <TableHead className="w-36 text-slate-500 font-semibold text-xs">{t('orderId')}</TableHead>
+            {showClientColumn && <TableHead className="min-w-[160px] text-slate-500 font-semibold text-xs">{t('clientLabel')}</TableHead>}
+            <TableHead className="w-44 text-slate-500 font-semibold text-xs">{t('amountLabel')}</TableHead>
             <TableHead className="w-10" />
-            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Inv Rcv</TableHead>
-            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Proof</TableHead>
-            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Non-M</TableHead>
-            <TableHead className="text-slate-500 font-semibold text-xs pr-4">Inv#</TableHead>
+            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('invRcv')}</TableHead>
+            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('proof')}</TableHead>
+            <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('nonM')}</TableHead>
+            <TableHead className="text-slate-500 font-semibold text-xs pr-4">{t('invNum')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -379,28 +381,29 @@ export default function StaffActiveOrders() {
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
                   <span className="text-white/60">•</span>
-                  <span className="text-white">Active Orders</span>
+                  <span className="text-white">{t('mod_activeOrders_title')}</span>
                 </div>
-                <Badge className="bg-[#f5a623] text-white">{activeOrders.length} total orders</Badge>
+                <Badge className="bg-[#f5a623] text-white">{activeOrders.length} {t('ordersLabel')}</Badge>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               <Link to={createPageUrl('GTrans')}>
                 <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                  <Globe className="w-4 h-4 mr-1" /> Public Site
+                  <Globe className="w-4 h-4 mr-1" /> {t('publicSite')}
                 </Button>
               </Link>
               {selectedIds.size > 0 && (
                 <>
-                  <span className="text-white/70 text-sm">{selectedIds.size} selected</span>
+                  <span className="text-white/70 text-sm">{selectedIds.size} {t('selectedLabel')}</span>
                   <Button onClick={handleCreateInstruction} className="bg-white/10 hover:bg-white/20 text-white border border-white/30">
-                    <FileDown className="w-4 h-4 mr-2" /> Create TXT
+                    <FileDown className="w-4 h-4 mr-2" /> {t('createTxt')}
                   </Button>
                   <Button onClick={handleMarkAsExecuted} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
-                    <CheckCircle className="w-4 h-4 mr-2" /> Mark Executed
+                    <CheckCircle className="w-4 h-4 mr-2" /> {t('markExecuted')}
                   </Button>
                   <Button onClick={() => setDeleteDialogOpen(true)} variant="destructive">
-                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    <Trash2 className="w-4 h-4 mr-2" /> {t('deleteLabel')}
                   </Button>
                 </>
               )}
@@ -427,7 +430,7 @@ export default function StaffActiveOrders() {
                   {s.totalEUR > 0 && <div className="text-xs text-slate-500">EUR {s.totalEUR.toLocaleString()}</div>}
                   {s.totalCNY > 0 && <div className="text-xs text-slate-500">CNY {s.totalCNY.toLocaleString()}</div>}
                   {s.totalUSD === 0 && s.totalEUR === 0 && s.totalCNY === 0 && (
-                    <div className="text-xs text-slate-400 italic">No orders</div>
+                    <div className="text-xs text-slate-400 italic">{t('noOrdersLabel')}</div>
                   )}
                 </div>
               </div>
@@ -439,16 +442,16 @@ export default function StaffActiveOrders() {
         <div className="flex items-center gap-4 mb-5 flex-wrap">
           <div className="relative w-72">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-            <Input placeholder="Search by order, client, beneficiary, BIC..."
+            <Input placeholder={t('searchActiveOrdersPlaceholder')}
               value={search} onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white border-slate-300 text-slate-800 placeholder:text-slate-400" />
           </div>
           <Select value={currencyFilter} onValueChange={setCurrencyFilter}>
             <SelectTrigger className="w-36 bg-white border-slate-300 text-slate-800">
-              <SelectValue placeholder="Currency" />
+              <SelectValue placeholder={t('selectCurrency')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Currencies</SelectItem>
+              <SelectItem value="all">{t('allCurrencies')}</SelectItem>
               <SelectItem value="USD">USD</SelectItem>
               <SelectItem value="EUR">EUR</SelectItem>
               <SelectItem value="CNY">CNY</SelectItem>
@@ -457,13 +460,13 @@ export default function StaffActiveOrders() {
           </Select>
           <button onClick={() => setSortOrder(s => s === 'desc' ? 'asc' : 'desc')}
             className="flex items-center gap-1.5 text-xs text-slate-600 border border-slate-300 bg-white px-3 py-2 rounded-md hover:bg-slate-50 transition-colors">
-            <ArrowUpDown className="w-3 h-3" /> {sortOrder === 'desc' ? 'Newest first' : 'Oldest first'}
+            <ArrowUpDown className="w-3 h-3" /> {sortOrder === 'desc' ? t('newestFirst') : t('oldestFirst')}
           </button>
           <button
             onClick={() => setSelectedIds(new Set(filteredOrders.filter(o => o.status === 'on_execution').map(o => o.orderId)))}
             className="text-xs text-indigo-600 border border-indigo-200 bg-indigo-50 px-3 py-2 rounded-md hover:bg-indigo-100 transition-colors font-medium"
           >
-            Select On Execution
+            {t('selectOnExecution')}
           </button>
           {/* Group by toggle */}
           <div className="ml-auto flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-0.5">
@@ -471,30 +474,30 @@ export default function StaffActiveOrders() {
               onClick={() => setGroupByClient(false)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${!groupByClient ? 'bg-[#1e3a5f] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              By Status
+              {t('byStatus')}
             </button>
             <button
               onClick={() => setGroupByClient(true)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${groupByClient ? 'bg-[#1e3a5f] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              By Client
+              {t('byClient')}
             </button>
           </div>
           {(currencyFilter !== 'all' || search) && (
             <Button variant="ghost" size="sm" onClick={() => { setCurrencyFilter('all'); setSearch(''); }} className="text-slate-500 hover:text-slate-800">
-              <X className="w-4 h-4 mr-1" /> Clear
+              <X className="w-4 h-4 mr-1" /> {t('clearFilters')}
             </Button>
           )}
         </div>
 
         {isLoading ? (
-          <div className="text-center text-slate-500 py-16">Loading orders...</div>
+          <div className="text-center text-slate-500 py-16">{t('loadingDots')}</div>
         ) : (
           <div className="space-y-4">
             {groupByClient ? (
               /* ── BY CLIENT VIEW ── */
               clientGroups.length === 0 ? (
-                <div className="text-center text-slate-400 py-16 bg-white rounded-xl border border-slate-200">No active orders match your filters</div>
+                <div className="text-center text-slate-400 py-16 bg-white rounded-xl border border-slate-200">{t('noActiveOrders')}</div>
               ) : (
                 clientGroups.map(({ client_id, client_name, orders: clientOrders }) => {
                   const isCollapsed = collapsedSections[`client_${client_id}`];
@@ -522,7 +525,7 @@ export default function StaffActiveOrders() {
                             </div>
                             <div className="text-xs text-slate-400 font-mono">{client_id}</div>
                           </div>
-                          <Badge className={`text-xs ${hasAlert ? 'bg-amber-500' : 'bg-[#1e3a5f]'} text-white`}>{clientOrders.length} orders</Badge>
+                          <Badge className={`text-xs ${hasAlert ? 'bg-amber-500' : 'bg-[#1e3a5f]'} text-white`}>{clientOrders.length} {t('clientOrdersBadge')}</Badge>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex gap-2 text-xs text-slate-500">{totalByCur.map(t => <span key={t} className="bg-white border border-slate-200 rounded px-2 py-0.5">{t}</span>)}</div>
@@ -555,13 +558,13 @@ export default function StaffActiveOrders() {
                                     <TableHeader>
                                       <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-slate-100">
                                         <TableHead className="w-10 pl-4" />
-                                        <TableHead className="w-36 text-slate-500 font-semibold text-xs">Order ID</TableHead>
-                                        <TableHead className="w-44 text-slate-500 font-semibold text-xs">Amount</TableHead>
+                                        <TableHead className="w-36 text-slate-500 font-semibold text-xs">{t('orderId')}</TableHead>
+                                        <TableHead className="w-44 text-slate-500 font-semibold text-xs">{t('amountLabel')}</TableHead>
                                         <TableHead className="w-10" />
-                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Inv Rcv</TableHead>
-                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Proof</TableHead>
-                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">Non-M</TableHead>
-                                        <TableHead className="text-slate-500 font-semibold text-xs pr-4">Inv#</TableHead>
+                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('invRcv')}</TableHead>
+                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('proof')}</TableHead>
+                                        <TableHead className="w-20 text-center text-slate-500 font-semibold text-xs">{t('nonM')}</TableHead>
+                                        <TableHead className="text-slate-500 font-semibold text-xs pr-4">{t('invNum')}</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -634,7 +637,7 @@ export default function StaffActiveOrders() {
                 })}
                 {filteredOrders.length === 0 && (
                   <div className="text-center text-slate-400 py-16 bg-white rounded-xl border border-slate-200">
-                    No active orders match your filters
+                    {t('noActiveOrders')}
                   </div>
                 )}
               </>
@@ -650,35 +653,35 @@ export default function StaffActiveOrders() {
         <AlertDialogContent className="bg-white border-orange-300 border-2 max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-orange-700">
-              <AlertTriangle className="w-5 h-5 text-orange-600" /> Unusual Transaction Detected
+              <AlertTriangle className="w-5 h-5 text-orange-600" /> {t('unusualTransactionTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <p className="text-slate-700">
-                  This order from <strong>{clientsMap[suspiciousAlertOrder?.order?.clientId]?.name || suspiciousAlertOrder?.order?.clientId}</strong> is significantly above their historical average.
+                  <strong>{clientsMap[suspiciousAlertOrder?.order?.clientId]?.name || suspiciousAlertOrder?.order?.clientId}</strong> {t('unusualTransactionDesc')}
                 </p>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-600">This order:</span>
+                    <span className="text-slate-600">{t('thisOrder')}</span>
                     <span className="font-bold text-orange-700">{suspiciousAlertOrder?.order?.currency} {parseFloat(suspiciousAlertOrder?.order?.amount || 0).toLocaleString('en-US')}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-600">Client avg:</span>
+                    <span className="text-slate-600">{t('clientAvgLabel')}</span>
                     <span className="font-semibold text-slate-700">{suspiciousAlertOrder?.order?.currency} {suspiciousAlertOrder?.avg?.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                   </div>
                   <div className="flex justify-between text-xs border-t border-orange-200 pt-1 mt-1">
-                    <span className="text-slate-600">Deviation:</span>
-                    <span className="font-bold text-red-600">{suspiciousAlertOrder?.ratio?.toFixed(1)}x above average</span>
+                    <span className="text-slate-600">{t('deviationLabel')}</span>
+                    <span className="font-bold text-red-600">{suspiciousAlertOrder?.ratio?.toFixed(1)}{t('xAboveAverage')}</span>
                   </div>
                 </div>
-                <p className="text-orange-600 text-xs font-medium italic">Please conduct a thorough review. Enhanced verification may be required.</p>
+                <p className="text-orange-600 text-xs font-medium italic">{t('enhancedVerification')}</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSuspiciousAlertOrder(null)} className="border-slate-300">Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setSuspiciousAlertOrder(null)} className="border-slate-300">{t('cancelLabel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { setSelectedOrder(suspiciousAlertOrder.order); setDrawerOpen(true); setSuspiciousAlertOrder(null); }} className="bg-orange-600 hover:bg-orange-700 text-white">
-              Proceed to Review
+              {t('proceedToReview')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -688,12 +691,12 @@ export default function StaffActiveOrders() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedIds.size} Order(s)</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">Are you sure you want to delete the selected orders? This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{t('deleteLabel')} {selectedIds.size} {t('deleteOrdersTitle')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">{t('deleteOrdersDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-600 text-slate-300 hover:bg-slate-700">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteMutation.mutate([...selectedIds])} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+            <AlertDialogCancel className="border-slate-600 text-slate-300 hover:bg-slate-700">{t('cancelLabel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteMutation.mutate([...selectedIds])} className="bg-red-600 hover:bg-red-700">{t('deleteLabel')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Globe, ChevronDown, ChevronUp, ArrowUpDown, X, Clock, CheckCircle2, AlertCircle, Loader2, CreditCard } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import ClientTermsDrawer from '@/components/client/ClientTermsDrawer';
 import { format } from 'date-fns';
@@ -167,17 +169,20 @@ export default function CurrentOrders() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-white">My Orders</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded-full text-white font-medium">{currentOrders.length} active</span>
+                  <h1 className="text-lg font-bold text-white">{t('currentOrders')}</h1>
+                  <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded-full text-white font-medium">{currentOrders.length} {t('activeLabel')}</span>
                 </div>
-                <p className="text-slate-300 text-xs">Track your transfer status</p>
+                <p className="text-slate-300 text-xs">{t('trackTransferStatus')}</p>
               </div>
             </div>
-            <Link to={createPageUrl('GTrans')}>
-              <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex">
-                <Globe className="w-4 h-4 mr-1" /> Site
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher variant="ghost" />
+              <Link to={createPageUrl('GTrans')}>
+                <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex">
+                  <Globe className="w-4 h-4 mr-1" /> {t('publicSite')}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -201,7 +206,7 @@ export default function CurrentOrders() {
                   {s.totalUSD > 0 && <div className="text-xs text-slate-500">USD {s.totalUSD.toLocaleString()}</div>}
                   {s.totalEUR > 0 && <div className="text-xs text-slate-500">EUR {s.totalEUR.toLocaleString()}</div>}
                   {s.totalCNY > 0 && <div className="text-xs text-slate-500">CNY {s.totalCNY.toLocaleString()}</div>}
-                  {s.count === 0 && <div className="text-xs text-slate-400 italic">None</div>}
+                  {s.count === 0 && <div className="text-xs text-slate-400 italic">{t('noneLabel')}</div>}
                 </div>
               </div>
             );
@@ -213,7 +218,7 @@ export default function CurrentOrders() {
           <div className="relative flex-1 min-w-[220px] max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Search orders or beneficiary..."
+              placeholder={t('searchOrdersBeneficiary')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 bg-white border-slate-200 rounded-xl h-10"
@@ -223,11 +228,11 @@ export default function CurrentOrders() {
             onClick={() => setSortOrder(s => s === 'desc' ? 'asc' : 'desc')}
             className="flex items-center gap-1.5 text-xs text-slate-600 border border-slate-200 bg-white px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
           >
-            <ArrowUpDown className="w-3.5 h-3.5" /> {sortOrder === 'desc' ? 'Newest first' : 'Oldest first'}
+            <ArrowUpDown className="w-3.5 h-3.5" /> {sortOrder === 'desc' ? t('newestFirst') : t('oldestFirst')}
           </button>
           {search && (
             <Button variant="ghost" size="sm" onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-700">
-              <X className="w-4 h-4 mr-1" /> Clear
+              <X className="w-4 h-4 mr-1" /> {t('clearFilters')}
             </Button>
           )}
         </div>
@@ -236,13 +241,13 @@ export default function CurrentOrders() {
         {isLoading ? (
           <div className="text-center text-slate-400 py-20 flex flex-col items-center gap-3">
             <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-            Loading your orders...
+            {t('loadingYourOrders')}
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="text-center text-slate-400 py-20 bg-white rounded-2xl border border-slate-200">
             <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-slate-200" />
-            <p className="font-medium text-slate-500">No active orders</p>
-            {search && <p className="text-sm mt-1">Try clearing your search</p>}
+            <p className="font-medium text-slate-500">{t('noActiveOrders')}</p>
+            {search && <p className="text-sm mt-1">{t('tryClearingSearch')}</p>}
           </div>
         ) : (
           <div className="space-y-4">
@@ -287,11 +292,11 @@ export default function CurrentOrders() {
                         <table className="w-full">
                           <thead>
                             <tr className="bg-slate-50/60 border-b border-slate-100">
-                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 pl-5 pr-3">Order ID</th>
-                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Date</th>
-                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Amount</th>
-                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Beneficiary</th>
-                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">Bank</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 pl-5 pr-3">{t('orderId')}</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">{t('date')}</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">{t('amountLabel')}</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">{t('beneficiaryLabel')}</th>
+                              <th className="text-left text-xs font-semibold text-slate-400 py-2.5 px-3">{t('bankLabel')}</th>
                               <th className="py-2.5 pl-3 pr-5" />
                             </tr>
                           </thead>

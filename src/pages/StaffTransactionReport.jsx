@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Plus, Download, ChevronUp, ChevronDown, Search, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import TransactionFormModal from '@/components/reports/TransactionFormModal';
+import { t } from '@/components/utils/language';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 const COLUMNS = [
   { key: 'transaction_id', label: 'Transaction ID' },
@@ -115,15 +117,16 @@ export default function StaffTransactionReport() {
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('StaffDashboard')}>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Dashboard
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('backToDashboard')}
               </Button>
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-white">Transaction Data Report</h1>
+              <h1 className="text-lg font-bold text-white">{t('transactionDataReport')}</h1>
               <p className="text-xs text-slate-300">
                 {filtered.length} records{filtered.length !== records.length ? ` (filtered from ${records.length})` : ''}
               </p>
             </div>
+            <LanguageSwitcher />
           </div>
           <div className="flex gap-2">
             <Button onClick={async () => {
@@ -139,10 +142,10 @@ export default function StaffTransactionReport() {
                 toast.error('Failed to export: ' + e.message);
               }
             }} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-              <Download className="w-4 h-4 mr-2" /> Download Excel
+              <Download className="w-4 h-4 mr-2" /> {t('downloadExcel')}
             </Button>
             <Button onClick={openAdd} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
-              <Plus className="w-4 h-4 mr-2" /> Add Record
+              <Plus className="w-4 h-4 mr-2" /> {t('addRecord')}
             </Button>
           </div>
         </div>
@@ -155,7 +158,7 @@ export default function StaffTransactionReport() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
-                placeholder="Search ID, sender, recipient, currency…"
+                placeholder={t('searchTransactionPlaceholder')}
                 value={search}
                 onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                 className="pl-9"
@@ -164,10 +167,10 @@ export default function StaffTransactionReport() {
             <Select value={filterType} onValueChange={v => { setFilterType(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-36"><SelectValue placeholder="Type" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="ingoing">Ingoing</SelectItem>
-                <SelectItem value="outgoing">Outgoing</SelectItem>
-                <SelectItem value="domestic">Domestic</SelectItem>
+                <SelectItem value="all">{t('allTypes')}</SelectItem>
+                <SelectItem value="ingoing">{t('ingoing')}</SelectItem>
+                <SelectItem value="outgoing">{t('outgoing')}</SelectItem>
+                <SelectItem value="domestic">{t('domestic')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterCurrency} onValueChange={v => { setFilterCurrency(v); setCurrentPage(1); }}>
@@ -180,29 +183,29 @@ export default function StaffTransactionReport() {
             <Select value={filterRisk} onValueChange={v => { setFilterRisk(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-32"><SelectValue placeholder="Risk" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Risk</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="all">{t('allRisk')}</SelectItem>
+                <SelectItem value="low">{t('riskLow')}</SelectItem>
+                <SelectItem value="medium">{t('riskMedium')}</SelectItem>
+                <SelectItem value="high">{t('riskHigh')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterDTTOT} onValueChange={v => { setFilterDTTOT(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-36"><SelectValue placeholder="DTTOT" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">DTTOT: All</SelectItem>
-                <SelectItem value="true">DTTOT: Yes</SelectItem>
-                <SelectItem value="false">DTTOT: No</SelectItem>
+                <SelectItem value="all">DTTOT: {t('pepAll').split(': ')[1]}</SelectItem>
+                <SelectItem value="true">DTTOT: {t('pepYes').split(': ')[1]}</SelectItem>
+                <SelectItem value="false">DTTOT: {t('pepNo').split(': ')[1]}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterDPPPSPM} onValueChange={v => { setFilterDPPPSPM(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-40"><SelectValue placeholder="DPPPSPM" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">DPPPSPM: All</SelectItem>
-                <SelectItem value="true">DPPPSPM: Yes</SelectItem>
-                <SelectItem value="false">DPPPSPM: No</SelectItem>
+                <SelectItem value="all">DPPPSPM: {t('pepAll').split(': ')[1]}</SelectItem>
+                <SelectItem value="true">DPPPSPM: {t('pepYes').split(': ')[1]}</SelectItem>
+                <SelectItem value="false">DPPPSPM: {t('pepNo').split(': ')[1]}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={clearFilters} className="text-slate-500 shrink-0">Clear</Button>
+            <Button variant="outline" onClick={clearFilters} className="text-slate-500 shrink-0">{t('clearFilters')}</Button>
           </div>
         </div>
 
@@ -224,14 +227,14 @@ export default function StaffTransactionReport() {
                       </div>
                     </th>
                   ))}
-                  <th className="px-3 py-3 text-xs font-semibold text-white uppercase tracking-wide whitespace-nowrap">Actions</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-white uppercase tracking-wide whitespace-nowrap">{t('actionsLabel')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
-                  <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">Loading…</td></tr>
+                  <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">{t('loadingDots')}</td></tr>
                 ) : paged.length === 0 ? (
-                  <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">No records found</td></tr>
+                  <tr><td colSpan={COLUMNS.length + 1} className="px-4 py-12 text-center text-slate-400">{t('noRecordsFound')}</td></tr>
                 ) : paged.map(row => (
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-3 py-2.5 font-mono text-xs text-slate-700 whitespace-nowrap">{String(row.transaction_id || row.id)}</td>
@@ -281,16 +284,16 @@ export default function StaffTransactionReport() {
           {/* Pagination */}
           <div className="border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <span>Rows per page:</span>
+              <span>{t('rowsPerPage')}</span>
               <Select value={String(pageSize)} onValueChange={v => { setPageSize(Number(v)); setCurrentPage(1); }}>
                 <SelectTrigger className="w-16 h-7 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{[10, 20, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <span>Page {currentPage} of {totalPages}</span>
-              <Button size="sm" variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Prev</Button>
-              <Button size="sm" variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next</Button>
+              <span>{t('pageLabel')} {currentPage} {t('pageOfLabel')} {totalPages}</span>
+              <Button size="sm" variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>{t('prevLabel')}</Button>
+              <Button size="sm" variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>{t('nextLabel')}</Button>
             </div>
           </div>
         </div>

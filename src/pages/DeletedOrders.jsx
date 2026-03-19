@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientDeletedDrawer from '@/components/client/ClientDeletedDrawer';
 import { format } from 'date-fns';
@@ -105,17 +107,20 @@ export default function DeletedOrders() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
+                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">{t('clientDashboard')}</span>
                 </div>
-                <p className="text-slate-300 text-sm">Deleted Orders</p>
+                <p className="text-slate-300 text-sm">{t('deletedOrders')}</p>
               </div>
             </div>
-            <Link to={createPageUrl('GTrans')}>
-              <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                <Globe className="w-4 h-4 mr-2" />
-                Public Site
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher variant="ghost" />
+              <Link to={createPageUrl('GTrans')}>
+                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-2" />
+                  {t('publicSite')}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -125,7 +130,7 @@ export default function DeletedOrders() {
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search deleted orders..."
+              placeholder={t('searchDeletedPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white"
@@ -136,9 +141,9 @@ export default function DeletedOrders() {
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-slate-500">
-              Showing {startIndex}-{endIndex} of {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+              {t('showing')} {startIndex}-{endIndex} {t('ofLabel')} {filteredOrders.length} {filteredOrders.length === 1 ? t('orderLabel') : t('ordersLabel')}
             </p>
-            <p className="text-xs text-slate-400 italic">Click on any order to view full details</p>
+            <p className="text-xs text-slate-400 italic">{t('clickToViewDetails')}</p>
           </div>
         )}
 
@@ -146,28 +151,28 @@ export default function DeletedOrders() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-100 to-slate-50">
-                <TableHead className="text-slate-700 font-bold py-4">Order ID</TableHead>
+                <TableHead className="text-slate-700 font-bold py-4">{t('orderId')}</TableHead>
                 <TableHead className="text-slate-700 font-bold py-4">
                   <button
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-slate-900 transition-colors"
                   >
-                    Date Created
+                    {t('dateCreated')}
                     <ArrowUpDown className="w-4 h-4" />
                   </button>
                 </TableHead>
-                <TableHead className="text-slate-700 font-bold py-4">Amount</TableHead>
-                <TableHead className="text-slate-700 font-bold py-4 pr-6">Beneficiary</TableHead>
+                <TableHead className="text-slate-700 font-bold py-4">{t('amountLabel')}</TableHead>
+                <TableHead className="text-slate-700 font-bold py-4 pr-6">{t('beneficiaryLabel')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-slate-500">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center py-8 text-slate-500">{t('loadingDots')}</TableCell>
                 </TableRow>
               ) : filteredOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-slate-500">No deleted orders</TableCell>
+                  <TableCell colSpan={4} className="text-center py-8 text-slate-500">{t('noDeletedOrders2')}</TableCell>
                 </TableRow>
               ) : paginatedOrders.map((order) => (
                 <TableRow
@@ -196,7 +201,7 @@ export default function DeletedOrders() {
           {filteredOrders.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-600">Rows per page:</span>
+                <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
                 <Select value={itemsPerPage.toString()} onValueChange={(val) => {
                   setItemsPerPage(Number(val));
                   setCurrentPage(1);
@@ -222,7 +227,7 @@ export default function DeletedOrders() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <span className="text-sm text-slate-600 min-w-[100px] text-center">
-                  Page {currentPage} of {totalPages}
+                  {t('pageLabel')} {currentPage} {t('ofLabel')} {totalPages}
                 </span>
                 <Button
                   variant="outline"

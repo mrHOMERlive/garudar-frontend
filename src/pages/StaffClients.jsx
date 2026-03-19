@@ -22,6 +22,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Pencil, Trash2, UserX, UserCheck, Search, Eye, EyeOff, Key, Globe, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { t } from '@/components/utils/language';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 import CountrySelector from '../components/kyc/CountrySelector';
 
@@ -290,21 +292,22 @@ export default function StaffClients() {
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
                   <span className="text-white/60">•</span>
-                  <span className="text-white">Client Management</span>
+                  <span className="text-white">{t('clientManagementTitle')}</span>
                 </div>
-                <Badge className="bg-[#f5a623] text-white">{clients.length} clients</Badge>
+                <Badge className="bg-[#f5a623] text-white">{clients.length} {t('clientsCountLabel')}</Badge>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               <Link to={createPageUrl('GTrans')}>
                 <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-1" />
-                  Public Site
+                  {t('publicSite')}
                 </Button>
               </Link>
               <Button onClick={openCreateDialog} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Client
+                {t('addClient')}
               </Button>
             </div>
           </div>
@@ -316,7 +319,7 @@ export default function StaffClients() {
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search clients..."
+              placeholder={t('searchClientsPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white border-slate-300 text-slate-800 placeholder:text-slate-400"
@@ -333,23 +336,23 @@ export default function StaffClients() {
                     onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                     className="flex items-center gap-1 hover:text-[#152a45]"
                   >
-                    Client ID
+                    {t('clientIdColumn')}
                     <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Name</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-36">Sign Status</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-36">Account Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('nameColumn')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('signStatusColumn')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('accountStatusColumn')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">Loading...</TableCell>
+                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell>
                 </TableRow>
               ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">No clients found</TableCell>
+                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">{t('noClientsFound')}</TableCell>
                 </TableRow>
               ) : paginatedClients.map((client) => (
                 <TableRow
@@ -368,12 +371,12 @@ export default function StaffClients() {
                         client.status_sign === 'sent' ? 'bg-amber-500 text-white' :
                           'bg-slate-400 text-white'
                     }>
-                      {client.status_sign === 'signed' ? 'Signed' : client.status_sign === 'sent' ? 'Sent' : 'Not Sent'}
+                      {client.status_sign === 'signed' ? t('signedStatus') : client.status_sign === 'sent' ? t('sentStatus') : t('notSentStatus')}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge className={client.active ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
-                      {client.active ? 'Active' : 'Inactive'}
+                      {client.active ? t('activeStatus') : t('inactiveStatus')}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -385,7 +388,7 @@ export default function StaffClients() {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Show:</span>
+            <span className="text-sm text-slate-600">{t('showLabel')}</span>
             <Select value={itemsPerPage.toString()} onValueChange={(value) => { setItemsPerPage(Number(value)); setCurrentPage(1); }}>
               <SelectTrigger className="w-20 bg-white border-slate-300">
                 <SelectValue />
@@ -412,7 +415,7 @@ export default function StaffClients() {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm text-slate-600">
-              Page {currentPage} of {totalPages}
+              {t('pageLabel')} {currentPage} {t('ofLabel')} {totalPages}
             </span>
             <Button
               variant="outline"
@@ -431,31 +434,31 @@ export default function StaffClients() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-[#1e3a5f]">{editingClient ? 'Edit Client' : 'Add New Client'}</DialogTitle>
+            <DialogTitle className="text-[#1e3a5f]">{editingClient ? t('editClientTitle') : t('addNewClientTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Client Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">Client Information</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('clientInfoSection')}</h3>
               <div className="grid grid-cols-2 gap-4">
                 {editingClient && (
                   <div className="space-y-2">
-                    <Label className="text-slate-700 text-xs">Client ID *</Label>
+                    <Label className="text-slate-700 text-xs">{t('fieldClientIdLabel')}</Label>
                     <Input
                       value={formData.client_id}
                       onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                      placeholder="e.g., CL1"
+                      placeholder={t('phClientId')}
                       className="bg-white border-slate-300 text-sm"
                       disabled={true}
                     />
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Client Name *</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldClientNameLabel')}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Client name"
+                    placeholder={t('phClientName')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
@@ -463,29 +466,29 @@ export default function StaffClients() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Alias 1</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldAlias1')}</Label>
                   <Input
                     value={formData.client_alias_1}
                     onChange={(e) => setFormData({ ...formData, client_alias_1: e.target.value })}
-                    placeholder="Alternative name 1"
+                    placeholder={t('phAltName1')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Alias 2</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldAlias2')}</Label>
                   <Input
                     value={formData.client_alias_2}
                     onChange={(e) => setFormData({ ...formData, client_alias_2: e.target.value })}
-                    placeholder="Alternative name 2"
+                    placeholder={t('phAltName2')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Alias 3</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldAlias3')}</Label>
                   <Input
                     value={formData.client_alias_3}
                     onChange={(e) => setFormData({ ...formData, client_alias_3: e.target.value })}
-                    placeholder="Alternative name 3"
+                    placeholder={t('phAltName3')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
@@ -493,53 +496,53 @@ export default function StaffClients() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Registration Number</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldRegNumber')}</Label>
                   <Input
                     value={formData.client_reg_number}
                     onChange={(e) => setFormData({ ...formData, client_reg_number: e.target.value })}
-                    placeholder="Registration no."
+                    placeholder={t('phRegNumber')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Tax Number</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldTaxNumber')}</Label>
                   <Input
                     value={formData.client_tax_number}
                     onChange={(e) => setFormData({ ...formData, client_tax_number: e.target.value })}
-                    placeholder="Tax ID"
+                    placeholder={t('phTaxNumber')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Registration Country</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldRegCountry')}</Label>
                   <CountrySelector
                     value={formData.client_reg_country}
                     onChange={(value) => setFormData({ ...formData, client_reg_country: value })}
                     language="en"
                     countries={countries}
                     saveName={true}
-                    placeholder="Select country"
+                    placeholder={t('phCountry')}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Director Name</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldDirectorName')}</Label>
                   <Input
                     value={formData.client_director}
                     onChange={(e) => setFormData({ ...formData, client_director: e.target.value })}
-                    placeholder="Director name"
+                    placeholder={t('phDirectorName')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Email *</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldEmail')}</Label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="client@example.com"
+                    placeholder={t('phEmail')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
@@ -548,32 +551,32 @@ export default function StaffClients() {
 
             {/* Document Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">Document & Signing</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('docSigningSection')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Document ID</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldDocId')}</Label>
                   <Input
                     value={formData.doc_id}
                     onChange={(e) => setFormData({ ...formData, doc_id: e.target.value })}
-                    placeholder="e.g., AGG/1/20261201"
+                    placeholder={t('phDocId')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Signing Status</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldSigningStatus')}</Label>
                   <Select value={formData.status_sign} onValueChange={(value) => setFormData({ ...formData, status_sign: value })}>
                     <SelectTrigger className="bg-white border-slate-300 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="not_sent">Not Sent</SelectItem>
-                      <SelectItem value="sent">Sent</SelectItem>
-                      <SelectItem value="signed">Signed</SelectItem>
+                      <SelectItem value="not_sent">{t('optNotSent')}</SelectItem>
+                      <SelectItem value="sent">{t('optSent')}</SelectItem>
+                      <SelectItem value="signed">{t('optSigned')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Date of Signing</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldDateSigning')}</Label>
                   <Input
                     type="date"
                     value={formData.date_signing}
@@ -586,23 +589,23 @@ export default function StaffClients() {
 
             {/* Group Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">Group & Reference</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('groupReferenceSection')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Group ID</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldGroupId')}</Label>
                   <Input
                     value={formData.group_id}
                     onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
-                    placeholder="e.g., 1"
+                    placeholder={t('phGroupId')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Group Name</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldGroupName')}</Label>
                   <Input
                     value={formData.group_name}
                     onChange={(e) => setFormData({ ...formData, group_name: e.target.value })}
-                    placeholder="e.g., Garuda"
+                    placeholder={t('phGroupName')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
@@ -613,21 +616,21 @@ export default function StaffClients() {
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
               <div className="flex items-center gap-2 text-[#1e3a5f] text-sm font-semibold">
                 <Key className="w-4 h-4" />
-                Authorization Credentials
+                {t('authCredentialsSection')}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Login *</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldLogin')}</Label>
                   <Input
                     value={formData.login}
                     onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    placeholder={editingClient ? (editingClient.login || 'username') : 'username'}
+                    placeholder={editingClient ? (editingClient.login || t('phUsername')) : t('phUsername')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 text-xs">Password *</Label>
+                  <Label className="text-slate-700 text-xs">{t('fieldPassword')}</Label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -659,25 +662,25 @@ export default function StaffClients() {
                   className="border-[#1e3a5f] text-[#1e3a5f] hover:bg-slate-100 text-xs"
                 >
                   <Key className="w-3.5 h-3.5 mr-2" />
-                  Generate Password
+                  {t('generatePassword')}
                 </Button>
                 <div className="flex items-center gap-2 ml-auto">
                   <Switch
                     checked={formData.active}
                     onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
                   />
-                  <Label className="text-slate-700 text-xs">Active</Label>
+                  <Label className="text-slate-700 text-xs">{t('activeLabel')}</Label>
                 </div>
               </div>
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <Label className="text-slate-700 text-xs">Description</Label>
+              <Label className="text-slate-700 text-xs">{t('fieldDescription')}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Additional notes"
+                placeholder={t('phAdditionalNotes')}
                 className="bg-white border-slate-300 text-sm"
                 rows={2}
               />
@@ -685,10 +688,10 @@ export default function StaffClients() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog} className="border-slate-300 text-slate-600 text-sm">
-              Cancel
+              {t('cancelLabel')}
             </Button>
             <Button onClick={handleSubmit} disabled={saveMutation.isPending} className="bg-[#1e3a5f] hover:bg-[#152a45] text-sm">
-              {saveMutation.isPending ? 'Saving...' : 'Save Client'}
+              {saveMutation.isPending ? t('savingLabel') : t('saveClient')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -698,18 +701,18 @@ export default function StaffClients() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-white border-slate-200 text-slate-800">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#1e3a5f]">Delete Client</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#1e3a5f]">{t('deleteClientTitle')}</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500">
-              Are you sure you want to delete client "{clientToDelete?.name}"? This action cannot be undone.
+              {t('deleteOrdersDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-300 text-slate-600 hover:bg-slate-100">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-slate-300 text-slate-600 hover:bg-slate-100">{t('cancelLabel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(clientToDelete?.user_id)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {t('deleteLabel')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

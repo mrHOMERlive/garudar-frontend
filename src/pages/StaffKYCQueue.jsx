@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Search, Eye, Loader2 } from 'lucide-react';
 import StaffKYCDrawer from '../components/staff/StaffKYCDrawer';
+import { t } from '@/components/utils/language';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 export default function StaffKYCQueue() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,20 +79,21 @@ export default function StaffKYCQueue() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-[#1e3a5f] shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
           <Link to={createPageUrl('StaffDashboard')}>
             <Button variant="ghost" className="text-white hover:bg-white/10">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t('backToDashboard')}
             </Button>
           </Link>
+          <LanguageSwitcher />
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">KYC Review Queue</h1>
-          <p className="text-slate-600">Review and process client KYC submissions</p>
+          <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">{t('kycReviewQueueTitle')}</h1>
+          <p className="text-slate-600">{t('kycReviewQueueSubtitle')}</p>
         </div>
 
         <Card className="mb-6">
@@ -98,7 +101,7 @@ export default function StaffKYCQueue() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
-                placeholder="Search by company, client name or email..."
+                placeholder={t('searchKYCPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -115,7 +118,7 @@ export default function StaffKYCQueue() {
           ) : filteredQueue.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-slate-500">
-                No KYC submissions pending review matches your criteria.
+                {t('noKYCPending')}
               </CardContent>
             </Card>
           ) : (
@@ -125,13 +128,13 @@ export default function StaffKYCQueue() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg mb-2">
-                        {item.company_name || 'Company Name Not Provided'}
+                        {item.company_name || t('companyNameNotProvided')}
                       </CardTitle>
                       <div className="text-sm text-slate-600 space-y-1">
-                        <div className="font-medium text-slate-800">{item.client_name || 'Unknown Client'}</div>
+                        <div className="font-medium text-slate-800">{t('clientLabel')}: {item.client_name || t('unknownLabel')}</div>
                         <div>Email: {item.client_email || 'N/A'}</div>
                         {item.submitted_at && (
-                          <div>Submitted: {new Date(item.submitted_at).toLocaleDateString()} {new Date(item.submitted_at).toLocaleTimeString()}</div>
+                          <div>{t('submittedAtLabel')} {new Date(item.submitted_at).toLocaleDateString()} {new Date(item.submitted_at).toLocaleTimeString()}</div>
                         )}
                       </div>
                     </div>
@@ -144,7 +147,7 @@ export default function StaffKYCQueue() {
                         className="bg-[#1e3a5f] hover:bg-[#152a45]"
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Review
+                        {t('reviewButton')}
                       </Button>
                     </div>
                   </div>

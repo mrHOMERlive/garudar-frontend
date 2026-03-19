@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Building, AlertCircle, Search } from 'lucide-react';
 import { validateAccountNumber, validateBIC, IBAN_COUNTRIES } from './utils/validators';
+import { t } from '@/components/utils/language';
 import {
   Command,
   CommandEmpty,
@@ -174,16 +175,16 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
       <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
         <CardTitle className="flex items-center gap-2 text-slate-800">
           <Building className="w-5 h-5 text-teal-700" />
-          Bank Details
+          {t('bankDetails')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 space-y-5">
         {/* Account Number */}
         <div className="space-y-2">
           <Label htmlFor="destination_account" className="text-slate-700 font-medium">
-            Destination Account Number *
+            {t('destinationAccount')}
             <span className="text-xs text-slate-500 ml-2">
-              {isIBANCountry ? '(IBAN format required)' : '(5-35 chars, A-Z 0-9)'}
+              {isIBANCountry ? t('ibanRequired') : t('accountFormat')}
             </span>
           </Label>
           <Input
@@ -204,7 +205,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
         {/* Country Selection */}
         <div className="space-y-2">
-          <Label className="text-slate-700 font-medium">Country (Bank) *</Label>
+          <Label className="text-slate-700 font-medium">{t('countryBank')}</Label>
           <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
@@ -215,7 +216,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 {selectedCountry ? (
                   <span>{selectedCountry.name} ({selectedCountry.code})</span>
                 ) : (
-                  <span className="text-slate-400">Select country...</span>
+                  <span className="text-slate-400">{t('selectCountry')}</span>
                 )}
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -228,11 +229,11 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             >
               <Command shouldFilter={false}>
                 <CommandInput
-                  placeholder="Search country..."
+                  placeholder={t('searchCountry')}
                   value={countrySearchQuery}
                   onValueChange={setCountrySearchQuery}
                 />
-                <CommandEmpty>No country found.</CommandEmpty>
+                <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
                   {countrySearchResults.map((country) => (
                     <CommandItem
@@ -256,8 +257,8 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         {/* BIC */}
         <div className="space-y-2">
           <Label className="text-slate-700 font-medium">
-            BIC (Bank) *
-            <span className="text-xs text-slate-500 ml-2">(8 or 11 characters)</span>
+            {t('bicLabel')}
+            <span className="text-xs text-slate-500 ml-2">{t('bicChars')}</span>
           </Label>
           <Popover open={bicSearchOpen} onOpenChange={setBicSearchOpen} modal={true}>
             <PopoverTrigger asChild>
@@ -269,7 +270,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                 {formData.bic ? (
                   <span className="font-mono">{formData.bic}</span>
                 ) : (
-                  <span className="text-slate-400">Search or enter BIC...</span>
+                  <span className="text-slate-400">{t('searchOrEnterBIC')}</span>
                 )}
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -282,17 +283,17 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             >
               <Command>
                 <CommandInput
-                  placeholder="Search BIC..."
+                  placeholder={t('searchBIC')}
                   onValueChange={handleBICSearch}
                 />
                 <CommandEmpty>
                   <div className="p-4 text-sm">
-                    <p>No BIC found. You can enter manually:</p>
+                    <p>{t('noBICFound')}</p>
                     <div className="flex gap-2 mt-2">
                       <Input
                         value={formData.bic || ''}
                         onChange={(e) => handleBICManualEntry(e.target.value)}
-                        placeholder="Enter BIC manually"
+                        placeholder={t('enterBICManually')}
                         maxLength={11}
                       />
                       <Button
@@ -306,7 +307,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                         }}
                         className="bg-[#1e3a5f] hover:bg-[#152a45]"
                       >
-                        Confirm
+                        {t('confirm')}
                       </Button>
                     </div>
                   </div>
@@ -337,7 +338,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
           {formData.bic && formData.bank_manual_override && (
             <div className="flex items-center gap-1 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
               <AlertCircle className="w-4 h-4" />
-              <span>Manual entry - please fill Bank Name and Address below</span>
+              <span>{t('manualEntryNote')}</span>
             </div>
           )}
         </div>
@@ -345,7 +346,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
         {/* Bank Name */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-slate-700 font-medium">Bank Name *</Label>
+            <Label className="text-slate-700 font-medium">{t('bankName')}</Label>
             {formData.bic && (
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -357,7 +358,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                   htmlFor="manual_override"
                   className="text-sm text-slate-600 cursor-pointer"
                 >
-                  Enter manually
+                  {t('manualEntry')}
                 </label>
               </div>
             )}
@@ -365,7 +366,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
           <Input
             value={formData.bank_name || ''}
             onChange={(e) => onChange({ bank_name: e.target.value })}
-            placeholder="Bank name"
+            placeholder={t('bankNamePlaceholder')}
             className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 ${formData.bank_manual_override ? 'ring-2 ring-amber-400 border-amber-400' : ''}`}
             readOnly={!formData.bank_manual_override}
             disabled={!formData.bank_manual_override && !formData.bank_name}
@@ -375,11 +376,11 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
         {/* Bank Address */}
         <div className="space-y-2">
-          <Label className="text-slate-700 font-medium">Bank Address *</Label>
+          <Label className="text-slate-700 font-medium">{t('bankAddress')}</Label>
           <Textarea
             value={formData.bank_address || ''}
             onChange={(e) => onChange({ bank_address: e.target.value })}
-            placeholder="Full bank address"
+            placeholder={t('bankAddressPlaceholder')}
             className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 min-h-[60px] ${formData.bank_manual_override ? 'ring-2 ring-amber-400 border-amber-400' : ''}`}
             readOnly={!formData.bank_manual_override}
             disabled={!formData.bank_manual_override && !formData.bank_address}
@@ -389,7 +390,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
         {formData.bank_manual_override && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-            ⚠️ Manual override enabled. Bank details will be logged for review.
+            {t('manualOverrideWarning')}
           </div>
         )}
       </CardContent>

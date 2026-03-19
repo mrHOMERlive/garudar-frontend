@@ -5,46 +5,48 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, FileText, CheckCircle, Database, Globe, LogOut, User, FileCheck, Shield, FileSignature, BarChart2 } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 
 const modules = [
   {
-    title: 'Clients',
-    description: 'Manage client accounts',
+    titleKey: 'mod_clients_title',
+    descKey: 'mod_clients_desc',
     icon: Users,
     page: 'StaffClients',
     color: 'bg-[#1e3a5f]'
   },
   {
-    title: 'Active Orders',
-    description: 'View and process active orders',
+    titleKey: 'mod_activeOrders_title',
+    descKey: 'mod_activeOrders_desc',
     icon: FileText,
     page: 'StaffActiveOrders',
     color: 'bg-[#f5a623]'
   },
   {
-    title: 'Executed Orders',
-    description: 'View completed orders',
+    titleKey: 'mod_executedOrders_title',
+    descKey: 'mod_executedOrders_desc',
     icon: CheckCircle,
     page: 'StaffExecutedOrders',
     color: 'bg-emerald-600'
   },
   {
-    title: 'Payeer Accounts',
-    description: 'Manage payer accounts by currency',
+    titleKey: 'mod_payeerAccounts_title',
+    descKey: 'mod_payeerAccounts_desc',
     icon: Database,
     page: 'StaffPayeerAccounts',
     color: 'bg-[#1e3a5f]'
   },
   {
-    title: 'KYC Database',
-    description: 'Know Your Customer verification',
+    titleKey: 'mod_kycDatabase_title',
+    descKey: 'mod_kycDatabase_desc',
     icon: Users,
     page: 'StaffKYC',
     color: 'bg-[#f5a623]'
   },
   {
-    title: 'KYC Onboarding Queue',
-    description: 'Review client KYC submissions',
+    titleKey: 'mod_kycQueue_title',
+    descKey: 'mod_kycQueue_desc',
     icon: Users,
     page: 'StaffKYCQueue',
     color: 'bg-emerald-600'
@@ -80,12 +82,13 @@ export default function StaffDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">STAFF</span>
+                  <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">{t('staffLabel')}</span>
                 </div>
-                <p className="text-slate-300 text-sm">Manage orders, clients, and operations</p>
+                <p className="text-slate-300 text-sm">{t('staffSubtitle')}</p>
               </div>
             </Link>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               {user && (
                 <div className="flex items-center gap-2 text-white">
                   <User className="w-4 h-4" />
@@ -95,7 +98,7 @@ export default function StaffDashboard() {
               <Link to={createPageUrl('GTrans')}>
                 <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-2" />
-                  Public Site
+                  {t('publicSite')}
                 </Button>
               </Link>
               <Button
@@ -113,7 +116,7 @@ export default function StaffDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
         {/* Administration Section */}
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-6">Administration</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('administrationSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {administrationModules.map((module) => (
               <Link key={module.page} to={createPageUrl(module.page)}>
@@ -122,8 +125,8 @@ export default function StaffDashboard() {
                     <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center mb-3`}>
                       <module.icon className="w-6 h-6 text-white" />
                     </div>
-                    <CardTitle className="text-[#1e3a5f]">{module.title}</CardTitle>
-                    <CardDescription className="text-slate-500">{module.description}</CardDescription>
+                    <CardTitle className="text-[#1e3a5f]">{t(module.titleKey)}</CardTitle>
+                    <CardDescription className="text-slate-500">{t(module.descKey)}</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -133,7 +136,7 @@ export default function StaffDashboard() {
 
         {/* Orders Section */}
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-6">Orders</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('ordersSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {ordersModules.map((module) => (
               <Link key={module.page} to={createPageUrl(module.page)}>
@@ -142,8 +145,8 @@ export default function StaffDashboard() {
                     <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center mb-3`}>
                       <module.icon className="w-6 h-6 text-white" />
                     </div>
-                    <CardTitle className="text-[#1e3a5f]">{module.title}</CardTitle>
-                    <CardDescription className="text-slate-500">{module.description}</CardDescription>
+                    <CardTitle className="text-[#1e3a5f]">{t(module.titleKey)}</CardTitle>
+                    <CardDescription className="text-slate-500">{t(module.descKey)}</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -153,7 +156,7 @@ export default function StaffDashboard() {
 
         {/* KYC Section */}
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-6">KYC</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('kycSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link to={createPageUrl('StaffKYC')}>
               <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
@@ -161,8 +164,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-[#f5a623] rounded-lg flex items-center justify-center mb-3">
                     <Users className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">KYC Database</CardTitle>
-                  <CardDescription className="text-slate-500">Know Your Customer verification database</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_kycDatabase_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_kycDatabase_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -171,7 +174,7 @@ export default function StaffDashboard() {
 
         {/* Reports Section */}
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-6">Reports</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('reportsSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link to={createPageUrl('StaffTransactionReport')}>
               <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
@@ -179,8 +182,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-[#1e3a5f] rounded-lg flex items-center justify-center mb-3">
                     <BarChart2 className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">Transaction Data</CardTitle>
-                  <CardDescription className="text-slate-500">Full transaction database with sort, filter &amp; Excel export</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_transactionData_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_transactionData_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -190,8 +193,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-[#f5a623] rounded-lg flex items-center justify-center mb-3">
                     <Users className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">Customer Data</CardTitle>
-                  <CardDescription className="text-slate-500">Client &amp; counterparty data with KYC fields &amp; Excel export</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_customerData_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_customerData_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -200,7 +203,7 @@ export default function StaffDashboard() {
 
         {/* Requests Section */}
         <div>
-          <h2 className="text-xl font-bold text-slate-700 mb-6">Requests</h2>
+          <h2 className="text-xl font-bold text-slate-700 mb-6">{t('requestsSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link to={createPageUrl('StaffKYCQueue')}>
               <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
@@ -208,8 +211,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center mb-3">
                     <Users className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">KYC Onboarding Queue</CardTitle>
-                  <CardDescription className="text-slate-500">Review client KYC submissions</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_kycQueue_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_kycQueue_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -220,8 +223,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-[#1e3a5f] rounded-lg flex items-center justify-center mb-3">
                     <FileSignature className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">Service Agreement</CardTitle>
-                  <CardDescription className="text-slate-500">Manage master documents and client submissions</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_serviceAgreement_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_serviceAgreement_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -232,8 +235,8 @@ export default function StaffDashboard() {
                   <div className="w-12 h-12 bg-slate-600 rounded-lg flex items-center justify-center mb-3">
                     <FileCheck className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-[#1e3a5f]">Manage Badges</CardTitle>
-                  <CardDescription className="text-slate-500">Account status, KYC, and Service Agreement badges</CardDescription>
+                  <CardTitle className="text-[#1e3a5f]">{t('mod_manageBadges_title')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('mod_manageBadges_desc')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

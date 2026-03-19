@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, AlertCircle, Eye, Plus, X } from 'lucide-react';
 import { validateLatinText, parseDate } from './utils/validators';
+import { t } from '@/components/utils/language';
 
 const DEFAULT_DOCUMENT_TYPES = [
   { value: 'inv', label: 'Invoice' },
@@ -127,28 +128,28 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
       <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
         <CardTitle className="flex items-center gap-2 text-slate-800">
           <FileText className="w-5 h-5 text-teal-700" />
-          Transaction Remark
+          {t('transactionRemark')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 space-y-5">
         <Tabs value={formData.transaction_remark_mode || 'template'} onValueChange={handleModeChange}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="template">Template</TabsTrigger>
-            <TabsTrigger value="manual">Manual</TabsTrigger>
+            <TabsTrigger value="template">{t('templateMode')}</TabsTrigger>
+            <TabsTrigger value="manual">{t('manualMode')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {formData.transaction_remark_mode === 'manual' ? (
           <div className="space-y-2">
             <Label htmlFor="transaction_remark" className="text-slate-700 font-medium">
-              Transaction Remark *
-              <span className="text-xs text-slate-500 ml-2">(Max 500 chars)</span>
+              {t('transactionRemarkLabel')}
+              <span className="text-xs text-slate-500 ml-2">{t('transactionRemarkChars')}</span>
             </Label>
             <Textarea
               id="transaction_remark"
               value={formData.transaction_remark || ''}
               onChange={(e) => handleManualChange(e.target.value)}
-              placeholder="Enter transaction remark..."
+              placeholder={t('enterTransactionRemark')}
               className={`border-slate-200 focus:border-teal-700 focus:ring-teal-700 min-h-[100px] ${errors.transaction_remark ? 'border-red-500' : ''}`}
               maxLength={500}
               required
@@ -160,39 +161,39 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
               </div>
             )}
             <div className="text-xs text-slate-500">
-              {formData.transaction_remark?.length || 0} / 500 characters
+              {formData.transaction_remark?.length || 0} / {t('characters500')}
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <div className="text-xs text-slate-600 mb-1">Template:</div>
+              <div className="text-xs text-slate-600 mb-1">{t('templateLabel')}</div>
               <code className="text-sm text-slate-800">{'{PAYMENT}'} for {'{GOODS}'} under {'{TYPE} {NUMBER} dd {DATE}'} (multiple)</code>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="payment" className="text-slate-700 font-medium">
-                  Payment Type {'{PAYMENT}'}
+                  {t('paymentType')} {'{PAYMENT}'}
                 </Label>
                 <Input
                   id="payment"
                   value={formData.remark_payment || 'Payment'}
                   onChange={(e) => onChange({ remark_payment: e.target.value })}
-                  placeholder="Payment, partial payment"
+                  placeholder={t('paymentPlaceholder')}
                   className="border-slate-200 focus:border-teal-700 focus:ring-teal-700"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="goods" className="text-slate-700 font-medium">
-                  Goods {'{GOODS}'}
+                  {t('goods')} {'{GOODS}'}
                 </Label>
                 <Input
                   id="goods"
                   value={formData.remark_goods || 'goods'}
                   onChange={(e) => onChange({ remark_goods: e.target.value })}
-                  placeholder="goods"
+                  placeholder={t('goodsPlaceholder')}
                   className="border-slate-200 focus:border-teal-700 focus:ring-teal-700"
                   maxLength={40}
                 />
@@ -201,7 +202,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-slate-700 font-medium">Documents</Label>
+                <Label className="text-slate-700 font-medium">{t('documents')}</Label>
                 <Button
                   type="button"
                   onClick={addDocument}
@@ -210,7 +211,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                   className="border-teal-700 text-teal-700 hover:bg-blue-50"
                 >
                   <Plus className="w-4 h-4 mr-1" />
-                  Add Document
+                  {t('addDocument')}
                 </Button>
               </div>
 
@@ -219,7 +220,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                   <div className="flex items-start gap-3">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-2">
-                        <Label className="text-xs text-slate-600">Document Type *</Label>
+                        <Label className="text-xs text-slate-600">{t('documentType')}</Label>
                         <Select
                           value={doc.type}
                           onValueChange={(value) => updateDocument(index, 'type', value)}
@@ -238,7 +239,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs text-slate-600">Document Number *</Label>
+                        <Label className="text-xs text-slate-600">{t('documentNumber')}</Label>
                         <Input
                           value={doc.number}
                           onChange={(e) => updateDocument(index, 'number', e.target.value)}
@@ -249,7 +250,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs text-slate-600">Document Date *</Label>
+                        <Label className="text-xs text-slate-600">{t('documentDate')}</Label>
                         <Input
                           type="date"
                           value={doc.date}
@@ -278,13 +279,13 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
             <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Eye className="w-4 h-4 text-teal-700" />
-                <span className="text-sm font-semibold text-teal-700">Preview:</span>
+                <span className="text-sm font-semibold text-teal-700">{t('preview')}</span>
               </div>
               <div className="text-sm text-slate-800 bg-white p-3 rounded border border-teal-100">
-                {preview || 'Fill in the required fields to see preview...'}
+                {preview || t('fillFieldsPreview')}
               </div>
               <div className="text-xs text-slate-500 mt-2">
-                {preview.length} / 500 characters
+                {preview.length} / {t('characters500')}
               </div>
             </div>
 

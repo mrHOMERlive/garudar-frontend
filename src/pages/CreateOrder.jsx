@@ -5,6 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { Send, Download, Copy, Mail, History, Upload, XCircle } from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { t } from '@/components/utils/language';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -286,14 +288,13 @@ export default function CreateOrder() {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Account on Hold</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">{t('accountOnHold')}</h1>
           <p className="text-slate-600 mb-6">
-            Your account is currently on hold. You cannot create new orders at this time.
-            Please contact support for assistance.
+            {t('accountOnHoldMessage')}
           </p>
           <Link to={createPageUrl('UserDashboard')}>
             <Button className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">
-              Return to Dashboard
+              {t('returnToDashboard')}
             </Button>
           </Link>
         </div>
@@ -320,17 +321,18 @@ export default function CreateOrder() {
                   <h1 className="text-2xl md:text-3xl font-bold text-white">GTrans</h1>
                   <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
                 </div>
-                <p className="text-slate-300 text-sm">Create Payment Order</p>
+                <p className="text-slate-300 text-sm">{t('createPaymentOrder')}</p>
               </div>
             </Link>
             <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="ghost" />
               <Link to={createPageUrl('UserDashboard')}>
                 <Button
                   variant="outline"
                   className="border-white/20 text-white hover:bg-white/10 bg-transparent"
                 >
                   <History className="w-4 h-4 mr-2" />
-                  Dashboard
+                  {t('dashboard')}
                 </Button>
               </Link>
             </div>
@@ -382,9 +384,9 @@ export default function CreateOrder() {
               </div>
               <div className="flex-1 space-y-4">
                 <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">Invoice Required</h3>
+                  <h3 className="font-semibold text-amber-900 mb-2">{t('invoiceRequired')}</h3>
                   <p className="text-sm text-amber-800 mb-3">
-                    To complete order processing, please send your invoice to:
+                    {t('invoiceInstructions')}
                   </p>
                   <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
                     <code className="text-sm font-mono text-slate-800 flex-1">
@@ -397,19 +399,19 @@ export default function CreateOrder() {
                       className="border-amber-300 hover:bg-amber-50"
                     >
                       <Copy className="w-4 h-4 mr-2" />
-                      Copy
+                      {t('copy')}
                     </Button>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-amber-200">
-                  <h4 className="font-semibold text-amber-900 mb-3">Upload Documents (Optional)</h4>
-                  <p className="text-xs text-amber-700 mb-3">You can upload documents here or send them by email</p>
+                  <h4 className="font-semibold text-amber-900 mb-3">{t('uploadDocumentsOptional')}</h4>
+                  <p className="text-xs text-amber-700 mb-3">{t('uploadHereOrEmail')}</p>
 
                   <div className="space-y-3">
                     {/* Sales Contract Upload */}
                     <div>
-                      <Label className="text-xs text-amber-800 mb-1">Sales Contract</Label>
+                      <Label className="text-xs text-amber-800 mb-1">{t('salesContract')}</Label>
                       <div className="flex items-center gap-2">
                         <label className="flex-1">
                           <input
@@ -427,7 +429,7 @@ export default function CreateOrder() {
                             disabled={uploadingDocuments}
                           >
                             <Upload className="w-3 h-3 mr-2" />
-                            {salesContractFile ? 'Selected ✓' : 'Upload Sales Contract'}
+                            {salesContractFile ? t('selected') : t('uploadSalesContract')}
                           </Button>
                         </label>
                       </div>
@@ -440,7 +442,7 @@ export default function CreateOrder() {
 
                     {/* Invoice Upload */}
                     <div>
-                      <Label className="text-xs text-amber-800 mb-1">Invoice</Label>
+                      <Label className="text-xs text-amber-800 mb-1">{t('invoiceLabel')}</Label>
                       <div className="flex items-center gap-2">
                         <label className="flex-1">
                           <input
@@ -458,7 +460,7 @@ export default function CreateOrder() {
                             disabled={uploadingDocuments}
                           >
                             <Upload className="w-3 h-3 mr-2" />
-                            {invoiceFile ? 'Selected ✓' : 'Upload Invoice'}
+                            {invoiceFile ? t('selected') : t('uploadInvoice')}
                           </Button>
                         </label>
                       </div>
@@ -471,7 +473,7 @@ export default function CreateOrder() {
 
                     {/* Other Documents Upload */}
                     <div>
-                      <Label className="text-xs text-amber-800 mb-1">Other Documents</Label>
+                      <Label className="text-xs text-amber-800 mb-1">{t('otherDocuments')}</Label>
                       <div className="flex items-center gap-2">
                         <label className="flex-1">
                           <input
@@ -489,7 +491,7 @@ export default function CreateOrder() {
                             disabled={uploadingDocuments}
                           >
                             <Upload className="w-3 h-3 mr-2" />
-                            {otherDocsFile ? 'Selected ✓' : 'Upload Other Documents'}
+                            {otherDocsFile ? t('selected') : t('uploadOtherDocuments')}
                           </Button>
                         </label>
                       </div>
@@ -516,11 +518,11 @@ export default function CreateOrder() {
               />
               <div className="flex-1">
                 <label htmlFor="terms" className="text-sm font-medium text-slate-900 cursor-pointer">
-                  I accept the{' '}
+                  {t('iAcceptThe')}{' '}
                   <Dialog>
                     <DialogTrigger asChild>
                       <button className="text-[#1e3a5f] underline hover:text-[#f5a623] transition-colors">
-                        Terms & Conditions
+                        {t('termsAndConditions')}
                       </button>
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -537,12 +539,12 @@ export default function CreateOrder() {
                             className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
                           >
                             <FileText className="w-5 h-5" />
-                            <span className="font-medium underline">Open Full Terms & Conditions (PDF)</span>
+                            <span className="font-medium underline">{t('openFullTermsPDF')}</span>
                           </button>
                         </div>
 
                         <div className="bg-slate-50 rounded-lg p-6 space-y-4">
-                          <h3 className="font-bold text-lg text-[#1e3a5f]">Key Points:</h3>
+                          <h3 className="font-bold text-lg text-[#1e3a5f]">{t('keyPoints')}</h3>
                           <ul className="list-disc list-inside space-y-2 text-sm text-slate-700">
                             <li>All fund transfers comply with Indonesian regulations including Anti-Money Laundering laws</li>
                             <li>PT GARUDA ARMA NUSA will execute transfers as mandated in signed Fund Transfer Orders</li>
@@ -569,7 +571,7 @@ export default function CreateOrder() {
                   {' '}*
                 </label>
                 <p className="text-xs text-slate-600 mt-1">
-                  By checking this box, you agree to comply with all terms, conditions, and applicable regulations.
+                  {t('byCheckingBoxAgree')}
                 </p>
               </div>
             </div>
@@ -583,11 +585,11 @@ export default function CreateOrder() {
               className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold px-8 py-6 text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createOrderMutation.isPending ? (
-                <>Processing...</>
+                <>{t('processing')}</>
               ) : (
                 <>
                   <Send className="w-5 h-5 mr-2" />
-                  Send the Order
+                  {t('sendOrder')}
                 </>
               )}
             </Button>

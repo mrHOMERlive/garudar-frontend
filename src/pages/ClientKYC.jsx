@@ -14,7 +14,7 @@ import KYCBankingDetails from '../components/kyc/KYCBankingDetails';
 import KYCOwnership from '../components/kyc/KYCOwnership';
 import KYCDeclaration from '../components/kyc/KYCDeclaration';
 
-import { getLanguage, setLanguage } from '@/components/utils/language';
+import { t, getLanguage, setLanguage } from '@/components/utils/language';
 
 export default function ClientKYC() {
   const queryClient = useQueryClient();
@@ -178,26 +178,11 @@ export default function ClientKYC() {
   };
 
   const steps = [
-    {
-      title: language === 'en' ? 'Corporate Details' : 'Detail Perusahaan',
-      component: KYCCorporateDetails
-    },
-    {
-      title: language === 'en' ? 'Documents' : 'Dokumen',
-      component: KYCDocuments
-    },
-    {
-      title: language === 'en' ? 'Banking Details' : 'Detail Perbankan',
-      component: KYCBankingDetails
-    },
-    {
-      title: language === 'en' ? 'Ownership' : 'Kepemilikan',
-      component: KYCOwnership
-    },
-    {
-      title: language === 'en' ? 'Declaration & Signature' : 'Deklarasi & Tanda Tangan',
-      component: KYCDeclaration
-    }
+    { title: t('kycStepCorporate'), component: KYCCorporateDetails },
+    { title: t('kycStepDocuments'), component: KYCDocuments },
+    { title: t('kycStepBanking'), component: KYCBankingDetails },
+    { title: t('kycStepOwnership'), component: KYCOwnership },
+    { title: t('kycStepDeclaration'), component: KYCDeclaration }
   ];
 
   const CurrentStepComponent = steps[currentStep].component;
@@ -207,7 +192,7 @@ export default function ClientKYC() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#1e3a5f] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+          <p className="text-slate-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -220,7 +205,7 @@ export default function ClientKYC() {
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <p className="text-slate-600">Client not found. Please contact support.</p>
           <Link to={createPageUrl('UserDashboard')}>
-            <Button className="mt-4">Back to Dashboard</Button>
+            <Button className="mt-4">{t('backToDashboard')}</Button>
           </Link>
         </div>
       </div>
@@ -228,11 +213,11 @@ export default function ClientKYC() {
   }
 
   const statusConfig = {
-    created: { icon: Clock, color: 'text-slate-500', bg: 'bg-slate-50', text: 'Not Started' },
-    in_progress: { icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50', text: 'In Progress' },
-    submitted: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', text: 'Under Review' },
-    approved: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50', text: 'Approved' },
-    rejected: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50', text: 'Rejected' }
+    created: { icon: Clock, color: 'text-slate-500', bg: 'bg-slate-50', text: t('kycStatusNotStarted') },
+    in_progress: { icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50', text: t('kycStatusInProgress') },
+    submitted: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', text: t('kycStatusUnderReview') },
+    approved: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50', text: t('kycStatusApproved') },
+    rejected: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50', text: t('kycStatusRejected') }
   };
 
   const status = statusConfig[client.kyc_status] || statusConfig.created;
@@ -245,7 +230,7 @@ export default function ClientKYC() {
             <Link to={createPageUrl('UserDashboard')}>
               <Button variant="ghost" className="text-white hover:bg-white/10">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
+                {t('backToDashboardBtn')}
               </Button>
             </Link>
             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${status.bg}`}>
@@ -261,12 +246,10 @@ export default function ClientKYC() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">
-                {language === 'en' ? 'KYC Verification' : 'Verifikasi KYC'}
+                {t('kycVerificationTitle')}
               </h1>
               <p className="text-slate-600">
-                {language === 'en'
-                  ? 'Complete your Know Your Customer verification'
-                  : 'Lengkapi verifikasi Know Your Customer Anda'}
+                {t('kycVerificationDesc')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -323,7 +306,7 @@ export default function ClientKYC() {
             onClick={() => handleStepChange(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
           >
-            {language === 'en' ? 'Previous' : 'Sebelumnya'}
+            {t('previousBtn')}
           </Button>
 
           <div className="flex gap-3">
@@ -332,7 +315,7 @@ export default function ClientKYC() {
               onClick={handleSaveProgress}
               disabled={saveKYCMutation.isPending}
             >
-              {language === 'en' ? 'Save Progress' : 'Simpan Progres'}
+              {t('saveProgressBtn')}
             </Button>
 
             {currentStep < steps.length - 1 ? (
@@ -340,7 +323,7 @@ export default function ClientKYC() {
                 onClick={() => handleStepChange(currentStep + 1)}
                 className="bg-[#1e3a5f] hover:bg-[#152a45]"
               >
-                {language === 'en' ? 'Next' : 'Selanjutnya'}
+                {t('nextBtn')}
               </Button>
             ) : (
               <Button
@@ -349,7 +332,7 @@ export default function ClientKYC() {
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Send className="w-4 h-4 mr-2" />
-                {language === 'en' ? 'Submit KYC' : 'Kirim KYC'}
+                {t('submitKYCBtn')}
               </Button>
             )}
           </div>

@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { UserCheck, AlertCircle, Search } from 'lucide-react';
 import { validateLatinText } from './utils/validators';
+import { t } from '@/components/utils/language';
 import { apiClient } from '@/api/apiClient';
 
 export default function BeneficiaryInfoSection({ formData, onChange, errors, setErrors }) {
@@ -73,15 +74,15 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
       <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
         <CardTitle className="flex items-center gap-2 text-slate-800">
           <UserCheck className="w-5 h-5 text-teal-700" />
-          Beneficiary Information
+          {t('beneficiaryInformation')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 space-y-5">
         <div className="space-y-2">
           <Label htmlFor="beneficiary_name" className="text-slate-700 font-medium">
-            Beneficiary Name *
+            {t('beneficiaryName')}
             <span className="text-xs text-slate-500 ml-2">
-              (Max 70 chars, Latin letters, digits, and /-?:().,'+&)
+              {t('beneficiaryNameHint')}
             </span>
           </Label>
           <div className="relative">
@@ -90,7 +91,7 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
               id="beneficiary_name"
               value={formData.beneficiary_name || ''}
               onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Full name of beneficiary"
+              placeholder={t('beneficiaryNamePlaceholder')}
               className={`pl-10 border-slate-200 focus:border-teal-600 focus:ring-teal-600 ${errors.beneficiary_name ? 'border-red-500' : ''}`}
               maxLength={70}
               required
@@ -103,22 +104,22 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
             </div>
           )}
           <div className="text-xs text-slate-500">
-            {formData.beneficiary_name?.length || 0} / 70 characters
+            {formData.beneficiary_name?.length || 0} / 70 {t('characters')}
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="beneficiary_address" className="text-slate-700 font-medium">
-            Beneficiary Address *
+            {t('beneficiaryAddress')}
             <span className="text-xs text-slate-500 ml-2">
-              (Max 105 chars, same rules as name)
+              {t('beneficiaryAddressHint')}
             </span>
           </Label>
           <Textarea
             id="beneficiary_address"
             value={formData.beneficiary_address || ''}
             onChange={(e) => handleAddressChange(e.target.value)}
-            placeholder="Full address"
+            placeholder={t('beneficiaryAddressPlaceholder')}
             className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 min-h-[80px] ${errors.beneficiary_address ? 'border-red-500' : ''}`}
             maxLength={105}
             required
@@ -130,11 +131,11 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
             </div>
           )}
           <div className="text-xs text-slate-500">
-            {formData.beneficiary_address?.length || 0} / 105 characters
+            {formData.beneficiary_address?.length || 0} / 105 {t('characters')}
           </div>
         </div>
         <div className="space-y-2">
-          <Label className="text-slate-700 font-medium">Beneficiary Country *</Label>
+          <Label className="text-slate-700 font-medium">{t('beneficiaryCountry')}</Label>
           <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
@@ -145,7 +146,7 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
                 {selectedCountry ? (
                   <span>{selectedCountry.name} ({selectedCountry.code})</span>
                 ) : (
-                  <span className="text-slate-400">Select country...</span>
+                  <span className="text-slate-400">{t('selectCountry')}</span>
                 )}
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -158,11 +159,11 @@ export default function BeneficiaryInfoSection({ formData, onChange, errors, set
             >
               <Command shouldFilter={false}>
                 <CommandInput
-                  placeholder="Search country..."
+                  placeholder={t('searchCountry')}
                   value={countrySearchQuery}
                   onValueChange={setCountrySearchQuery}
                 />
-                <CommandEmpty>No country found.</CommandEmpty>
+                <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-auto">
                   {countrySearchResults.map((country) => (
                     <CommandItem

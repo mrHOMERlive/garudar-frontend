@@ -1,37 +1,28 @@
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Globe } from 'lucide-react';
+import React, { useState } from 'react';
 import { getLanguage, setLanguage } from '@/components/utils/language';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export default function LanguageSwitcher({ variant = "default" }) {
-  const currentLang = getLanguage();
-  
+  const [lang, setLang] = useState(getLanguage());
+
+  const handleChange = (l) => {
+    setLanguage(l);
+    setLang(l);
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant={variant} 
-          size="sm"
-          className={variant === "ghost" ? "text-white hover:bg-white/10" : ""}
-        >
-          <Globe className="w-4 h-4 mr-2" />
-          {currentLang === 'en' ? 'EN' : 'ID'}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setLanguage('en')} className={currentLang === 'en' ? 'bg-slate-100' : ''}>
-          English
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('id')} className={currentLang === 'id' ? 'bg-slate-100' : ''}>
-          Bahasa Indonesia
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center bg-white/10 rounded-lg p-0.5 gap-0.5">
+      <button
+        onClick={() => handleChange('en')}
+        className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${lang === 'en' ? 'bg-white text-[#1e3a5f]' : 'text-white/70 hover:text-white'}`}
+      >
+        EN
+      </button>
+      <button
+        onClick={() => handleChange('id')}
+        className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${lang === 'id' ? 'bg-white text-[#1e3a5f]' : 'text-white/70 hover:text-white'}`}
+      >
+        ID
+      </button>
+    </div>
   );
 }
