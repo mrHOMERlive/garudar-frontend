@@ -16,6 +16,7 @@ export function computeClientAverage(allOrders, clientId, excludeOrderId) {
 
 export default function SuspiciousTransactionAlert({ order, allOrders }) {
   if (!order || !allOrders) return null;
+  if (order.status !== 'created') return null;
 
   const avg = computeClientAverage(allOrders, order.clientId, order.orderId);
   if (avg === null) return null; // Not enough history

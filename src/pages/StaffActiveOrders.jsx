@@ -58,13 +58,13 @@ function AlertIcon({ reasons }) {
 
 function getAlertReasons(order, isSuspicious, avg) {
   const reasons = [];
-  if (isAboveThreshold(order.amount, order.currency)) reasons.push(`Amount ≥ 25,000 USD equivalent — regulatory reporting threshold`);
+  if (order.status === 'created' && isAboveThreshold(order.amount, order.currency)) reasons.push(`Amount ≥ 25,000 USD equivalent — regulatory reporting threshold`);
   if (isSuspicious && avg) reasons.push(`Amount is ${(parseFloat(order.amount) / avg).toFixed(1)}x above this client's historical average (avg: ${order.currency} ${avg.toLocaleString('en-US', { maximumFractionDigits: 0 })})`);
   return reasons;
 }
 
 function OrderRow({ order, selectedIds, onSelect, onOpen, isSuspicious, avg, clientName }) {
-  const isThreshold = isAboveThreshold(order.amount, order.currency);
+  const isThreshold = order.status === 'created' && isAboveThreshold(order.amount, order.currency);
   const hasAlert = isThreshold || isSuspicious;
   const reasons = getAlertReasons(order, isSuspicious, avg);
   return (
@@ -189,6 +189,7 @@ export default function StaffActiveOrders() {
   const suspiciousOrderIds = useMemo(() => {
     const ids = new Set();
     activeOrders.forEach(order => {
+      if (order.status !== 'created') return;
       const avg = computeClientAverage(orders, order.clientId, order.orderId);
       if (avg !== null && parseFloat(order.amount) / avg >= 3) ids.add(order.orderId);
     });
@@ -309,7 +310,7 @@ export default function StaffActiveOrders() {
 
   const openDrawer = (order) => {
     const avg = computeClientAverage(orders, order.clientId, order.orderId);
-    if (avg !== null && parseFloat(order.amount) / avg >= 3) {
+    if (order.status === 'created' && avg !== null && parseFloat(order.amount) / avg >= 3) {
       setSuspiciousAlertOrder({ order, avg, ratio: parseFloat(order.amount) / avg });
     } else {
       setSelectedOrder(order);
@@ -505,7 +506,7 @@ export default function StaffActiveOrders() {
                     const t = clientOrders.filter(o => o.currency === cur).reduce((s,o) => s+(parseFloat(o.amount)||0),0);
                     return t > 0 ? `${cur} ${t.toLocaleString()}` : null;
                   }).filter(Boolean);
-                  const hasAlert = clientOrders.some(o => suspiciousOrderIds.has(o.orderId) || isAboveThreshold(o.amount, o.currency));
+                  const hasAlert = clientOrders.some(o => suspiciousOrderIds.has(o.orderId) || (o.status === 'created' && isAboveThreshold(o.amount, o.currency)));
                   const statusesPresent = ACTIVE_STATUSES.filter(s => clientOrders.some(o => o.status === s));
                   return (
                     <div key={client_id} className={`bg-white rounded-xl shadow-sm overflow-hidden border-2 ${hasAlert ? 'border-amber-300' : 'border-slate-200'}`}>
@@ -569,7 +570,7 @@ export default function StaffActiveOrders() {
                                     </TableHeader>
                                     <TableBody>
                                       {statusOrders.map(order => (
-                                        <TableRow key={order.orderId} className={`border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors ${(isAboveThreshold(order.amount, order.currency) || suspiciousOrderIds.has(order.orderId)) ? 'bg-amber-50/30' : ''}`} onClick={() => openDrawer(order)}>
+                                        <TableRow key={order.orderId} className={`border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors ${((order.status === 'created' && isAboveThreshold(order.amount, order.currency)) || suspiciousOrderIds.has(order.orderId)) ? 'bg-amber-50/30' : ''}`} onClick={() => openDrawer(order)}>
                                           <TableCell className="w-10 py-2 pl-4" onClick={e => e.stopPropagation()}>
                                             <Checkbox checked={selectedIds.has(order.orderId)} onCheckedChange={(c) => handleSelectOne(order.orderId, c)} />
                                           </TableCell>
@@ -577,7 +578,7 @@ export default function StaffActiveOrders() {
                                             <div className="flex items-center gap-1">{order.orderId}{order.invocieRequired && <AlertTriangle className="w-3 h-3 text-[#f5a623]" />}</div>
                                           </TableCell>
                                           <TableCell className="w-44 py-2">
-                                            <span className={`font-medium text-xs ${(isAboveThreshold(order.amount, order.currency) || suspiciousOrderIds.has(order.orderId)) ? 'text-amber-700' : 'text-[#1e3a5f]'}`}>
+                                            <span className={`font-medium text-xs ${((order.status === 'created' && isAboveThreshold(order.amount, order.currency)) || suspiciousOrderIds.has(order.orderId)) ? 'text-amber-700' : 'text-[#1e3a5f]'}`}>
                                               {parseFloat(order.amount || 0).toLocaleString()} {order.currency}
                                             </span>
                                           </TableCell>

@@ -433,7 +433,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         <div className="flex-1 overflow-y-auto px-1 pb-6">
           <div className="space-y-6">
             {/* Compliance Alerts */}
-            {isAboveThreshold(order.amount, order.currency) && (
+            {order.status === 'created' && isAboveThreshold(order.amount, order.currency) && (
               <div className="flex items-start gap-3 bg-red-50 border-2 border-red-300 rounded-lg p-3">
                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
