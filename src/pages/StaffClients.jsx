@@ -103,7 +103,8 @@ export default function StaffClients() {
         password: '',
         active: client.is_active ?? true,
         kyc_status: client.kyc_status || '',
-        created_date: client.kyc_submitted_at || new Date().toISOString()
+        created_date: client.kyc_submitted_at || new Date().toISOString(),
+        aml_risk_level: client.aml_risk_level || null
       }));
     },
   });
@@ -343,16 +344,17 @@ export default function StaffClients() {
                 <TableHead className="text-[#1e3a5f] font-semibold">{t('nameColumn')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('signStatusColumn')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('accountStatusColumn')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-28">AML</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell>
                 </TableRow>
               ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-8">{t('noClientsFound')}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">{t('noClientsFound')}</TableCell>
                 </TableRow>
               ) : paginatedClients.map((client) => (
                 <TableRow
@@ -378,6 +380,20 @@ export default function StaffClients() {
                     <Badge className={client.active ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
                       {client.active ? t('activeStatus') : t('inactiveStatus')}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {client.aml_risk_level ? (
+                      <Badge className={
+                        client.aml_risk_level === 'high' ? 'bg-red-600 text-white' :
+                        client.aml_risk_level === 'medium' ? 'bg-amber-500 text-white' :
+                        client.aml_risk_level === 'low' ? 'bg-emerald-600 text-white' :
+                        'bg-slate-400 text-white'
+                      }>
+                        {client.aml_risk_level.charAt(0).toUpperCase() + client.aml_risk_level.slice(1)}
+                      </Badge>
+                    ) : (
+                      <span className="text-slate-400 text-sm">—</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

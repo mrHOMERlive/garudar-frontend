@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, CheckCircle, Database, Globe, LogOut, User, FileCheck, Shield, FileSignature, BarChart2 } from 'lucide-react';
+import { Users, FileText, CheckCircle, Database, Globe, LogOut, User, FileCheck, ShieldCheck, FileSignature, BarChart2 } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
 
@@ -154,10 +154,21 @@ export default function StaffDashboard() {
           </div>
         </div>
 
-        {/* KYC Section */}
+        {/* KYC & AML Section */}
         <div>
           <h2 className="text-xl font-bold text-slate-700 mb-6">{t('kycSection')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link to={createPageUrl('StaffComplyAdvantage')}>
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center mb-3">
+                    <ShieldCheck className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">AML Screening</CardTitle>
+                  <CardDescription className="text-slate-500">ComplyAdvantage Mesh — sanctions, PEP & adverse media</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
             <Link to={createPageUrl('StaffKYC')}>
               <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
                 <CardHeader>

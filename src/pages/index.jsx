@@ -37,6 +37,7 @@ const StaffServiceAgreement = lazy(() => import("./StaffServiceAgreement"));
 const ClientServiceAgreement = lazy(() => import("./ClientServiceAgreement"));
 const StaffCustomerReport = lazy(() => import("./StaffCustomerReport"));
 const StaffTransactionReport = lazy(() => import("./StaffTransactionReport"));
+const StaffComplyAdvantage = lazy(() => import("./StaffComplyAdvantage"));
 
 const PAGES = {
 
@@ -108,6 +109,7 @@ const PAGES = {
 
     StaffTransactionReport: StaffTransactionReport,
 
+    StaffComplyAdvantage: StaffComplyAdvantage,
 
 }
 
@@ -209,6 +211,8 @@ function PagesContent() {
                 <Route path="/staffcustomerreport" element={<RequireAdmin><StaffCustomerReport /></RequireAdmin>} />
 
                 <Route path="/stafftransactionreport" element={<RequireAdmin><StaffTransactionReport /></RequireAdmin>} />
+
+                <Route path="/staffcomplyadvantage" element={<RequireAdmin><StaffComplyAdvantage /></RequireAdmin>} />
 
             </Routes>
             </Suspense>

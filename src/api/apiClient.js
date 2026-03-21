@@ -754,6 +754,89 @@ class ApiClient {
         }
         return response.blob();
     }
+
+    // ══════════════════════════════════════════════════════════════════
+    // AML (Anti-Money Laundering) — ComplyAdvantage
+    // ══════════════════════════════════════════════════════════════════
+
+    async screenPerson(data) {
+        return this.request('/aml/screen/person', { method: 'POST', body: JSON.stringify(data) });
+    }
+
+    async screenCompany(data) {
+        return this.request('/aml/screen/company', { method: 'POST', body: JSON.stringify(data) });
+    }
+
+    async searchAmlCustomers(params = {}) {
+        const qs = new URLSearchParams(params).toString();
+        return this.request(`/aml/customers${qs ? '?' + qs : ''}`);
+    }
+
+    async getAmlCustomer(id) {
+        return this.request(`/aml/customers/${id}`);
+    }
+
+    async getCustomerCases(id) {
+        return this.request(`/aml/customers/${id}/cases`);
+    }
+
+    async getCustomerAlerts(id) {
+        return this.request(`/aml/customers/${id}/alerts`);
+    }
+
+    async getCustomerRisk(id) {
+        return this.request(`/aml/customers/${id}/risk`);
+    }
+
+    async getCustomerScreenings(id) {
+        return this.request(`/aml/customers/${id}/screenings`);
+    }
+
+    async rescreenCustomer(id) {
+        return this.request(`/aml/customers/${id}/rescreen`, { method: 'POST' });
+    }
+
+    async toggleMonitoring(id, data) {
+        return this.request(`/aml/customers/${id}/monitoring`, { method: 'PATCH', body: JSON.stringify(data) });
+    }
+
+    async overrideRisk(id, data) {
+        return this.request(`/aml/customers/${id}/risk/override`, { method: 'POST', body: JSON.stringify(data) });
+    }
+
+    async getAlerts(params = {}) {
+        const qs = new URLSearchParams(params).toString();
+        return this.request(`/aml/alerts${qs ? '?' + qs : ''}`);
+    }
+
+    async confirmAlert(id) {
+        return this.request(`/aml/alerts/${id}/confirm`, { method: 'POST' });
+    }
+
+    async dismissAlert(id) {
+        return this.request(`/aml/alerts/${id}/dismiss`, { method: 'POST' });
+    }
+
+    async addCaseComment(caseId, data) {
+        return this.request(`/aml/cases/${caseId}/comment`, { method: 'POST', body: JSON.stringify(data) });
+    }
+
+    async updateAmlCase(caseId, data) {
+        return this.request(`/aml/cases/${caseId}`, { method: 'PATCH', body: JSON.stringify(data) });
+    }
+
+    async getMonitoredCustomers(params = {}) {
+        const qs = new URLSearchParams(params).toString();
+        return this.request(`/aml/monitored${qs ? '?' + qs : ''}`);
+    }
+
+    async getAmlSummary() {
+        return this.request('/aml/summary');
+    }
+
+    async getClientAmlStatus(clientId) {
+        return this.request(`/aml/client/${clientId}/status`);
+    }
 }
 
 export const apiClient = new ApiClient();
