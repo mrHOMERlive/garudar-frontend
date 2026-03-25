@@ -97,7 +97,7 @@ class ApiClient {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            let errorMessage = errorData.error || `HTTP error ${response.status}`;
+            let errorMessage = errorData.detail || errorData.error || `HTTP error ${response.status}`;
 
             // Handle Pydantic/FastAPI validation errors which usually come in 'detail'
             if (response.status === 422 && errorData.detail) {
