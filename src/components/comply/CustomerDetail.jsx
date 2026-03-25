@@ -31,12 +31,14 @@ export default function CustomerDetail({ customer, onBack }) {
   const loadAll = async () => {
     setLoad('cases', true); setLoad('alerts', true); setLoad('risk', true);
     try {
-      const [c, a, r, s] = await Promise.all([
+      const [cust, c, a, r, s] = await Promise.all([
+        apiClient.getAmlCustomer(customer.id).catch(() => null),
         apiClient.getCustomerCases(customer.id).catch(() => []),
         apiClient.getCustomerAlerts(customer.id).catch(() => []),
         apiClient.getCustomerRisk(customer.id).catch(() => null),
         apiClient.getCustomerScreenings(customer.id).catch(() => []),
       ]);
+      if (cust) setData(cust);
       setCases(c);
       setAlerts(a);
       setRiskScore(r);
