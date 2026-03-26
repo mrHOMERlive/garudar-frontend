@@ -497,7 +497,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   <SelectContent>
                     {activePayeerAccounts.map(acc => (
                       <SelectItem key={acc.account_no} value={acc.account_no}>
-                        {acc.account_no} ({acc.currency})
+                        {acc.alias ? `${acc.alias} — ` : ''}{acc.account_no} ({acc.currency})
                       </SelectItem>
                     ))}
                   </SelectContent>

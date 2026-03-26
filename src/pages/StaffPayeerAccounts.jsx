@@ -28,6 +28,7 @@ export default function StaffPayeerAccounts() {
   const [countries, setCountries] = useState([]);
   const [formData, setFormData] = useState({
     currency: 'USD',
+    alias: '',
     account_number: '',
     bank_name: '',
     bank_address: '',
@@ -59,6 +60,7 @@ export default function StaffPayeerAccounts() {
       return data.map(acc => ({
         id: acc.account_no,
         account_number: acc.account_no,
+        alias: acc.alias || '',
         bank_name: acc.bank_name || '',
         bank_address: acc.bank_address || '',
         bank_corr_account: acc.bank_corr_account || '',
@@ -74,6 +76,7 @@ export default function StaffPayeerAccounts() {
     mutationFn: async (data) => {
       const payload = {
         account_no: data.account_number,
+        alias: data.alias || null,
         currency: data.currency,
         status: data.active ? 'active' : 'inactive',
         bank_name: data.bank_name || null,
@@ -112,6 +115,7 @@ export default function StaffPayeerAccounts() {
     setEditingAccount(null);
     setFormData({
       currency: 'USD',
+      alias: '',
       account_number: '',
       bank_name: '',
       bank_address: '',
@@ -127,6 +131,7 @@ export default function StaffPayeerAccounts() {
     setEditingAccount(account);
     setFormData({
       currency: account.currency,
+      alias: account.alias || '',
       account_number: account.account_number,
       bank_name: account.bank_name || '',
       bank_address: account.bank_address || '',
@@ -201,6 +206,7 @@ export default function StaffPayeerAccounts() {
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
                 <TableHead className="text-[#1e3a5f] font-semibold w-24">Currency</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">Alias</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Account Number</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Bank Name</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">Country</TableHead>
@@ -210,11 +216,11 @@ export default function StaffPayeerAccounts() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">Loading...</TableCell>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">Loading...</TableCell>
                 </TableRow>
               ) : accounts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">No accounts found</TableCell>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">No accounts found</TableCell>
                 </TableRow>
               ) : accounts.map((account) => (
                 <TableRow
@@ -225,6 +231,7 @@ export default function StaffPayeerAccounts() {
                   <TableCell>
                     <Badge className="bg-[#f5a623] text-white">{account.currency}</Badge>
                   </TableCell>
+                  <TableCell className="text-slate-700">{account.alias || '-'}</TableCell>
                   <TableCell className="text-[#1e3a5f] font-mono">{account.account_number}</TableCell>
                   <TableCell className="text-slate-700">{account.bank_name || '-'}</TableCell>
                   <TableCell className="text-slate-600">{account.bank_country || '-'}</TableCell>
@@ -264,6 +271,16 @@ export default function StaffPayeerAccounts() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-700">Alias</Label>
+              <Input
+                value={formData.alias}
+                onChange={(e) => setFormData({ ...formData, alias: e.target.value })}
+                placeholder="Short name to identify this account"
+                className="bg-white border-slate-300"
+              />
             </div>
 
             <div className="space-y-2">
