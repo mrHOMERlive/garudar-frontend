@@ -76,10 +76,35 @@ export default function AlertsPanel() {
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${a.status === 'pending' ? 'text-red-500' : 'text-slate-400'}`} />
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <div className="font-semibold text-slate-800">{a.title || a.match_type || `Alert ${a.id}`}</div>
                       {a.customer_name && <div className="text-sm text-slate-500">Customer: {a.customer_name}</div>}
                       {a.description && <div className="text-sm text-slate-500 mt-0.5">{a.description}</div>}
+                      {a.match_details?.aml_types?.length > 0 && (
+                        <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                          {a.match_details.aml_types.map(t => (
+                            <Badge key={t} className={`text-xs ${
+                              t === 'SANCTION' ? 'bg-red-600 text-white' :
+                              t === 'SANCTION_RELATED' ? 'bg-red-400 text-white' :
+                              t.startsWith('PEP') ? 'bg-orange-500 text-white' :
+                              t.startsWith('ADVERSE_MEDIA') ? 'bg-yellow-600 text-white' :
+                              'bg-slate-500 text-white'
+                            }`}>{t}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      {a.match_details?.entities?.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {a.match_details.entities.map((e, i) => (
+                            <div key={i} className="text-xs bg-red-50 border border-red-100 rounded px-2 py-1.5">
+                              {e.name && <span className="font-medium text-slate-800">{e.name}</span>}
+                              {e.sources?.length > 0 && (
+                                <span className="text-slate-500 ml-1.5">— {e.sources.join(', ')}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <div className="flex gap-2 mt-1.5 flex-wrap">
                         <Badge className={a.status === 'pending' ? 'bg-red-500 text-white text-xs' : a.status === 'confirmed' ? 'bg-amber-500 text-white text-xs' : 'bg-slate-400 text-white text-xs'}>{a.status}</Badge>
                         {a.match_type && <Badge variant="outline" className="text-xs">{a.match_type}</Badge>}

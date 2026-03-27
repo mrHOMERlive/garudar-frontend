@@ -272,10 +272,34 @@ export default function CustomerDetail({ customer, onBack }) {
             <Card key={a.id} className={`border-l-4 ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-800">{a.title || a.match_type || `Alert ${a.id}`}</div>
                     {a.description && <div className="text-sm text-slate-500 mt-0.5">{a.description}</div>}
-                    {a.match_type && <div className="text-xs text-slate-400 mt-1">Type: {a.match_type}</div>}
+                    {a.match_details?.aml_types?.length > 0 && (
+                      <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                        {a.match_details.aml_types.map(t => (
+                          <Badge key={t} className={`text-xs ${
+                            t === 'SANCTION' ? 'bg-red-600 text-white' :
+                            t === 'SANCTION_RELATED' ? 'bg-red-400 text-white' :
+                            t.startsWith('PEP') ? 'bg-orange-500 text-white' :
+                            t.startsWith('ADVERSE_MEDIA') ? 'bg-yellow-600 text-white' :
+                            'bg-slate-500 text-white'
+                          }`}>{t}</Badge>
+                        ))}
+                      </div>
+                    )}
+                    {a.match_details?.entities?.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {a.match_details.entities.map((e, i) => (
+                          <div key={i} className="text-xs bg-red-50 border border-red-100 rounded px-2 py-1.5">
+                            {e.name && <span className="font-medium text-slate-800">{e.name}</span>}
+                            {e.sources?.length > 0 && (
+                              <span className="text-slate-500 ml-1.5">— {e.sources.join(', ')}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex gap-2 mt-1.5 flex-wrap">
                       <Badge className={a.status === 'pending' ? 'bg-red-500 text-white text-xs' : a.status === 'confirmed' ? 'bg-amber-500 text-white text-xs' : 'bg-slate-400 text-white text-xs'}>{a.status}</Badge>
                       {a.created_at && <span className="text-xs text-slate-400">{new Date(a.created_at).toLocaleDateString()}</span>}

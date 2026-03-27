@@ -796,6 +796,10 @@ class ApiClient {
         return this.request(`/aml/customers/${id}/rescreen`, { method: 'POST' });
     }
 
+    async deleteAmlCustomer(id) {
+        return this.request(`/aml/customers/${id}`, { method: 'DELETE' });
+    }
+
     async toggleMonitoring(id, data) {
         return this.request(`/aml/customers/${id}/monitoring`, { method: 'PATCH', body: JSON.stringify(data) });
     }
