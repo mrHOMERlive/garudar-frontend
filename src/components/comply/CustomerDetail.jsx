@@ -225,10 +225,27 @@ export default function CustomerDetail({ customer, onBack }) {
                     <div>
                       <div className="font-semibold text-slate-800">{c.title || `Case ${c.id}`}</div>
                       {c.description && <div className="text-sm text-slate-500 mt-0.5">{c.description}</div>}
-                      <div className="flex gap-2 mt-1.5 flex-wrap">
+                      {c.aml_types?.length > 0 && (
+                        <div className="flex gap-1 mt-1.5 flex-wrap">
+                          {c.aml_types.map(t => (
+                            <Badge key={t} className={`text-xs ${
+                              t === 'SANCTION' ? 'bg-red-600 text-white' :
+                              t === 'SANCTION_RELATED' ? 'bg-red-400 text-white' :
+                              t.startsWith('PEP') ? 'bg-orange-500 text-white' :
+                              t.startsWith('ADVERSE_MEDIA') ? 'bg-yellow-600 text-white' :
+                              'bg-slate-500 text-white'
+                            }`}>{t}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-2 mt-1.5 flex-wrap items-center">
                         <Badge className={c.status === 'open' ? 'bg-amber-500 text-white text-xs' : 'bg-slate-400 text-white text-xs'}>{c.status}</Badge>
                         {c.risk_level && <RiskBadge level={c.risk_level} />}
                         {c.created_at && <span className="text-xs text-slate-400">{new Date(c.created_at).toLocaleDateString()}</span>}
+                        {c.external_case_id && <span className="text-xs text-slate-400 font-mono">CA: {c.external_case_id}</span>}
+                        {alerts && alerts.filter(a => a.status === 'pending').length > 0 && c.status === 'open' && (
+                          <span className="text-xs text-red-500 font-medium">{alerts.filter(a => a.status === 'pending').length} open alert{alerts.filter(a => a.status === 'pending').length !== 1 ? 's' : ''}</span>
+                        )}
                       </div>
                     </div>
                   </div>
