@@ -102,7 +102,6 @@ export default function GTransContactSales() {
       return;
     }
     submitMutation.mutate(formData);
-    submitMutation.mutate(formData);
   };
 
   const handlePrivacyPolicyClick = async (e) => {
