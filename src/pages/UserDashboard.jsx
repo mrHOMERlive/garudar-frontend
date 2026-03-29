@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -10,10 +10,12 @@ import { PlusCircle, FileText, History, Globe, LogOut, User, CheckCircle, XCircl
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
 import { Badge } from '@/components/ui/badge';
+import ProfileDrawer from '@/components/user/ProfileDrawer';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -116,16 +118,16 @@ export default function UserDashboard() {
 
               {user && (
                 <div className="flex items-center gap-2 text-white">
-                  <User className="w-4 h-4" />
                   <span className="text-sm">{user.username}</span>
                 </div>
               )}
-              <Link to={createPageUrl('GTrans')}>
-                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                  <Globe className="w-4 h-4 mr-2" />
-                  {t('publicSite')}
-                </Button>
-              </Link>
+              <Button
+                className="bg-white text-[#1e3a5f] hover:bg-slate-100"
+                onClick={() => setProfileOpen(true)}
+              >
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -304,6 +306,8 @@ export default function UserDashboard() {
           </div>
         </div>
       </main>
+
+      <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }
