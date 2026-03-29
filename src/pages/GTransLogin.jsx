@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
+import ObligationsModal from '@/components/ObligationsModal';
 
 const LOGO_URL = "/gan.png";
 
@@ -15,15 +16,21 @@ import { getLanguage, setLanguage } from '@/components/utils/language';
 
 export default function GTransLogin() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, isAuthenticated, user, checkAuth } = useAuth();
   const language = getLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showObligations, setShowObligations] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user) {
+      if (!user.terms_accepted && user.role !== 'ADMIN') {
+        // Stay on login page — obligations modal will handle redirect
+        return;
+      }
       const targetPage = user.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
       navigate(createPageUrl(targetPage), { replace: true });
     }
@@ -43,7 +50,12 @@ export default function GTransLogin() {
       const userData = await login(username, password);
       toast.success(language === 'en' ? 'Login successful!' : 'Login berhasil!');
       const targetPage = userData.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
-      navigate(createPageUrl(targetPage));
+      if (!userData.terms_accepted && userData.role !== 'ADMIN') {
+        setPendingTarget(createPageUrl(targetPage));
+        setShowObligations(true);
+      } else {
+        navigate(createPageUrl(targetPage));
+      }
     } catch (error) {
       console.error('Login error:', error);
       toast.error(language === 'en'
@@ -55,7 +67,15 @@ export default function GTransLogin() {
     }
   };
 
+  const handleObligationsAgreed = async () => {
+    setShowObligations(false);
+    await checkAuth(); // refresh user so terms_accepted: true is in context
+    navigate(pendingTarget);
+  };
+
   return (
+    <>
+    <ObligationsModal open={showObligations} onAgreed={handleObligationsAgreed} />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -170,5 +190,6 @@ export default function GTransLogin() {
         </div>
       </div>
     </div>
+    </>
   );
 }

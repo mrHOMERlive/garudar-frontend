@@ -643,6 +643,14 @@ class ApiClient {
         return this.request(`/legal/terms-and-conditions${query}`);
     }
 
+    async getObligations() {
+        return this.request('/legal/obligations');
+    }
+
+    async acceptTerms() {
+        return this.request('/auth/accept-terms', { method: 'POST' });
+    }
+
     // Badges (General Update)
     async updateBadge(id, data) {
         return this.request(`/badges/${id}`, {
