@@ -150,6 +150,9 @@ export default function StaffClients() {
       toast.success(editingClient ? 'Client updated' : 'Client created');
       closeDialog();
     },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to save client');
+    },
   });
 
   const deleteMutation = useMutation({
