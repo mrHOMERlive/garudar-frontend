@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/api/apiClient';
+import { t } from '@/components/utils/language';
 
 function InfoRow({ icon: Icon, label, value }) {
   return (
@@ -49,7 +50,7 @@ export default function ProfileDrawer({ open, onClose }) {
       await apiClient.updateCurrentUser({ password: newPassword });
     },
     onSuccess: () => {
-      toast.success('Password changed successfully');
+      toast.success(t('passwordChangedSuccess'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -59,9 +60,9 @@ export default function ProfileDrawer({ open, onClose }) {
     onError: (error) => {
       const msg = error?.message || '';
       if (msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthorized') || msg.toLowerCase().includes('incorrect') || msg.toLowerCase().includes('invalid')) {
-        setFieldError('Current password is incorrect');
+        setFieldError(t('currentPasswordIncorrect'));
       } else {
-        toast.error('Failed to change password. Please try again.');
+        toast.error(t('passwordChangeFailed'));
       }
     },
   });
@@ -71,15 +72,15 @@ export default function ProfileDrawer({ open, onClose }) {
     setFieldError('');
 
     if (!currentPassword) {
-      setFieldError('Please enter your current password');
+      setFieldError(t('enterCurrentPasswordError'));
       return;
     }
     if (newPassword.length < 8) {
-      setFieldError('New password must be at least 8 characters');
+      setFieldError(t('passwordMinLengthError'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setFieldError('Passwords do not match');
+      setFieldError(t('passwordsMismatch'));
       return;
     }
 
@@ -90,20 +91,20 @@ export default function ProfileDrawer({ open, onClose }) {
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>My Profile</SheetTitle>
-          <SheetDescription>Account information and settings</SheetDescription>
+          <SheetTitle>{t('profileTitle')}</SheetTitle>
+          <SheetDescription>{t('profileSubtitle')}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
           {/* Account Info */}
           <div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-3">Account Information</h4>
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">{t('accountInformation')}</h4>
             <div className="bg-slate-50 rounded-lg px-4">
-              <InfoRow icon={User} label="Username" value={user?.username} />
+              <InfoRow icon={User} label={t('usernameLabel')} value={user?.username} />
               <Separator className="my-0" />
-              <InfoRow icon={Mail} label="Email" value={user?.email} />
+              <InfoRow icon={Mail} label={t('emailLabel')} value={user?.email} />
               <Separator className="my-0" />
-              <InfoRow icon={Shield} label="Role" value={user?.role} />
+              <InfoRow icon={Shield} label={t('roleLabel')} value={user?.role} />
             </div>
           </div>
 
@@ -113,16 +114,16 @@ export default function ProfileDrawer({ open, onClose }) {
           <div>
             <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
               <KeyRound className="w-4 h-4" />
-              Change Password
+              {t('changePassword')}
             </h4>
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div className="space-y-1">
-                <Label htmlFor="current-password" className="text-xs text-slate-600">Current Password</Label>
+                <Label htmlFor="current-password" className="text-xs text-slate-600">{t('currentPassword')}</Label>
                 <div className="relative">
                   <Input
                     id="current-password"
                     type={showCurrent ? 'text' : 'password'}
-                    placeholder="Enter current password"
+                    placeholder={t('enterCurrentPassword')}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     className="pr-10"
@@ -138,12 +139,12 @@ export default function ProfileDrawer({ open, onClose }) {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="new-password" className="text-xs text-slate-600">New Password</Label>
+                <Label htmlFor="new-password" className="text-xs text-slate-600">{t('newPassword')}</Label>
                 <div className="relative">
                   <Input
                     id="new-password"
                     type={showNew ? 'text' : 'password'}
-                    placeholder="At least 8 characters"
+                    placeholder={t('atLeast8Chars')}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="pr-10"
@@ -159,12 +160,12 @@ export default function ProfileDrawer({ open, onClose }) {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="confirm-password" className="text-xs text-slate-600">Confirm New Password</Label>
+                <Label htmlFor="confirm-password" className="text-xs text-slate-600">{t('confirmNewPassword')}</Label>
                 <div className="relative">
                   <Input
                     id="confirm-password"
                     type={showConfirm ? 'text' : 'password'}
-                    placeholder="Repeat new password"
+                    placeholder={t('repeatNewPassword')}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pr-10"
@@ -188,7 +189,7 @@ export default function ProfileDrawer({ open, onClose }) {
                 className="w-full bg-[#1e3a5f] hover:bg-[#162d4a] text-white"
                 disabled={changeMutation.isPending}
               >
-                {changeMutation.isPending ? 'Saving…' : 'Save Password'}
+                {changeMutation.isPending ? t('saving') : t('savePassword')}
               </Button>
             </form>
           </div>

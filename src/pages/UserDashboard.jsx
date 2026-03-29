@@ -126,7 +126,7 @@ export default function UserDashboard() {
                 onClick={() => setProfileOpen(true)}
               >
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t('myProfile')}
               </Button>
               <Button
                 onClick={handleLogout}
@@ -134,7 +134,7 @@ export default function UserDashboard() {
                 className="bg-white text-[#1e3a5f] hover:bg-slate-100"
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('logout')}
               </Button>
             </div>
           </div>
