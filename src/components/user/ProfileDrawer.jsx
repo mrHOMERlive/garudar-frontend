@@ -54,6 +54,7 @@ export default function ProfileDrawer({ open, onClose }) {
       setNewPassword('');
       setConfirmPassword('');
       setFieldError('');
+      onClose();
     },
     onError: (error) => {
       const msg = error?.message || '';
