@@ -266,9 +266,9 @@ export default function StaffClients() {
   );
 
   const sortedClients = [...filteredClients].sort((a, b) => {
-    const idA = a.client_id || '';
-    const idB = b.client_id || '';
-    return sortOrder === 'desc' ? idB.localeCompare(idA) : idA.localeCompare(idB);
+    const numA = parseInt((a.client_id || '').replace(/\D/g, ''), 10) || 0;
+    const numB = parseInt((b.client_id || '').replace(/\D/g, ''), 10) || 0;
+    return sortOrder === 'desc' ? numB - numA : numA - numB;
   });
 
   const totalPages = Math.ceil(sortedClients.length / itemsPerPage);
