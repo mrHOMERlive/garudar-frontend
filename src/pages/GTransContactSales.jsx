@@ -123,9 +123,9 @@ export default function GTransContactSales() {
     <div className="min-h-screen bg-slate-50">
       <PublicHeader language={language} setLanguage={setLanguage} />
 
-      <main className="pt-24 pb-20">
+      <main className="pt-24 pb-10 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-[#1e3a5f] mb-6">
               {language === 'en' ? 'Contact Sales' : 'Hubungi Sales'}
             </h1>
@@ -137,7 +137,7 @@ export default function GTransContactSales() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-12">
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
             <div className="lg:col-span-1">
               <div className="sticky top-28 space-y-6">
                 <h3 className="text-xl font-bold text-[#1e3a5f] mb-6">

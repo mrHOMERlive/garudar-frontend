@@ -100,9 +100,9 @@ export default function GTrans() {
       <HeroSection language={language} />
 
       {/* What is GTrans */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-slate-50" id="about">
+      <section className="py-10 md:py-20 bg-gradient-to-br from-blue-50 via-white to-slate-50" id="about">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -153,9 +153,9 @@ export default function GTrans() {
       </section>
 
       {/* Value Propositions */}
-      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50" id="features">
+      <section className="py-10 md:py-20 bg-gradient-to-br from-slate-50 to-blue-50" id="features">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
               {language === 'en' ? 'Why Choose GTrans' : 'Mengapa Memilih GTrans'}
             </h2>
@@ -192,9 +192,9 @@ export default function GTrans() {
       </section>
 
       {/* Products */}
-      <section className="py-20 bg-white" id="products">
+      <section className="py-10 md:py-20 bg-white" id="products">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
               {language === 'en' ? 'Product Portfolio' : 'Portofolio Produk'}
             </h2>
@@ -325,9 +325,9 @@ export default function GTrans() {
       </section>
 
       {/* Platform Screenshots */}
-      <section className="py-20 bg-white" id="platform">
+      <section className="py-10 md:py-20 bg-white" id="platform">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
               {language === 'en' ? 'Intuitive Platform Interface' : 'Antarmuka Platform yang Intuitif'}
             </h2>
@@ -339,7 +339,7 @@ export default function GTrans() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Creating Order - Animation */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -385,9 +385,9 @@ export default function GTrans() {
       </section>
 
       {/* Client Journey */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-slate-50" id="journey">
+      <section className="py-10 md:py-20 bg-gradient-to-br from-blue-50 to-slate-50" id="journey">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
               {language === 'en' ? 'Your Journey with GTrans' : 'Perjalanan Anda dengan GTrans'}
             </h2>
@@ -402,7 +402,7 @@ export default function GTrans() {
           <div className="relative">
             <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-slate-200" />
 
-            <div className="grid md:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
               {clientJourney.map((item, idx) => (
                 <motion.div
                   key={idx}
@@ -425,7 +425,7 @@ export default function GTrans() {
       </section>
 
       {/* Currencies */}
-      <section className="py-20 bg-[#1e3a5f]">
+      <section className="py-10 md:py-20 bg-[#1e3a5f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -454,7 +454,7 @@ export default function GTrans() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-[#1e3a5f] to-[#2d5a8f]">
+      <section className="py-10 md:py-20 bg-gradient-to-r from-[#1e3a5f] to-[#2d5a8f]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             {language === 'en' ? 'Ready to Get Started?' : 'Siap untuk Memulai?'}

@@ -85,7 +85,7 @@ export default function HeroSection({ language }) {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -126,7 +126,7 @@ export default function HeroSection({ language }) {
             </div>
 
             {/* Trust Badges */}
-            <div className="mt-12 flex flex-wrap items-center gap-8">
+            <div className="mt-8 md:mt-12 flex flex-wrap items-center gap-4 md:gap-8">
               <div className="flex items-center gap-2 text-slate-500">
                 <Globe className="w-5 h-5" />
                 <span className="text-sm">{language === 'en' ? '19+ Currencies' : '19+ Mata Uang'}</span>

@@ -30,8 +30,8 @@ export default function PublicFooter({ language, setLanguage }) {
 
   return (
     <footer className="bg-[#1e3a5f] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
