@@ -24,7 +24,13 @@ export default function UserDashboard() {
 
   const { data: client } = useQuery({
     queryKey: ['currentClient', user?.email],
-    queryFn: () => apiClient.getMyClient(),
+    queryFn: async () => {
+      try {
+        return await apiClient.getMyClient();
+      } catch {
+        return null;
+      }
+    },
     enabled: !!user
   });
 
