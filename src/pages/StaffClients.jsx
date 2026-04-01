@@ -78,35 +78,33 @@ export default function StaffClients() {
 
   const { data: rawClients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: async () => {
-      const data = await apiClient.getAllClients();
-      return data.map(client => ({
-        client_id: client.client_id,
-        user_id: client.user_id,
-        name: client.client_name || '',
-        client_alias_1: client.client_alias_1 || '',
-        client_alias_2: client.client_alias_2 || '',
-        client_alias_3: client.client_alias_3 || '',
-        client_reg_number: client.client_reg_number || '',
-        client_tax_number: client.client_tax_number || '',
-        client_reg_country: client.client_reg_country || '',
-        doc_id: client.doc_id || '',
-        status_sign: client.status_sign?.toLowerCase() || 'not_sent',
-        date_signing: client.date_signing || '',
-        group_id: client.group_id || '',
-        group_name: client.group_name || '',
-        client_director: client.client_director || '',
-        last_id: client.last_id || '',
-        description: '',
-        email: client.client_mail || '',
-        login: client.username || '',
-        password: '',
-        active: client.is_active ?? true,
-        kyc_status: client.kyc_status || '',
-        created_date: client.kyc_submitted_at || new Date().toISOString(),
-        aml_risk_level: client.aml_risk_level || null
-      }));
-    },
+    queryFn: () => apiClient.getAllClients(),
+    select: (data) => data.map(client => ({
+      client_id: client.client_id,
+      user_id: client.user_id,
+      name: client.client_name || '',
+      client_alias_1: client.client_alias_1 || '',
+      client_alias_2: client.client_alias_2 || '',
+      client_alias_3: client.client_alias_3 || '',
+      client_reg_number: client.client_reg_number || '',
+      client_tax_number: client.client_tax_number || '',
+      client_reg_country: client.client_reg_country || '',
+      doc_id: client.doc_id || '',
+      status_sign: client.status_sign?.toLowerCase() || 'not_sent',
+      date_signing: client.date_signing || '',
+      group_id: client.group_id || '',
+      group_name: client.group_name || '',
+      client_director: client.client_director || '',
+      last_id: client.last_id || '',
+      description: '',
+      email: client.client_mail || '',
+      login: client.username || '',
+      password: '',
+      active: client.is_active ?? true,
+      kyc_status: client.kyc_status || '',
+      created_date: client.kyc_submitted_at || new Date().toISOString(),
+      aml_risk_level: client.aml_risk_level || null
+    })),
   });
 
   const clients = rawClients;
