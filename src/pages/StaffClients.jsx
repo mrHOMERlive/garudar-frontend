@@ -160,6 +160,10 @@ export default function StaffClients() {
       toast.success('Client deleted');
       setDeleteDialogOpen(false);
       setClientToDelete(null);
+      closeDialog();
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to delete client');
     },
   });
 
@@ -703,7 +707,18 @@ export default function StaffClients() {
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-row items-center">
+            {editingClient && (
+              <Button
+                variant="destructive"
+                onClick={() => openDeleteDialog(editingClient)}
+                disabled={deleteMutation.isPending || saveMutation.isPending}
+                className="mr-auto text-sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('deleteLabel')}
+              </Button>
+            )}
             <Button variant="outline" onClick={closeDialog} className="border-slate-300 text-slate-600 text-sm">
               {t('cancelLabel')}
             </Button>
@@ -720,7 +735,7 @@ export default function StaffClients() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[#1e3a5f]">{t('deleteClientTitle')}</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500">
-              {t('deleteOrdersDesc')}
+              {t('deleteClientDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

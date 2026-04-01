@@ -408,6 +408,7 @@ export const translations = {
     saveClient: 'Save Client',
     savingLabel: 'Saving...',
     deleteClientTitle: 'Delete Client',
+    deleteClientDesc: 'Are you sure you want to delete this client? This action cannot be undone.',
     // StaffKYCQueue
     kycReviewQueueTitle: 'KYC Review Queue',
     kycReviewQueueSubtitle: 'Review and process client KYC submissions',
@@ -908,6 +909,7 @@ export const translations = {
     saveClient: 'Simpan Klien',
     savingLabel: 'Menyimpan...',
     deleteClientTitle: 'Hapus Klien',
+    deleteClientDesc: 'Apakah Anda yakin ingin menghapus klien ini? Tindakan ini tidak dapat dibatalkan.',
     activeLabel: 'Aktif',
     // StaffKYCQueue
     backToDashboard: 'Kembali ke Dashboard',
