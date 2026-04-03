@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, AlertCircle, Eye, Plus, X } from 'lucide-react';
 import { validateLatinText, parseDate } from './utils/validators';
 import { t } from '@/components/utils/language';
@@ -14,23 +14,21 @@ const DEFAULT_DOCUMENT_TYPES = [
   { value: 'inv', label: 'Invoice' },
   { value: 'invoice', label: 'Invoice (full)' },
   { value: 'contract', label: 'Contract' },
-  { value: 'proforma invoice', label: 'Proforma Invoice' }
+  { value: 'proforma invoice', label: 'Proforma Invoice' },
 ];
 
 export default function TransactionRemarkSection({ formData, onChange, errors, setErrors }) {
   const [preview, setPreview] = useState('');
-  const [documents, setDocuments] = useState([
-    { type: 'inv', number: '', date: '' }
-  ]);
+  const [documents, setDocuments] = useState([{ type: 'inv', number: '', date: '' }]);
 
   useEffect(() => {
     if (formData.transaction_remark_mode === 'template') {
       // Build remark with multiple documents
       let remark = `${formData.remark_payment || 'Payment'} for ${formData.remark_goods || 'goods'} under `;
-      
+
       const docParts = documents
-        .filter(doc => doc.number && doc.date)
-        .map(doc => {
+        .filter((doc) => doc.number && doc.date)
+        .map((doc) => {
           // Convert YYYY-MM-DD to DD.MM.YYYY
           let formattedDate = doc.date;
           if (doc.date.includes('-')) {
@@ -39,30 +37,30 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
           }
           return `${doc.type} ${doc.number} dd ${formattedDate}`;
         });
-      
+
       if (docParts.length > 0) {
         remark += docParts.join(', ');
       } else {
         remark = '';
       }
-      
+
       setPreview(remark);
       onChange({ transaction_remark: remark });
-      
+
       if (remark.length > 500) {
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          transaction_remark: 'Transaction remark exceeds 500 characters'
+          transaction_remark: 'Transaction remark exceeds 500 characters',
         }));
       } else if (!remark) {
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          transaction_remark: 'Please add at least one document'
+          transaction_remark: 'Please add at least one document',
         }));
       } else {
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          transaction_remark: null
+          transaction_remark: null,
         }));
       }
     }
@@ -70,27 +68,29 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
     formData.transaction_remark_mode,
     formData.remark_goods,
     formData.remark_payment,
-    documents
+    documents,
+    onChange,
+    setErrors,
   ]);
 
   const handleManualChange = (value) => {
     onChange({ transaction_remark: value });
-    
+
     const validation = validateLatinText(value, 500);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      transaction_remark: validation.valid ? null : validation.error
+      transaction_remark: validation.valid ? null : validation.error,
     }));
   };
 
   const handleModeChange = (mode) => {
-    onChange({ 
+    onChange({
       transaction_remark_mode: mode,
-      transaction_remark: mode === 'manual' ? '' : preview
+      transaction_remark: mode === 'manual' ? '' : preview,
     });
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      transaction_remark: null
+      transaction_remark: null,
     }));
   };
 
@@ -108,12 +108,12 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
     const newDocs = [...documents];
     newDocs[index][field] = value;
     setDocuments(newDocs);
-    
+
     // Sync first document number with formData.remark_inv_no
     if (index === 0 && field === 'number') {
       onChange({ remark_inv_no: value });
     }
-    
+
     // Sync first document date with formData.remark_date in DD.MM.YYYY format
     if (index === 0 && field === 'date' && value) {
       // Convert from YYYY-MM-DD to DD.MM.YYYY
@@ -168,7 +168,9 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
           <div className="space-y-4">
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div className="text-xs text-slate-600 mb-1">{t('templateLabel')}</div>
-              <code className="text-sm text-slate-800">{'{PAYMENT}'} for {'{GOODS}'} under {'{TYPE} {NUMBER} dd {DATE}'} (multiple)</code>
+              <code className="text-sm text-slate-800">
+                {'{PAYMENT}'} for {'{GOODS}'} under {'{TYPE} {NUMBER} dd {DATE}'} (multiple)
+              </code>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -221,10 +223,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-2">
                         <Label className="text-xs text-slate-600">{t('documentType')}</Label>
-                        <Select
-                          value={doc.type}
-                          onValueChange={(value) => updateDocument(index, 'type', value)}
-                        >
+                        <Select value={doc.type} onValueChange={(value) => updateDocument(index, 'type', value)}>
                           <SelectTrigger className="border-slate-200">
                             <SelectValue />
                           </SelectTrigger>

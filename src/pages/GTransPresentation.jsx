@@ -1,16 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import {
-  Lock, ArrowRight, ArrowLeft, Building2, Globe, Workflow,
-  Users, Shield, Zap, CreditCard, ShoppingCart, RefreshCw,
-  CheckCircle, MapPin, Calendar, FileText, Code, Mail, Phone
+  Lock,
+  ArrowRight,
+  ArrowLeft,
+  Building2,
+  Globe,
+  Workflow,
+  Users,
+  Shield,
+  Zap,
+  CreditCard,
+  ShoppingCart,
+  RefreshCw,
+  CheckCircle,
+  MapPin,
+  Calendar,
+  FileText,
+  Code,
+  Mail,
+  Phone,
 } from 'lucide-react';
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-const LOGO_URL = "/gan.png";
+const LOGO_URL = '/gan.png';
 const PRESENTATION_PASSWORD = 'gtrans2026';
 
 export default function GTransPresentation() {
@@ -74,7 +90,7 @@ export default function GTransPresentation() {
             </div>
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'contents',
@@ -89,7 +105,7 @@ export default function GTransPresentation() {
               { icon: Zap, title: 'Our Advantage', desc: 'Why choose us' },
               { icon: FileText, title: 'Operations Flow', desc: 'Process details' },
               { icon: Code, title: 'Technology Roadmap', desc: 'Future plans' },
-              { icon: Building2, title: 'Teams & Contacts', desc: 'Get in touch' }
+              { icon: Building2, title: 'Teams & Contacts', desc: 'Get in touch' },
             ].map((item, idx) => (
               <motion.div
                 key={idx}
@@ -112,7 +128,7 @@ export default function GTransPresentation() {
             ))}
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'who-why',
@@ -127,10 +143,12 @@ export default function GTransPresentation() {
                   <strong className="text-[#1e3a5f]">GTrans</strong> – cross-border funds transfer for businesses.
                 </p>
                 <p>
-                  GAN's cross-border funds transfer (remittance) service for corporate clients, enabling multi-currency payouts and collections between entities in different countries.
+                  GAN&apos;s cross-border funds transfer (remittance) service for corporate clients, enabling
+                  multi-currency payouts and collections between entities in different countries.
                 </p>
                 <p>
-                  Operating under Bank Indonesia's PSP licensing framework for remittance, meeting all capital adequacy, risk management, ownership, and technology control requirements.
+                  Operating under Bank Indonesia&apos;s PSP licensing framework for remittance, meeting all capital
+                  adequacy, risk management, ownership, and technology control requirements.
                 </p>
               </div>
             </div>
@@ -142,7 +160,7 @@ export default function GTransPresentation() {
                   'BRICS and new trade corridors are emerging',
                   'Demand for alternative, flexible payment solutions',
                   'Indonesian businesses need reliable cross-border partners',
-                  'Regulatory frameworks now support innovation'
+                  'Regulatory frameworks now support innovation',
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -153,14 +171,14 @@ export default function GTransPresentation() {
             </div>
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'products',
       content: (
         <div className="min-h-screen bg-slate-50 p-8 md:p-16">
           <h2 className="text-4xl font-bold text-[#1e3a5f] mb-4">Product Portfolio</h2>
-          <p className="text-slate-600 mb-12">Operating under Bank Indonesia's PSP licensing framework</p>
+          <p className="text-slate-600 mb-12">Operating under Bank Indonesia&apos;s PSP licensing framework</p>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
@@ -169,22 +187,22 @@ export default function GTransPresentation() {
                 title: 'GTrans B2B',
                 subtitle: 'Cross-border Pay-in / Pay-out',
                 desc: 'Inbound and outbound payments for corporate clients, multi-currency payouts and collections between entities in different jurisdictions.',
-                color: 'bg-[#1e3a5f]'
+                color: 'bg-[#1e3a5f]',
               },
               {
                 icon: RefreshCw,
                 title: 'GTrans MerchantPay',
                 subtitle: 'Foreign Currency Acceptance',
                 desc: 'Foreign buyers pay Indonesian suppliers in their home currency. GTrans manages FX conversion and settlement into IDR or other currencies.',
-                color: 'bg-[#f5a623]'
+                color: 'bg-[#f5a623]',
               },
               {
                 icon: ShoppingCart,
                 title: 'eCommerce Collect & Settle',
                 subtitle: 'Marketplace Solutions',
                 desc: 'Non-IDR collection with local currency settlement for Indonesian marketplace sellers. Collect via partners, settle in local currency.',
-                color: 'bg-emerald-600'
-              }
+                color: 'bg-emerald-600',
+              },
             ].map((product, idx) => (
               <motion.div
                 key={idx}
@@ -206,7 +224,7 @@ export default function GTransPresentation() {
             ))}
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'contact',
@@ -216,7 +234,7 @@ export default function GTransPresentation() {
             <div className="w-24 h-24 bg-white rounded-2xl mx-auto mb-8 p-3">
               <img src={LOGO_URL} alt="GTrans" className="w-full h-full object-contain" />
             </div>
-            <h2 className="text-4xl font-bold mb-8">Let's Connect</h2>
+            <h2 className="text-4xl font-bold mb-8">Let&apos;s Connect</h2>
 
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               <div className="bg-white/10 rounded-xl p-6">
@@ -236,13 +254,11 @@ export default function GTransPresentation() {
               </div>
             </div>
 
-            <p className="text-slate-400 text-sm">
-              PRIVATE & CONFIDENTIAL • PT Garuda Arma Nusa • 2026
-            </p>
+            <p className="text-slate-400 text-sm">PRIVATE & CONFIDENTIAL • PT Garuda Arma Nusa • 2026</p>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   if (!authenticated) {
@@ -286,12 +302,7 @@ export default function GTransPresentation() {
 
   return (
     <div className="relative">
-      <motion.div
-        key={currentSlide}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
+      <motion.div key={currentSlide} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
         {slides[currentSlide].content}
       </motion.div>
 
@@ -313,8 +324,8 @@ export default function GTransPresentation() {
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all",
-                  currentSlide === idx ? "w-8 bg-[#1e3a5f]" : "bg-slate-300"
+                  'w-2 h-2 rounded-full transition-all',
+                  currentSlide === idx ? 'w-8 bg-[#1e3a5f]' : 'bg-slate-300'
                 )}
               />
             ))}

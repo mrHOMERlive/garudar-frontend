@@ -9,11 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const userData = await apiClient.getCurrentUser(true);
       setUser(userData);
@@ -24,7 +20,11 @@ export function AuthProvider({ children }) {
     }
     apiClient.cleanupLegacyTokens();
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = useCallback(async (username, password) => {
     await apiClient.login(username, password);
@@ -40,20 +40,19 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
   }, []);
 
-  const value = useMemo(() => ({
-    user,
-    loading,
-    isAuthenticated,
-    login,
-    logout,
-    checkAuth,
-  }), [user, loading, isAuthenticated, login, logout, checkAuth]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      isAuthenticated,
+      login,
+      logout,
+      checkAuth,
+    }),
+    [user, loading, isAuthenticated, login, logout, checkAuth]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

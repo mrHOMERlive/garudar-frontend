@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 
 // import { parseStatusHistory, addStatusEntry } from '@/components/utils/statusHistoryHelper'; // Removed
@@ -20,7 +18,16 @@ import { format } from 'date-fns';
 import SuspiciousTransactionAlert from '@/components/orders/SuspiciousTransactionAlert';
 import { isAboveThreshold, formatThreshold } from '@/components/orders/thresholdUtils';
 
-const ALL_STATUSES = ['created', 'draft', 'check', 'rejected', 'pending_payment', 'on_execution', 'released', 'cancelled'];
+const ALL_STATUSES = [
+  'created',
+  'draft',
+  'check',
+  'rejected',
+  'pending_payment',
+  'on_execution',
+  'released',
+  'cancelled',
+];
 
 export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const queryClient = useQueryClient();
@@ -80,15 +87,13 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     enabled: open,
   });
 
-  const activePayeerAccounts = payeerAccounts.filter(acc => acc.status === 'active');
+  const activePayeerAccounts = payeerAccounts.filter((acc) => acc.status === 'active');
 
   const { data: currencies = [] } = useQuery({
     queryKey: ['currencies'],
     queryFn: () => apiClient.getCurrencies(),
     enabled: open,
   });
-
-
 
   const { data: terms } = useQuery({
     queryKey: ['order-terms', order?.orderId],
@@ -175,7 +180,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       // Resolve executing bank to account_no if possible
       let exBank = terms.executingBank || '';
       if (exBank && payeerAccounts.length > 0) {
-        const found = payeerAccounts.find(p => p.bank_name === exBank || p.account_no === exBank);
+        const found = payeerAccounts.find((p) => p.bank_name === exBank || p.account_no === exBank);
         if (found) exBank = found.account_no;
       }
       setExecutingBank(exBank);
@@ -193,7 +198,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       // Auto-select Payment Account based on GANBankAccount from terms
       if (terms.GANBankAccount && payeerAccounts.length > 0) {
-        const matchedAccount = payeerAccounts.find(acc => acc.account_no === terms.GANBankAccount);
+        const matchedAccount = payeerAccounts.find((acc) => acc.account_no === terms.GANBankAccount);
         if (matchedAccount) {
           setClientPaymentAccountId(matchedAccount.account_no);
           setClientPaymentAccountName(matchedAccount.currency || matchedAccount.account_no);
@@ -213,9 +218,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
           setConversionMethod('no_conversion');
         }
       }
-
     }
-  }, [terms, open, payeerAccounts]);
+  }, [terms, open, payeerAccounts, order?.currency]);
 
   useEffect(() => {
     if (open && order && clientPaymentCurrency) {
@@ -275,7 +279,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         bank_statement_in_id: bankStatementInId || null,
         bank_statement_out_type: bankStatementOutType || null,
         bank_statement_out_id: bankStatementOutId || null,
-        amount_to_be_paid: amountToBePaid !== '' ? parseFloat(amountToBePaid) : (calculateAmountRemuneration() + (Number(order.amount) || 0)),
+        amount_to_be_paid:
+          amountToBePaid !== ''
+            ? parseFloat(amountToBePaid)
+            : calculateAmountRemuneration() + (Number(order.amount) || 0),
         doc_paid_no: docPaidNo || null,
         doc_paid_date: docPaidDate || null,
         payment_proof_no: paymentProofNo || null,
@@ -298,8 +305,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       const newErrors = {};
       if (!clientPaymentAccountId) newErrors.paymentAccount = true;
       if (!exchangeRate) newErrors.exchangeRate = true;
-      if (remunerationType === 'PERCENT' && !remunerationPercentage && remunerationPercentage !== 0) newErrors.remunerationPercentage = true;
-      if (remunerationType === 'FIXED' && !remunerationFixed && remunerationFixed !== 0) newErrors.remunerationFixed = true;
+      if (remunerationType === 'PERCENT' && !remunerationPercentage && remunerationPercentage !== 0)
+        newErrors.remunerationPercentage = true;
+      if (remunerationType === 'FIXED' && !remunerationFixed && remunerationFixed !== 0)
+        newErrors.remunerationFixed = true;
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
@@ -327,7 +336,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         payment_proof: paymentProof,
         date_payment_proof: paymentProofDate || null,
         non_mandiri_execution: nonMandiriExecution,
-
       };
 
       await onSave(updates);
@@ -354,7 +362,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       toast.error('Failed to download: ' + error.message);
     }
   };
-
 
   const handleDownloadExcel = async () => {
     try {
@@ -396,9 +403,17 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const setLoading = type === 'sales_contract' ? setUploadingSalesContract :
-      type === 'invoice' ? setUploadingInvoice :
-        (type === 'word_order' || type === 'word_order_signed_client' || type === 'word_order_unsigned' || type === 'word_order_signed_staff') ? setUploadingWordOrder : setUploadingOther;
+    const setLoading =
+      type === 'sales_contract'
+        ? setUploadingSalesContract
+        : type === 'invoice'
+          ? setUploadingInvoice
+          : type === 'word_order' ||
+              type === 'word_order_signed_client' ||
+              type === 'word_order_unsigned' ||
+              type === 'word_order_signed_staff'
+            ? setUploadingWordOrder
+            : setUploadingOther;
 
     setLoading(true);
     try {
@@ -412,7 +427,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     }
   };
 
-  const getDoc = (type) => documents.find(d => d.doc_type === type);
+  const getDoc = (type) => documents.find((d) => d.doc_type === type);
   const signedOrderDoc = getDoc('word_order') || getDoc('word_order_signed_client');
   const unsignedOrderDoc = getDoc('word_order_unsigned');
   const signedOrderStaffDoc = getDoc('word_order_signed_staff');
@@ -425,9 +440,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             #{order.orderId}
             <OrderStatusBadge status={status} />
           </SheetTitle>
-          <SheetDescription className="hidden">
-            Manage order details, documents, and status.
-          </SheetDescription>
+          <SheetDescription className="hidden">Manage order details, documents, and status.</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
@@ -439,7 +452,8 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div>
                   <p className="text-xs font-bold text-red-800">Regulatory Threshold Reached</p>
                   <p className="text-xs text-red-700 mt-0.5">
-                    {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} exceeds the {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
+                    {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} exceeds the{' '}
+                    {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
                   </p>
                 </div>
               </div>
@@ -456,8 +470,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ALL_STATUSES.map(s => (
-                      <SelectItem key={s} value={s}>{s.replace('_', ' ').toUpperCase()}</SelectItem>
+                    {ALL_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s.replace('_', ' ').toUpperCase()}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -473,31 +489,37 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div>
                 <Label className="text-xs text-slate-600 font-bold">Select Payment Account *</Label>
-                <Select value={clientPaymentAccountId} onValueChange={(val) => {
-                  setClientPaymentAccountId(val);
-                  setErrors(prev => ({ ...prev, paymentAccount: false }));
-                  const account = payeerAccounts.find(a => a.account_no === val);
-                  if (account) {
-                    setClientPaymentAccountName(account.account_no || account.currency);
-                    setClientPaymentAccountNumber(account.account_no || '');
-                    setClientPaymentBankName(account.bank_name || '');
-                    setClientPaymentBankAddress(account.bank_address || '');
-                    setClientPaymentBankBic(account.bank_bic || '');
-                    setClientPaymentBankSwift(account.bank_bic || '');
+                <Select
+                  value={clientPaymentAccountId}
+                  onValueChange={(val) => {
+                    setClientPaymentAccountId(val);
+                    setErrors((prev) => ({ ...prev, paymentAccount: false }));
+                    const account = payeerAccounts.find((a) => a.account_no === val);
+                    if (account) {
+                      setClientPaymentAccountName(account.account_no || account.currency);
+                      setClientPaymentAccountNumber(account.account_no || '');
+                      setClientPaymentBankName(account.bank_name || '');
+                      setClientPaymentBankAddress(account.bank_address || '');
+                      setClientPaymentBankBic(account.bank_bic || '');
+                      setClientPaymentBankSwift(account.bank_bic || '');
 
-                    // Auto-fill fields for backend
-                    if (account.currency) setClientPaymentCurrency(account.currency);
-                    setGanBankName(account.bank_name || '');
-                    setGanBankAccount(account.account_no || '');
-                  }
-                }}>
-                  <SelectTrigger className={`mt-1 bg-white ${errors.paymentAccount ? 'border-red-500' : 'border-slate-300'}`}>
+                      // Auto-fill fields for backend
+                      if (account.currency) setClientPaymentCurrency(account.currency);
+                      setGanBankName(account.bank_name || '');
+                      setGanBankAccount(account.account_no || '');
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    className={`mt-1 bg-white ${errors.paymentAccount ? 'border-red-500' : 'border-slate-300'}`}
+                  >
                     <SelectValue placeholder="Select account from Payeer Accounts..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {activePayeerAccounts.map(acc => (
+                    {activePayeerAccounts.map((acc) => (
                       <SelectItem key={acc.account_no} value={acc.account_no}>
-                        {acc.alias ? `${acc.alias} — ` : ''}{acc.account_no} ({acc.currency})
+                        {acc.alias ? `${acc.alias} — ` : ''}
+                        {acc.account_no} ({acc.currency})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -543,7 +565,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </div>
                 </div>
               )}
-
             </div>
 
             <Separator className="bg-slate-200" />
@@ -555,19 +576,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs text-slate-600">Source Currency</Label>
-                  <Select
-                    value={clientPaymentCurrency}
-                    onValueChange={setClientPaymentCurrency}
-                  >
+                  <Select value={clientPaymentCurrency} onValueChange={setClientPaymentCurrency}>
                     <SelectTrigger className="mt-1 bg-white border-slate-300">
                       <SelectValue placeholder="USD" />
                     </SelectTrigger>
                     <SelectContent>
-                      {currencies.filter(c => (c.code || c) !== 'RUB').map((c) => (
-                        <SelectItem key={c.code || c} value={c.code || c}>
-                          {c.symbol ? c.symbol + ' ' : ''}{c.code || c} {c.name ? `- ${c.name}` : ''}
-                        </SelectItem>
-                      ))}
+                      {currencies
+                        .filter((c) => (c.code || c) !== 'RUB')
+                        .map((c) => (
+                          <SelectItem key={c.code || c} value={c.code || c}>
+                            {c.symbol ? c.symbol + ' ' : ''}
+                            {c.code || c} {c.name ? `- ${c.name}` : ''}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -587,14 +608,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               </div>
 
               <div>
-                <Label className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}>
+                <Label
+                  className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}
+                >
                   {conversionMethod === 'central_bank' ? 'Central Bank Rate Applied *' : 'Exchange Rate *'}
                 </Label>
                 <Input
                   type="number"
                   step="0.0001"
                   value={exchangeRate}
-                  onChange={(e) => { setExchangeRate(e.target.value); setErrors(prev => ({ ...prev, exchangeRate: false })); }}
+                  onChange={(e) => {
+                    setExchangeRate(e.target.value);
+                    setErrors((prev) => ({ ...prev, exchangeRate: false }));
+                  }}
                   className={`mt-1 ${conversionMethod === 'no_conversion' ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white'} ${errors.exchangeRate ? 'border-red-500' : 'border-slate-300'}`}
                   placeholder={conversionMethod === 'central_bank' ? '5.4' : '1.0000'}
                   disabled={conversionMethod === 'no_conversion'}
@@ -602,7 +628,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               </div>
 
               <div>
-                <Label className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}>Data Fixing</Label>
+                <Label
+                  className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}
+                >
+                  Data Fixing
+                </Label>
                 <Input
                   type="date"
                   value={conversionMethod === 'no_conversion' ? '' : dataFixing}
@@ -614,8 +644,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             </div>
 
             <Separator className="bg-slate-200" />
-
-
 
             {/* REMUNERATION & FEES Section */}
             <div className="space-y-3">
@@ -641,7 +669,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     type="number"
                     step="0.01"
                     value={remunerationPercentage}
-                    onChange={(e) => { setRemunerationPercentage(e.target.value); setErrors(prev => ({ ...prev, remunerationPercentage: false })); }}
+                    onChange={(e) => {
+                      setRemunerationPercentage(e.target.value);
+                      setErrors((prev) => ({ ...prev, remunerationPercentage: false }));
+                    }}
                     className={`mt-1 bg-white ${errors.remunerationPercentage ? 'border-red-500' : 'border-slate-300'}`}
                   />
                 </div>
@@ -652,17 +683,23 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     type="number"
                     step="0.01"
                     value={remunerationFixed}
-                    onChange={(e) => { setRemunerationFixed(e.target.value); setErrors(prev => ({ ...prev, remunerationFixed: false })); }}
+                    onChange={(e) => {
+                      setRemunerationFixed(e.target.value);
+                      setErrors((prev) => ({ ...prev, remunerationFixed: false }));
+                    }}
                     className={`mt-1 bg-white ${errors.remunerationFixed ? 'border-red-500' : 'border-slate-300'}`}
                   />
                 </div>
               )}
 
-
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
                 <div className="text-lg font-bold text-indigo-900">
-                  {Number(amountToBePaid || (calculateAmountRemuneration() + (Number(order.amount) || 0))).toLocaleString('en-US', { minimumFractionDigits: 2 })} {order.currency}
+                  {Number(amountToBePaid || calculateAmountRemuneration() + (Number(order.amount) || 0)).toLocaleString(
+                    'en-US',
+                    { minimumFractionDigits: 2 }
+                  )}{' '}
+                  {order.currency}
                 </div>
               </div>
 
@@ -670,13 +707,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
                   <div className="text-xs text-slate-600 mb-1">Transfer Fee ({order.currency})</div>
                   <div className="text-sm font-bold text-[#1e3a5f]">
-                    {calculateAmountRemuneration().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {calculateAmountRemuneration().toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
                   <div className="text-xs text-slate-600 mb-1">Net to Beneficiary ({order.currency})</div>
                   <div className="text-sm font-bold text-emerald-700">
-                    {Number(order.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {Number(order.amount || 0).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
               </div>
@@ -778,7 +821,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* SECTION 4: EXECUTION Section */}
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">GAN's Execution & Payment</h3>
+                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">GAN&apos;s Execution & Payment</h3>
 
                 <div>
                   <Label className="text-xs text-slate-600">Date of Execution</Label>
@@ -797,7 +840,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       <SelectValue placeholder="Select executing bank..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {activePayeerAccounts.map(acc => (
+                      {activePayeerAccounts.map((acc) => (
                         <SelectItem key={acc.account_no} value={acc.account_no}>
                           {acc.bank_name}
                         </SelectItem>
@@ -805,7 +848,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     </SelectContent>
                   </Select>
                 </div>
-
               </div>
 
               <Separator className="bg-slate-200" />
@@ -838,7 +880,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       </Button>
                     </label>
                     {getDoc('sales_contract') && (
-                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('sales_contract').doc_id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-300"
+                        onClick={() => handleDownload(getDoc('sales_contract').doc_id)}
+                      >
                         <Download className="w-3 h-3" />
                       </Button>
                     )}
@@ -869,7 +916,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       </Button>
                     </label>
                     {getDoc('invoice') && (
-                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('invoice').doc_id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-300"
+                        onClick={() => handleDownload(getDoc('invoice').doc_id)}
+                      >
                         <Download className="w-3 h-3" />
                       </Button>
                     )}
@@ -900,7 +952,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       </Button>
                     </label>
                     {getDoc('other') && (
-                      <Button size="sm" variant="outline" className="border-slate-300" onClick={() => handleDownload(getDoc('other').doc_id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-300"
+                        onClick={() => handleDownload(getDoc('other').doc_id)}
+                      >
                         <Download className="w-3 h-3" />
                       </Button>
                     )}
@@ -942,7 +999,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         </Button>
                       </label>
                       {unsignedOrderDoc && (
-                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(unsignedOrderDoc.doc_id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-300"
+                          onClick={() => handleDownload(unsignedOrderDoc.doc_id)}
+                        >
                           <Download className="w-3 h-3" />
                         </Button>
                       )}
@@ -968,7 +1030,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         </Button>
                       </label>
                       {signedOrderDoc && (
-                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(signedOrderDoc.doc_id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-300"
+                          onClick={() => handleDownload(signedOrderDoc.doc_id)}
+                        >
                           <Download className="w-3 h-3" />
                         </Button>
                       )}
@@ -994,7 +1061,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         </Button>
                       </label>
                       {signedOrderStaffDoc && (
-                        <Button size="sm" variant="outline" className="border-blue-300" onClick={() => handleDownload(signedOrderStaffDoc.doc_id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-300"
+                          onClick={() => handleDownload(signedOrderStaffDoc.doc_id)}
+                        >
                           <Download className="w-3 h-3" />
                         </Button>
                       )}
@@ -1012,7 +1084,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                     <div className="text-xs text-slate-500 mb-1">Amount</div>
-                    <div className="font-semibold text-slate-900">{order.currency} {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <div className="font-semibold text-slate-900">
+                      {order.currency}{' '}
+                      {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
@@ -1038,7 +1113,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
-                  <div className="font-semibold text-slate-900 text-sm">{order.beneficiaryAddress || order.beneficiaryAdress}</div>
+                  <div className="font-semibold text-slate-900 text-sm">
+                    {order.beneficiaryAddress || order.beneficiaryAdress}
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
@@ -1204,7 +1281,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <h4 className="text-xs font-bold text-slate-700 uppercase">Execution</h4>
                 <div className="flex items-center gap-3">
                   <Label className="text-xs text-slate-600">Non-Mandiri Execution</Label>
-                  <Select value={nonMandiriExecution ? 'Y' : 'N'} onValueChange={(val) => setNonMandiriExecution(val === 'Y')}>
+                  <Select
+                    value={nonMandiriExecution ? 'Y' : 'N'}
+                    onValueChange={(val) => setNonMandiriExecution(val === 'Y')}
+                  >
                     <SelectTrigger className="w-20 bg-white border-slate-300">
                       <SelectValue />
                     </SelectTrigger>
@@ -1223,7 +1303,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             <div>
               <Label className="text-xs text-slate-600">Last Instruction Export</Label>
               <div className="mt-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded p-2">
-                {lastInstructionExport?.last_export_date ? format(new Date(lastInstructionExport.last_export_date), 'dd/MM/yyyy HH:mm') : 'Not exported yet'}
+                {lastInstructionExport?.last_export_date
+                  ? format(new Date(lastInstructionExport.last_export_date), 'dd/MM/yyyy HH:mm')
+                  : 'Not exported yet'}
               </div>
             </div>
 
@@ -1253,12 +1335,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200 flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 border-slate-300"
-          >
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-slate-300">
             Cancel
           </Button>
           <Button

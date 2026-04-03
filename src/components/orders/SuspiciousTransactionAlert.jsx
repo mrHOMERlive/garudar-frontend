@@ -7,7 +7,7 @@ const MIN_ORDERS_FOR_ANALYSIS = 1;
 
 export function computeClientAverage(allOrders, clientId, excludeOrderId) {
   const clientOrders = allOrders.filter(
-    o => o.clientId === clientId && o.orderId !== excludeOrderId && !o.deleted && o.amount > 0
+    (o) => o.clientId === clientId && o.orderId !== excludeOrderId && !o.deleted && o.amount > 0
   );
   if (clientOrders.length < MIN_ORDERS_FOR_ANALYSIS) return null;
   const total = clientOrders.reduce((sum, o) => sum + (parseFloat(o.amount) || 0), 0);
@@ -33,9 +33,15 @@ export default function SuspiciousTransactionAlert({ order, allOrders }) {
           Unusual Transaction Amount Detected
         </p>
         <p className="text-xs text-orange-700 mt-1">
-          This order (<strong>{order.currency} {parseFloat(order.amount)?.toLocaleString('en-US')}</strong>) is{' '}
-          <strong>{ratio.toFixed(1)}x</strong> the client's average order of{' '}
-          <strong>{order.currency} {avg.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>.
+          This order (
+          <strong>
+            {order.currency} {parseFloat(order.amount)?.toLocaleString('en-US')}
+          </strong>
+          ) is <strong>{ratio.toFixed(1)}x</strong> the client&apos;s average order of{' '}
+          <strong>
+            {order.currency} {avg.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          </strong>
+          .
         </p>
         <p className="text-xs text-orange-600 mt-1 italic">
           Please review for possible suspicious transaction. Enhanced verification may be required.
