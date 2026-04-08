@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -46,7 +46,7 @@ export default function CreateOrder() {
     remark_date: '',
     remark_goods: 'goods',
     remark_type: 'inv',
-    remark_payment: 'Payment'
+    remark_payment: 'Payment',
   });
 
   const [errors, setErrors] = useState({});
@@ -70,9 +70,9 @@ export default function CreateOrder() {
     queryFn: () => apiClient.getMyClient(),
   });
 
-  const handleFormChange = (updates) => {
-    setFormData(prev => ({ ...prev, ...updates }));
-  };
+  const handleFormChange = useCallback((updates) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -131,11 +131,13 @@ export default function CreateOrder() {
       const csvData = generateCSVData(orderData);
 
       // Найти названия стран по кодам
-      const selectedBankCountry = countries.find(c => c.code === orderData.country_bank);
+      const selectedBankCountry = countries.find((c) => c.code === orderData.country_bank);
       const bankCountryName = selectedBankCountry ? selectedBankCountry.name : orderData.country_bank;
 
-      const selectedBeneficiaryCountry = countries.find(c => c.code === orderData.beneficiary_country);
-      const beneficiaryCountryName = selectedBeneficiaryCountry ? selectedBeneficiaryCountry.name : orderData.beneficiary_country;
+      const selectedBeneficiaryCountry = countries.find((c) => c.code === orderData.beneficiary_country);
+      const beneficiaryCountryName = selectedBeneficiaryCountry
+        ? selectedBeneficiaryCountry.name
+        : orderData.beneficiary_country;
 
       // Преобразуем данные формы в формат API (OrderPoboDto-Input)
       const apiOrderData = {
@@ -162,7 +164,7 @@ export default function CreateOrder() {
     onSuccess: async (data) => {
       setCreatedOrder(data);
       toast.success('Order created successfully!', {
-        description: `Order #${data.orderId}`
+        description: `Order #${data.orderId}`,
       });
 
       await uploadDocumentsAfterOrder(data.orderId);
@@ -171,9 +173,9 @@ export default function CreateOrder() {
     },
     onError: (error) => {
       toast.error('Failed to create order', {
-        description: error.message
+        description: error.message,
       });
-    }
+    },
   });
 
   const handleSubmit = () => {
@@ -209,13 +211,13 @@ export default function CreateOrder() {
     const setFile = {
       sales_contract: setSalesContractFile,
       invoice: setInvoiceFile,
-      other: setOtherDocsFile
+      other: setOtherDocsFile,
     }[type];
 
     if (setFile) {
       setFile(file);
       toast.success('Document selected', {
-        description: file.name
+        description: file.name,
       });
     }
   };
@@ -227,7 +229,7 @@ export default function CreateOrder() {
       uploads.push({
         file: invoiceFile,
         docType: 'invoice',
-        name: 'Invoice'
+        name: 'Invoice',
       });
     }
 
@@ -235,7 +237,7 @@ export default function CreateOrder() {
       uploads.push({
         file: salesContractFile,
         docType: 'sales_contract',
-        name: 'Sales Contract'
+        name: 'Sales Contract',
       });
     }
 
@@ -243,7 +245,7 @@ export default function CreateOrder() {
       uploads.push({
         file: otherDocsFile,
         docType: 'other',
-        name: 'Other Documents'
+        name: 'Other Documents',
       });
     }
 
@@ -258,7 +260,7 @@ export default function CreateOrder() {
       }
     } catch (error) {
       toast.error('Failed to upload some documents', {
-        description: error.message
+        description: error.message,
       });
     } finally {
       setUploadingDocuments(false);
@@ -289,13 +291,9 @@ export default function CreateOrder() {
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
           <h1 className="text-2xl font-bold text-slate-800 mb-2">{t('accountOnHold')}</h1>
-          <p className="text-slate-600 mb-6">
-            {t('accountOnHoldMessage')}
-          </p>
+          <p className="text-slate-600 mb-6">{t('accountOnHoldMessage')}</p>
           <Link to={createPageUrl('UserDashboard')}>
-            <Button className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">
-              {t('returnToDashboard')}
-            </Button>
+            <Button className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">{t('returnToDashboard')}</Button>
           </Link>
         </div>
       </div>
@@ -310,11 +308,7 @@ export default function CreateOrder() {
           <div className="flex items-center justify-between">
             <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
-                <img
-                  src="/gan.png"
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                />
+                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -327,10 +321,7 @@ export default function CreateOrder() {
             <div className="flex items-center gap-3">
               <LanguageSwitcher variant="ghost" />
               <Link to={createPageUrl('UserDashboard')}>
-                <Button
-                  variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10 bg-transparent"
-                >
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                   <History className="w-4 h-4 mr-2" />
                   {t('dashboard')}
                 </Button>
@@ -350,9 +341,7 @@ export default function CreateOrder() {
             setErrors={setErrors}
           />
 
-          {formData.amount > 0 && (
-            <ThresholdBanner amount={formData.amount} currency={formData.currency} />
-          )}
+          {formData.amount > 0 && <ThresholdBanner amount={formData.amount} currency={formData.currency} />}
 
           <BeneficiaryInfoSection
             formData={formData}
@@ -385,13 +374,9 @@ export default function CreateOrder() {
               <div className="flex-1 space-y-4">
                 <div>
                   <h3 className="font-semibold text-amber-900 mb-2">{t('invoiceRequired')}</h3>
-                  <p className="text-sm text-amber-800 mb-3">
-                    {t('invoiceInstructions')}
-                  </p>
+                  <p className="text-sm text-amber-800 mb-3">{t('invoiceInstructions')}</p>
                   <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
-                    <code className="text-sm font-mono text-slate-800 flex-1">
-                      {INVOICE_EMAIL}
-                    </code>
+                    <code className="text-sm font-mono text-slate-800 flex-1">{INVOICE_EMAIL}</code>
                     <Button
                       size="sm"
                       variant="outline"
@@ -510,12 +495,7 @@ export default function CreateOrder() {
           {/* Terms & Conditions */}
           <div className="bg-slate-100 border-2 border-slate-300 rounded-xl p-6">
             <div className="flex items-start gap-4">
-              <Checkbox
-                id="terms"
-                checked={termsAccepted}
-                onCheckedChange={setTermsAccepted}
-                className="mt-1"
-              />
+              <Checkbox id="terms" checked={termsAccepted} onCheckedChange={setTermsAccepted} className="mt-1" />
               <div className="flex-1">
                 <label htmlFor="terms" className="text-sm font-medium text-slate-900 cursor-pointer">
                   {t('iAcceptThe')}{' '}
@@ -546,8 +526,12 @@ export default function CreateOrder() {
                         <div className="bg-slate-50 rounded-lg p-6 space-y-4">
                           <h3 className="font-bold text-lg text-[#1e3a5f]">{t('keyPoints')}</h3>
                           <ul className="list-disc list-inside space-y-2 text-sm text-slate-700">
-                            <li>All fund transfers comply with Indonesian regulations including Anti-Money Laundering laws</li>
-                            <li>PT GARUDA ARMA NUSA will execute transfers as mandated in signed Fund Transfer Orders</li>
+                            <li>
+                              All fund transfers comply with Indonesian regulations including Anti-Money Laundering laws
+                            </li>
+                            <li>
+                              PT GARUDA ARMA NUSA will execute transfers as mandated in signed Fund Transfer Orders
+                            </li>
                             <li>Orders must be submitted at least 1 hour before currency cut-off time</li>
                             <li>Payment must be received 30 minutes before cut-off time</li>
                             <li>Orders are valid only once on the stated date</li>
@@ -556,7 +540,9 @@ export default function CreateOrder() {
                         </div>
 
                         <div className="text-xs text-slate-600 leading-relaxed space-y-2">
-                          <p><strong>Regulations Applied:</strong></p>
+                          <p>
+                            <strong>Regulations Applied:</strong>
+                          </p>
                           <ul className="list-disc list-inside ml-4">
                             <li>Law No. 8/2010 - Prevention and Eradication of Money Laundering</li>
                             <li>Law No. 3/2011 - Fund Transfers</li>
@@ -567,12 +553,10 @@ export default function CreateOrder() {
                         </div>
                       </div>
                     </DialogContent>
-                  </Dialog>
-                  {' '}*
+                  </Dialog>{' '}
+                  *
                 </label>
-                <p className="text-xs text-slate-600 mt-1">
-                  {t('byCheckingBoxAgree')}
-                </p>
+                <p className="text-xs text-slate-600 mt-1">{t('byCheckingBoxAgree')}</p>
               </div>
             </div>
           </div>
