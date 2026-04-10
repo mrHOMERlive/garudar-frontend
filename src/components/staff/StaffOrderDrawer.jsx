@@ -81,7 +81,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const [clientPaymentBankBic, setClientPaymentBankBic] = useState('');
   const [clientPaymentBankSwift, setClientPaymentBankSwift] = useState('');
 
-  const { data: payeerAccounts = [] } = useQuery({
+  const { data: payeerAccounts = [], isLoading: payeerLoading } = useQuery({
     queryKey: ['payeer-accounts'],
     queryFn: () => apiClient.getPayeerAccounts(),
     enabled: open,
@@ -516,12 +516,22 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectValue placeholder="Select account from Payeer Accounts..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {activePayeerAccounts.map((acc) => (
-                      <SelectItem key={acc.account_no} value={acc.account_no}>
-                        {acc.alias ? `${acc.alias} — ` : ''}
-                        {acc.account_no} ({acc.currency})
+                    {payeerLoading ? (
+                      <SelectItem value="__loading" disabled>
+                        Loading accounts...
                       </SelectItem>
-                    ))}
+                    ) : activePayeerAccounts.length === 0 ? (
+                      <SelectItem value="__empty" disabled>
+                        No active accounts
+                      </SelectItem>
+                    ) : (
+                      activePayeerAccounts.map((acc) => (
+                        <SelectItem key={acc.account_no} value={acc.account_no}>
+                          {acc.alias ? `${acc.alias} — ` : ''}
+                          {acc.account_no} ({acc.currency})
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -840,11 +850,21 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       <SelectValue placeholder="Select executing bank..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {activePayeerAccounts.map((acc) => (
-                        <SelectItem key={acc.account_no} value={acc.account_no}>
-                          {acc.bank_name}
+                      {payeerLoading ? (
+                        <SelectItem value="__loading" disabled>
+                          Loading banks...
                         </SelectItem>
-                      ))}
+                      ) : activePayeerAccounts.length === 0 ? (
+                        <SelectItem value="__empty" disabled>
+                          No active accounts
+                        </SelectItem>
+                      ) : (
+                        activePayeerAccounts.map((acc) => (
+                          <SelectItem key={acc.account_no} value={acc.account_no}>
+                            {acc.bank_name}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
