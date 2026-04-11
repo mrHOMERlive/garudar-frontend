@@ -4,42 +4,48 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle
-} from "@/components/ui/sheet";
-import { ArrowLeft, Search, FileCheck, FileText, Shield, FileSignature, AlertCircle, CheckCircle, Clock, Globe } from 'lucide-react';
+  ArrowLeft,
+  Search,
+  FileCheck,
+  FileText,
+  Shield,
+  FileSignature,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Globe,
+} from 'lucide-react';
 
 const BADGE_TYPES = [
   { value: 'kyc', label: 'KYC Verification', icon: FileCheck },
-  { value: 'service_agreement', label: 'Service Agreement', icon: FileSignature }
+  { value: 'service_agreement', label: 'Service Agreement', icon: FileSignature },
 ];
-
-
 
 export default function StaffClientRequests() {
   const [search, setSearch] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: () => apiClient.getAllClients(),
   });
 
-  const filteredClients = clients.filter(c =>
-    c.client_name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
-    c.client_mail?.toLowerCase().includes(search.toLowerCase())
+  const filteredClients = clients.filter(
+    (c) =>
+      c.client_name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
+      c.client_mail?.toLowerCase().includes(search.toLowerCase())
   );
 
   const openDrawer = (client) => {
@@ -105,52 +111,65 @@ export default function StaffClientRequests() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClients.length === 0 ? (
+              {clientsLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">No clients found</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1e3a5f]"></div>
+                      Loading clients...
+                    </div>
+                  </TableCell>
                 </TableRow>
-              ) : filteredClients.map((client) => {
-                const isOnHold = client.account_status === 'hold';
+              ) : filteredClients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">
+                    No clients found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredClients.map((client) => {
+                  const isOnHold = client.account_status === 'hold';
 
-                return (
-                  <TableRow key={client.user_id} className="border-slate-200 hover:bg-slate-50">
-                    <TableCell>
-                      <div>
-                        <div className="text-[#1e3a5f] font-medium">{client.client_name}</div>
-                        <div className="text-slate-500 text-sm font-mono">{client.client_id}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-slate-700">{client.client_mail}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="border-[#1e3a5f] text-[#1e3a5f]">
-                        {client.active_badges_count || 0} active
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {isOnHold ? (
-                        <Badge className="bg-red-100 text-red-800 border border-red-300">
-                          <AlertCircle className="w-3 h-3 mr-1" />
-                          On Hold
+                  return (
+                    <TableRow key={client.user_id} className="border-slate-200 hover:bg-slate-50">
+                      <TableCell>
+                        <div>
+                          <div className="text-[#1e3a5f] font-medium">{client.client_name}</div>
+                          <div className="text-slate-500 text-sm font-mono">{client.client_id}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-700">{client.client_mail}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="border-[#1e3a5f] text-[#1e3a5f]">
+                          {client.active_badges_count || 0} active
                         </Badge>
-                      ) : (
-                        <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Active
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => openDrawer(client)}
-                        className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
-                      >
-                        Manage Badges
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      </TableCell>
+                      <TableCell>
+                        {isOnHold ? (
+                          <Badge className="bg-red-100 text-red-800 border border-red-300">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            On Hold
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Active
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          onClick={() => openDrawer(client)}
+                          className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
+                        >
+                          Manage Badges
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>
@@ -158,11 +177,7 @@ export default function StaffClientRequests() {
 
       {/* Badge Management Drawer */}
       {selectedClient && (
-        <ClientBadgeDrawer
-          client={selectedClient}
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-        />
+        <ClientBadgeDrawer client={selectedClient} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       )}
     </div>
   );
@@ -209,25 +224,28 @@ function ClientBadgeDrawer({ client, open, onClose }) {
   });
 
   const getBadgeData = (badgeType) => {
-    const existing = badges.find(b => b.badge_type === badgeType);
+    const existing = badges.find((b) => b.badge_type === badgeType);
     const edited = editedBadges[badgeType];
-    return edited || existing || {
-      client_id: client.client_id,
-      badge_type: badgeType,
-      is_active: false
-    };
+    return (
+      edited ||
+      existing || {
+        client_id: client.client_id,
+        badge_type: badgeType,
+        is_active: false,
+      }
+    );
   };
 
   const updateBadge = (badgeType, updates) => {
-    const existing = badges.find(b => b.badge_type === badgeType);
+    const existing = badges.find((b) => b.badge_type === badgeType);
     const currentData = getBadgeData(badgeType);
 
     setEditedBadges({
       ...editedBadges,
       [badgeType]: {
         ...currentData,
-        ...updates
-      }
+        ...updates,
+      },
     });
   };
 
@@ -236,17 +254,19 @@ function ClientBadgeDrawer({ client, open, onClose }) {
 
     // Save account status if changed
     if (accountStatus !== client.account_status || holdReason !== client.account_hold_reason) {
-      promises.push(updateClientMutation.mutateAsync({
-        account_status: accountStatus,
-        account_hold_reason: holdReason
-      }));
+      promises.push(
+        updateClientMutation.mutateAsync({
+          account_status: accountStatus,
+          account_hold_reason: holdReason,
+        })
+      );
     }
 
     // Save badges
     Object.entries(editedBadges).forEach(([badgeType, data]) => {
       // Clean up data for submission (remove unnecessary fields if needed, but API usually handles it)
       const payload = {
-        is_active: data.is_active
+        is_active: data.is_active,
       };
 
       promises.push(saveBadgeMutation.mutateAsync({ badgeType, data: payload }));
@@ -267,9 +287,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-white">
         <SheetHeader className="border-b border-slate-200 pb-4">
-          <SheetTitle className="text-[#1e3a5f]">
-            Manage Badges for {client.client_name}
-          </SheetTitle>
+          <SheetTitle className="text-[#1e3a5f]">Manage Badges for {client.client_name}</SheetTitle>
           <p className="text-sm text-slate-500">{client.client_id}</p>
         </SheetHeader>
 
@@ -278,7 +296,14 @@ function ClientBadgeDrawer({ client, open, onClose }) {
           <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-slate-900">Account Status</h3>
-              <Badge variant="outline" className={accountStatus === 'hold' ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}>
+              <Badge
+                variant="outline"
+                className={
+                  accountStatus === 'hold'
+                    ? 'border-red-300 bg-red-50 text-red-700'
+                    : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                }
+              >
                 {accountStatus === 'hold' ? 'On Hold' : 'Active'}
               </Badge>
             </div>
@@ -313,10 +338,15 @@ function ClientBadgeDrawer({ client, open, onClose }) {
             const Icon = badgeType.icon;
 
             return (
-              <div key={badgeType.value} className="bg-white rounded-xl p-5 border border-slate-200 hover:border-slate-300 transition-colors">
+              <div
+                key={badgeType.value}
+                className="bg-white rounded-xl p-5 border border-slate-200 hover:border-slate-300 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${badgeData.is_active ? 'bg-[#1e3a5f]' : 'bg-slate-200'}`}>
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${badgeData.is_active ? 'bg-[#1e3a5f]' : 'bg-slate-200'}`}
+                    >
                       <Icon className={`w-5 h-5 ${badgeData.is_active ? 'text-white' : 'text-slate-400'}`} />
                     </div>
                     <div>
@@ -331,8 +361,6 @@ function ClientBadgeDrawer({ client, open, onClose }) {
                     onCheckedChange={(checked) => updateBadge(badgeType.value, { is_active: checked })}
                   />
                 </div>
-
-
               </div>
             );
           })}

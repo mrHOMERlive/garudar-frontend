@@ -89,7 +89,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
   const activePayeerAccounts = payeerAccounts.filter((acc) => acc.status === 'active');
 
-  const { data: currencies = [] } = useQuery({
+  const { data: currencies = [], isLoading: currenciesLoading } = useQuery({
     queryKey: ['currencies'],
     queryFn: () => apiClient.getCurrencies(),
     enabled: open,
@@ -591,14 +591,20 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       <SelectValue placeholder="USD" />
                     </SelectTrigger>
                     <SelectContent>
-                      {currencies
-                        .filter((c) => (c.code || c) !== 'RUB')
-                        .map((c) => (
-                          <SelectItem key={c.code || c} value={c.code || c}>
-                            {c.symbol ? c.symbol + ' ' : ''}
-                            {c.code || c} {c.name ? `- ${c.name}` : ''}
-                          </SelectItem>
-                        ))}
+                      {currenciesLoading ? (
+                        <SelectItem value="__loading" disabled>
+                          Loading currencies...
+                        </SelectItem>
+                      ) : (
+                        currencies
+                          .filter((c) => (c.code || c) !== 'RUB')
+                          .map((c) => (
+                            <SelectItem key={c.code || c} value={c.code || c}>
+                              {c.symbol ? c.symbol + ' ' : ''}
+                              {c.code || c} {c.name ? `- ${c.name}` : ''}
+                            </SelectItem>
+                          ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
