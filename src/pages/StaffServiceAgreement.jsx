@@ -255,16 +255,33 @@ export default function StaffServiceAgreement() {
                   const badge = badgesByClient[client.client_id];
 
                   return (
-                    <div key={client.client_id} className="border border-slate-200 rounded-lg p-4">
+                    <div key={client.client_id} className="border border-slate-200 rounded-lg p-4 overflow-hidden">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Users className="w-5 h-5 text-slate-600" />
-                          <div>
-                            <div className="font-semibold text-slate-900">{client.client_name}</div>
-                            <div className="text-sm text-slate-600">{client.client_mail}</div>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Users className="w-5 h-5 text-slate-600 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-900 truncate">{client.client_name}</div>
+                            <div className="text-sm text-slate-600 truncate">{client.client_mail}</div>
                           </div>
                         </div>
                       </div>
+
+                      {!badge && (
+                        <div className="pt-3 border-t border-slate-200">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+                            onClick={() =>
+                              createBadgeMutation.mutate({ client_id: client.client_id, status: 'pending' })
+                            }
+                            disabled={createBadgeMutation.isPending}
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            Create Agreement
+                          </Button>
+                        </div>
+                      )}
 
                       {badge && (
                         <div className="space-y-3 pt-3 border-t border-slate-200">

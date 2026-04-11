@@ -103,11 +103,11 @@ export default function StaffClientRequests() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold">Client</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Email</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Active Badges</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Account Status</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-right">Actions</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold max-w-[200px]">Client</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold max-w-[220px]">Email</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-28">Active Badges</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-32">Account Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-right w-36">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,13 +132,13 @@ export default function StaffClientRequests() {
 
                   return (
                     <TableRow key={client.user_id} className="border-slate-200 hover:bg-slate-50">
-                      <TableCell>
+                      <TableCell className="max-w-[200px]">
                         <div>
-                          <div className="text-[#1e3a5f] font-medium">{client.client_name}</div>
-                          <div className="text-slate-500 text-sm font-mono">{client.client_id}</div>
+                          <div className="text-[#1e3a5f] font-medium truncate">{client.client_name}</div>
+                          <div className="text-slate-500 text-sm font-mono truncate">{client.client_id}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-700">{client.client_mail}</TableCell>
+                      <TableCell className="text-slate-700 max-w-[220px] truncate">{client.client_mail}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="border-[#1e3a5f] text-[#1e3a5f]">
                           {client.active_badges_count || 0} active
