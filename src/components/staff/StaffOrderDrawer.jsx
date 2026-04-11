@@ -525,8 +525,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     ) : (
                       activePayeerAccounts.map((acc) => (
                         <SelectItem key={acc.account_no} value={acc.account_no}>
-                          {acc.alias ? `${acc.alias} — ` : ''}
-                          {acc.account_no} ({acc.currency})
+                          {acc.bank_name} - {acc.alias || acc.account_no} ({acc.currency}) {acc.account_no}
                         </SelectItem>
                       ))
                     )}
@@ -865,7 +864,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       ) : (
                         activePayeerAccounts.map((acc) => (
                           <SelectItem key={acc.account_no} value={acc.account_no}>
-                            {acc.bank_name}
+                            {acc.bank_name} - {acc.alias || acc.account_no} ({acc.currency}) {acc.account_no}
                           </SelectItem>
                         ))
                       )}
