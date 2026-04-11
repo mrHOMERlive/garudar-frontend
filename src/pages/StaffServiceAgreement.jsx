@@ -30,7 +30,7 @@ export default function StaffServiceAgreement() {
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['all-clients'],
-    queryFn: () => apiClient.getAllClients(),
+    queryFn: () => apiClient.getAllClients({ limit: 500 }),
   });
 
   const updateBadgeMutation = useMutation({

@@ -4,14 +4,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
-import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+  ArrowLeft,
+  Search,
+  Globe,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  XCircle,
+  MinusCircle,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import StaffExecutedDrawer from '@/components/staff/StaffExecutedDrawer';
 import { t } from '@/components/utils/language';
@@ -30,7 +38,7 @@ export default function StaffExecutedOrders() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => apiClient.getAllClients(),
+    queryFn: () => apiClient.getAllClients({ limit: 500 }),
   });
 
   const { data: rawOrders = [], isLoading } = useQuery({
@@ -44,9 +52,9 @@ export default function StaffExecutedOrders() {
   });
 
   const orders = useMemo(() => {
-    return rawOrders.map(order => {
-      const client = clients.find(c => c.client_id === order.clientId);
-      const executedDetails = executedOrdersList.find(e => e.sourceOrderId === order.orderId) || {};
+    return rawOrders.map((order) => {
+      const client = clients.find((c) => c.client_id === order.clientId);
+      const executedDetails = executedOrdersList.find((e) => e.sourceOrderId === order.orderId) || {};
 
       return {
         ...order,
@@ -63,10 +71,13 @@ export default function StaffExecutedOrders() {
 
         // Map fields for UI (merging both sources, prioritizing executedDetails)
         mt103_received: executedDetails.mt103Status === 'sent' || order.mt103Received || order.mt103_received, // Logic might differ, checking status
-        transaction_status_received: (executedDetails.transactionStatusStatus === 'Y') || order.transactionStatusReceived || order.transaction_status_received,
+        transaction_status_received:
+          executedDetails.transactionStatusStatus === 'Y' ||
+          order.transactionStatusReceived ||
+          order.transaction_status_received,
         act_report_status: executedDetails.docPackageStatus || order.actReportStatus || order.act_report_status,
         settled: executedDetails.settledStatus || order.settled || 'NA',
-        refund: (executedDetails.refundFlag === 'Y') || order.refund,
+        refund: executedDetails.refundFlag === 'Y' || order.refund,
         staff_description: executedDetails.staffDescription || order.staff_description,
 
         // New fields from ExecutedOrder
@@ -92,17 +103,19 @@ export default function StaffExecutedOrders() {
   }, [rawOrders, clients, executedOrdersList]);
 
   const executedOrders = useMemo(() => {
-    return orders.filter(o => o.executed === true || o.executed === 'true');
+    return orders.filter((o) => o.executed === true || o.executed === 'true');
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
-    const filtered = executedOrders.filter(order => {
+    const filtered = executedOrders.filter((order) => {
       if (settledFilter !== 'all' && order.settled !== settledFilter) return false;
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
+        return (
+          order.order_number?.toLowerCase().includes(s) ||
           order.client_name?.toLowerCase().includes(s) ||
-          order.beneficiary_name?.toLowerCase().includes(s);
+          order.beneficiary_name?.toLowerCase().includes(s)
+        );
       }
       return true;
     });
@@ -157,7 +170,9 @@ export default function StaffExecutedOrders() {
                   <span className="text-white/60">•</span>
                   <span className="text-white">{t('mod_executedOrders_title')}</span>
                 </div>
-                <Badge className="bg-emerald-600 text-white">{executedOrders.length} {t('clientOrdersBadge')}</Badge>
+                <Badge className="bg-emerald-600 text-white">
+                  {executedOrders.length} {t('clientOrdersBadge')}
+                </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -225,59 +240,85 @@ export default function StaffExecutedOrders() {
                 <TableHead className="text-[#1e3a5f] font-semibold text-sm">{t('bankLabel')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">{t('txStatus')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center">MT103</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center pr-6">{t('actReport')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-sm text-center pr-6">
+                  {t('actReport')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell></TableRow>
-              ) : filteredOrders.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-slate-500 py-8">{t('noExecutedOrders')}</TableCell></TableRow>
-              ) : paginatedOrders.map((order) => (
-                <TableRow
-                  key={order.id}
-                  className="border-slate-200 hover:bg-blue-50/50 cursor-pointer transition-colors"
-                  onClick={() => openDrawer(order)}
-                >
-                  <TableCell className="text-[#1e3a5f] font-mono text-sm py-4">{order.order_number}</TableCell>
-                  <TableCell className="text-sm text-slate-900 py-4">
-                    {format(new Date(order.updated_date), 'dd/MM/yyyy')}
-                  </TableCell>
-                  <TableCell className="text-sm font-semibold text-blue-600 tabular-nums py-4">
-                    {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
-                  </TableCell>
-                  <TableCell className="text-sm text-slate-900 py-4">{order.beneficiary_name}</TableCell>
-                  <TableCell className="text-sm text-slate-900 py-4">{order.bank_name}</TableCell>
-                  <TableCell className="text-center py-4">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}>
-                      {order.transaction_status_received ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center py-4">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}>
-                      {order.mt103_received ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center py-4 pr-6">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.act_report_status === 'signed' ? 'bg-green-100' :
-                      order.act_report_status === 'on_sign' ? 'bg-amber-100' : 'bg-red-100'
-                      }`}>
-                      {order.act_report_status === 'signed' ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        order.act_report_status === 'on_sign' ?
-                          <MinusCircle className="w-5 h-5 text-amber-600" /> :
-                          <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-slate-500 py-8">
+                    {t('loadingDots')}
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredOrders.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-slate-500 py-8">
+                    {t('noExecutedOrders')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedOrders.map((order) => (
+                  <TableRow
+                    key={order.id}
+                    className="border-slate-200 hover:bg-blue-50/50 cursor-pointer transition-colors"
+                    onClick={() => openDrawer(order)}
+                  >
+                    <TableCell className="text-[#1e3a5f] font-mono text-sm py-4">{order.order_number}</TableCell>
+                    <TableCell className="text-sm text-slate-900 py-4">
+                      {format(new Date(order.updated_date), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell className="text-sm font-semibold text-blue-600 tabular-nums py-4">
+                      {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                      {order.currency}
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-900 py-4">{order.beneficiary_name}</TableCell>
+                    <TableCell className="text-sm text-slate-900 py-4">{order.bank_name}</TableCell>
+                    <TableCell className="text-center py-4">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.transaction_status_received ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center py-4">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.mt103_received ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center py-4 pr-6">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
+                          order.act_report_status === 'signed'
+                            ? 'bg-green-100'
+                            : order.act_report_status === 'on_sign'
+                              ? 'bg-amber-100'
+                              : 'bg-red-100'
+                        }`}
+                      >
+                        {order.act_report_status === 'signed' ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : order.act_report_status === 'on_sign' ? (
+                          <MinusCircle className="w-5 h-5 text-amber-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
 
@@ -285,10 +326,13 @@ export default function StaffExecutedOrders() {
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
-                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                  setItemsPerPage(Number(val));
-                  setCurrentPage(1);
-                }}>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
+                    setCurrentPage(1);
+                  }}
+                >
                   <SelectTrigger className="w-20 h-9">
                     <SelectValue />
                   </SelectTrigger>
@@ -303,7 +347,7 @@ export default function StaffExecutedOrders() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="h-9 w-9"
                 >
@@ -315,7 +359,7 @@ export default function StaffExecutedOrders() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="h-9 w-9"
                 >

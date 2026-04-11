@@ -38,7 +38,7 @@ export default function StaffClientRequests() {
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => apiClient.getAllClients(),
+    queryFn: () => apiClient.getAllClients({ limit: 500 }),
   });
 
   const filteredClients = clients.filter(

@@ -4,24 +4,41 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Pencil, Trash2, UserX, UserCheck, Search, Eye, EyeOff, Key, Globe, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+  ArrowLeft,
+  Plus,
+  Pencil,
+  Trash2,
+  UserX,
+  UserCheck,
+  Search,
+  Eye,
+  EyeOff,
+  Key,
+  Globe,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+} from 'lucide-react';
 import { t } from '@/components/utils/language';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
@@ -58,7 +75,7 @@ export default function StaffClients() {
     email: '',
     login: '',
     password: '',
-    active: true
+    active: true,
   });
 
   const queryClient = useQueryClient();
@@ -78,33 +95,34 @@ export default function StaffClients() {
 
   const { data: rawClients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => apiClient.getAllClients(),
-    select: (data) => data.map(client => ({
-      client_id: client.client_id,
-      user_id: client.user_id,
-      name: client.client_name || '',
-      client_alias_1: client.client_alias_1 || '',
-      client_alias_2: client.client_alias_2 || '',
-      client_alias_3: client.client_alias_3 || '',
-      client_reg_number: client.client_reg_number || '',
-      client_tax_number: client.client_tax_number || '',
-      client_reg_country: client.client_reg_country || '',
-      doc_id: client.doc_id || '',
-      status_sign: client.status_sign?.toLowerCase() || 'not_sent',
-      date_signing: client.date_signing || '',
-      group_id: client.group_id || '',
-      group_name: client.group_name || '',
-      client_director: client.client_director || '',
-      last_id: client.last_id || '',
-      description: '',
-      email: client.client_mail || '',
-      login: client.username || '',
-      password: '',
-      active: client.is_active ?? true,
-      kyc_status: client.kyc_status || '',
-      created_date: client.kyc_submitted_at || new Date().toISOString(),
-      aml_risk_level: client.aml_risk_level || null
-    })),
+    queryFn: () => apiClient.getAllClients({ limit: 500 }),
+    select: (data) =>
+      data.map((client) => ({
+        client_id: client.client_id,
+        user_id: client.user_id,
+        name: client.client_name || '',
+        client_alias_1: client.client_alias_1 || '',
+        client_alias_2: client.client_alias_2 || '',
+        client_alias_3: client.client_alias_3 || '',
+        client_reg_number: client.client_reg_number || '',
+        client_tax_number: client.client_tax_number || '',
+        client_reg_country: client.client_reg_country || '',
+        doc_id: client.doc_id || '',
+        status_sign: client.status_sign?.toLowerCase() || 'not_sent',
+        date_signing: client.date_signing || '',
+        group_id: client.group_id || '',
+        group_name: client.group_name || '',
+        client_director: client.client_director || '',
+        last_id: client.last_id || '',
+        description: '',
+        email: client.client_mail || '',
+        login: client.username || '',
+        password: '',
+        active: client.is_active ?? true,
+        kyc_status: client.kyc_status || '',
+        created_date: client.kyc_submitted_at || new Date().toISOString(),
+        aml_risk_level: client.aml_risk_level || null,
+      })),
   });
 
   const clients = rawClients;
@@ -127,7 +145,7 @@ export default function StaffClients() {
         group_id: data.group_id || null,
         group_name: data.group_name || null,
         description: data.description || null,
-        is_active: data.active
+        is_active: data.active,
       };
 
       if (editingClient) {
@@ -138,7 +156,7 @@ export default function StaffClients() {
         const createData = {
           username: data.login,
           password: data.password,
-          ...apiData
+          ...apiData,
         };
         return apiClient.createClient(createData);
       }
@@ -197,7 +215,7 @@ export default function StaffClients() {
       email: '',
       login: '',
       password: '',
-      active: true
+      active: true,
     });
     setShowPassword(false);
     setDialogOpen(true);
@@ -225,7 +243,7 @@ export default function StaffClients() {
       email: client.email,
       login: client.login || '',
       password: client.password || '',
-      active: client.active
+      active: client.active,
     });
     setShowPassword(false);
     setDialogOpen(true);
@@ -263,11 +281,12 @@ export default function StaffClients() {
     setShowPassword(true);
   };
 
-  const filteredClients = clients.filter(c =>
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.login?.toLowerCase().includes(search.toLowerCase())
+  const filteredClients = clients.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.client_id?.toLowerCase().includes(search.toLowerCase()) ||
+      c.email?.toLowerCase().includes(search.toLowerCase()) ||
+      c.login?.toLowerCase().includes(search.toLowerCase())
   );
 
   const sortedClients = [...filteredClients].sort((a, b) => {
@@ -300,7 +319,9 @@ export default function StaffClients() {
                   <span className="text-white/60">•</span>
                   <span className="text-white">{t('clientManagementTitle')}</span>
                 </div>
-                <Badge className="bg-[#f5a623] text-white">{clients.length} {t('clientsCountLabel')}</Badge>
+                <Badge className="bg-[#f5a623] text-white">
+                  {clients.length} {t('clientsCountLabel')}
+                </Badge>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -355,53 +376,72 @@ export default function StaffClients() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">{t('loadingDots')}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">
+                    {t('loadingDots')}
+                  </TableCell>
                 </TableRow>
               ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">{t('noClientsFound')}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-8">
+                    {t('noClientsFound')}
+                  </TableCell>
                 </TableRow>
-              ) : paginatedClients.map((client) => (
-                <TableRow
-                  key={client.client_id}
-                  className="border-slate-200 hover:bg-slate-100 cursor-pointer"
-                  onClick={() => openEditDialog(client)}
-                >
-                  <TableCell className="text-[#1e3a5f] font-mono">{client.client_id}</TableCell>
-                  <TableCell className="text-[#1e3a5f] font-medium">
-                    <div>{client.name}</div>
-                    {client.client_alias_1 && <div className="text-slate-500 text-sm">{client.client_alias_1}</div>}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={
-                      client.status_sign === 'signed' ? 'bg-emerald-600 text-white' :
-                        client.status_sign === 'sent' ? 'bg-amber-500 text-white' :
-                          'bg-slate-400 text-white'
-                    }>
-                      {client.status_sign === 'signed' ? t('signedStatus') : client.status_sign === 'sent' ? t('sentStatus') : t('notSentStatus')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={client.active ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
-                      {client.active ? t('activeStatus') : t('inactiveStatus')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {client.aml_risk_level ? (
-                      <Badge className={
-                        client.aml_risk_level === 'high' ? 'bg-red-600 text-white' :
-                        client.aml_risk_level === 'medium' ? 'bg-amber-500 text-white' :
-                        client.aml_risk_level === 'low' ? 'bg-emerald-600 text-white' :
-                        'bg-slate-400 text-white'
-                      }>
-                        {client.aml_risk_level.charAt(0).toUpperCase() + client.aml_risk_level.slice(1)}
+              ) : (
+                paginatedClients.map((client) => (
+                  <TableRow
+                    key={client.client_id}
+                    className="border-slate-200 hover:bg-slate-100 cursor-pointer"
+                    onClick={() => openEditDialog(client)}
+                  >
+                    <TableCell className="text-[#1e3a5f] font-mono">{client.client_id}</TableCell>
+                    <TableCell className="text-[#1e3a5f] font-medium">
+                      <div>{client.name}</div>
+                      {client.client_alias_1 && <div className="text-slate-500 text-sm">{client.client_alias_1}</div>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          client.status_sign === 'signed'
+                            ? 'bg-emerald-600 text-white'
+                            : client.status_sign === 'sent'
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-slate-400 text-white'
+                        }
+                      >
+                        {client.status_sign === 'signed'
+                          ? t('signedStatus')
+                          : client.status_sign === 'sent'
+                            ? t('sentStatus')
+                            : t('notSentStatus')}
                       </Badge>
-                    ) : (
-                      <span className="text-slate-400 text-sm">—</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={client.active ? 'bg-emerald-600 text-white' : 'bg-slate-400 text-white'}>
+                        {client.active ? t('activeStatus') : t('inactiveStatus')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {client.aml_risk_level ? (
+                        <Badge
+                          className={
+                            client.aml_risk_level === 'high'
+                              ? 'bg-red-600 text-white'
+                              : client.aml_risk_level === 'medium'
+                                ? 'bg-amber-500 text-white'
+                                : client.aml_risk_level === 'low'
+                                  ? 'bg-emerald-600 text-white'
+                                  : 'bg-slate-400 text-white'
+                          }
+                        >
+                          {client.aml_risk_level.charAt(0).toUpperCase() + client.aml_risk_level.slice(1)}
+                        </Badge>
+                      ) : (
+                        <span className="text-slate-400 text-sm">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -410,7 +450,13 @@ export default function StaffClients() {
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600">{t('showLabel')}</span>
-            <Select value={itemsPerPage.toString()} onValueChange={(value) => { setItemsPerPage(Number(value)); setCurrentPage(1); }}>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-20 bg-white border-slate-300">
                 <SelectValue />
               </SelectTrigger>
@@ -455,12 +501,16 @@ export default function StaffClients() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-[#1e3a5f]">{editingClient ? t('editClientTitle') : t('addNewClientTitle')}</DialogTitle>
+            <DialogTitle className="text-[#1e3a5f]">
+              {editingClient ? t('editClientTitle') : t('addNewClientTitle')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Client Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('clientInfoSection')}</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">
+                {t('clientInfoSection')}
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 {editingClient && (
                   <div className="space-y-2">
@@ -572,7 +622,9 @@ export default function StaffClients() {
 
             {/* Document Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('docSigningSection')}</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">
+                {t('docSigningSection')}
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">{t('fieldDocId')}</Label>
@@ -585,7 +637,10 @@ export default function StaffClients() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">{t('fieldSigningStatus')}</Label>
-                  <Select value={formData.status_sign} onValueChange={(value) => setFormData({ ...formData, status_sign: value })}>
+                  <Select
+                    value={formData.status_sign}
+                    onValueChange={(value) => setFormData({ ...formData, status_sign: value })}
+                  >
                     <SelectTrigger className="bg-white border-slate-300 text-sm">
                       <SelectValue />
                     </SelectTrigger>
@@ -610,7 +665,9 @@ export default function StaffClients() {
 
             {/* Group Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">{t('groupReferenceSection')}</h3>
+              <h3 className="text-sm font-semibold text-[#1e3a5f] border-b border-slate-200 pb-2">
+                {t('groupReferenceSection')}
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 text-xs">{t('fieldGroupId')}</Label>
@@ -646,7 +703,7 @@ export default function StaffClients() {
                   <Input
                     value={formData.login}
                     onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    placeholder={editingClient ? (editingClient.login || t('phUsername')) : t('phUsername')}
+                    placeholder={editingClient ? editingClient.login || t('phUsername') : t('phUsername')}
                     className="bg-white border-slate-300 text-sm"
                   />
                 </div>
@@ -654,7 +711,7 @@ export default function StaffClients() {
                   <Label className="text-slate-700 text-xs">{t('fieldPassword')}</Label>
                   <div className="relative">
                     <Input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="••••••••"
@@ -722,7 +779,11 @@ export default function StaffClients() {
             <Button variant="outline" onClick={closeDialog} className="border-slate-300 text-slate-600 text-sm">
               {t('cancelLabel')}
             </Button>
-            <Button onClick={handleSubmit} disabled={saveMutation.isPending} className="bg-[#1e3a5f] hover:bg-[#152a45] text-sm">
+            <Button
+              onClick={handleSubmit}
+              disabled={saveMutation.isPending}
+              className="bg-[#1e3a5f] hover:bg-[#152a45] text-sm"
+            >
               {saveMutation.isPending ? t('savingLabel') : t('saveClient')}
             </Button>
           </DialogFooter>
@@ -734,12 +795,12 @@ export default function StaffClients() {
         <AlertDialogContent className="bg-white border-slate-200 text-slate-800">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[#1e3a5f]">{t('deleteClientTitle')}</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500">
-              {t('deleteClientDesc')}
-            </AlertDialogDescription>
+            <AlertDialogDescription className="text-slate-500">{t('deleteClientDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-300 text-slate-600 hover:bg-slate-100">{t('cancelLabel')}</AlertDialogCancel>
+            <AlertDialogCancel className="border-slate-300 text-slate-600 hover:bg-slate-100">
+              {t('cancelLabel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(clientToDelete?.user_id)}
               className="bg-red-600 hover:bg-red-700"
