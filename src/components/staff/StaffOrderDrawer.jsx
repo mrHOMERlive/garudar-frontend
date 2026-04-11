@@ -84,7 +84,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const { data: payeerAccounts = [], isLoading: payeerLoading } = useQuery({
     queryKey: ['payeer-accounts'],
     queryFn: () => apiClient.getPayeerAccounts(),
-    enabled: open,
   });
 
   const activePayeerAccounts = payeerAccounts.filter((acc) => acc.status === 'active');
@@ -92,7 +91,6 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
   const { data: currencies = [], isLoading: currenciesLoading } = useQuery({
     queryKey: ['currencies'],
     queryFn: () => apiClient.getCurrencies(),
-    enabled: open,
   });
 
   const { data: terms } = useQuery({
