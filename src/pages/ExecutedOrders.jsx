@@ -3,14 +3,24 @@ import { apiClient } from '@/api/apiClient';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
+  ArrowLeft,
+  Search,
+  Globe,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  XCircle,
+  MinusCircle,
+} from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientExecutedDrawer from '@/components/client/ClientExecutedDrawer';
 import { format } from 'date-fns';
 
@@ -22,7 +32,14 @@ export default function ExecutedOrders() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  // Prefetch client data for drawer
+  useQuery({ queryKey: ['client', 'me'], queryFn: () => apiClient.getMyClient() });
+
+  const {
+    data: orders = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['executed-orders-full'],
     queryFn: async () => {
       // 1. Fetch executed orders (contains files + statuses)
@@ -34,73 +51,74 @@ export default function ExecutedOrders() {
       const poboList = await apiClient.getOrders({ include_deleted: false });
 
       // 3. Join them
-      const joined = executedList.map(exec => {
-        const pobo = poboList.find(p => p.orderId === exec.sourceOrderId) || {};
+      const joined = executedList
+        .map((exec) => {
+          const pobo = poboList.find((p) => p.orderId === exec.sourceOrderId) || {};
 
-        // Only include if the order is marked as executed in the main list
-        if (pobo.executed !== true && pobo.executed !== 'true') return null;
+          // Only include if the order is marked as executed in the main list
+          if (pobo.executed !== true && pobo.executed !== 'true') return null;
 
-        return {
-          // Base fields from POBO
-          id: exec.sourceOrderId,
-          order_number: exec.sourceOrderId,
-          client_id: pobo.clientId || '-',
-          client_name: pobo.clientName, // might be undefined
-          amount: pobo.amount,
-          currency: pobo.currency,
+          return {
+            // Base fields from POBO
+            id: exec.sourceOrderId,
+            order_number: exec.sourceOrderId,
+            client_id: pobo.clientId || '-',
+            client_name: pobo.clientName, // might be undefined
+            amount: pobo.amount,
+            currency: pobo.currency,
 
-          // Dates
-          updated_date: pobo.updatedAt || exec.movedAt, // Fallback to movedAt if POBO missing
+            // Dates
+            updated_date: pobo.updatedAt || exec.movedAt, // Fallback to movedAt if POBO missing
 
-          // Beneficiary & Bank
-          beneficiary_name: pobo.beneficiaryName || '-',
-          beneficiary_address: pobo.beneficiaryAdress,
-          destination_account: pobo.destinationAccount,
-          bank_name: pobo.bankName || '-',
-          bank_address: pobo.bankAddress,
-          bic: pobo.bankBic,
-          country_bank: pobo.bankCountry,
+            // Beneficiary & Bank
+            beneficiary_name: pobo.beneficiaryName || '-',
+            beneficiary_address: pobo.beneficiaryAdress,
+            destination_account: pobo.destinationAccount,
+            bank_name: pobo.bankName || '-',
+            bank_address: pobo.bankAddress,
+            bic: pobo.bankBic,
+            country_bank: pobo.bankCountry,
 
-          // Transaction info
-          transaction_remark: pobo.remark,
-          transaction_reference: exec.sourceOrderId, // executed ID usually matches source
-          debit_account_no: pobo.executingBank || '-',
+            // Transaction info
+            transaction_remark: pobo.remark,
+            transaction_reference: exec.sourceOrderId, // executed ID usually matches source
+            debit_account_no: pobo.executingBank || '-',
 
-          // STATUS FLAGS (from executedList)
-          transaction_status_received: exec.transactionStatusStatus === 'Y',
-          mt103_received: exec.mt103Status === 'sent',
-          act_report_status: exec.docPackageStatus || 'not_made', // 'signed', 'on_sign', 'not_made'
+            // STATUS FLAGS (from executedList)
+            transaction_status_received: exec.transactionStatusStatus === 'Y',
+            mt103_received: exec.mt103Status === 'sent',
+            act_report_status: exec.docPackageStatus || 'not_made', // 'signed', 'on_sign', 'not_made'
 
-          // FILES (from executedList)
-          attachment_transaction_status: exec.transactionStatusFileUrl,
-          attachment_mt103: exec.mt103FileUrl,
-          attachment_act_report: exec.actReportFileUrl,
-          // We might implement signed act report upload in drawer which would update this
+            // FILES (from executedList)
+            attachment_transaction_status: exec.transactionStatusFileUrl,
+            attachment_mt103: exec.mt103FileUrl,
+            attachment_act_report: exec.actReportFileUrl,
+            // We might implement signed act report upload in drawer which would update this
 
-          // Extra metadata
-          transaction_status_number: exec.transactionStatusNo,
-          transaction_status_date: exec.transactionStatusDate,
-          mt103_number: exec.mt103No,
-          mt103_date: exec.mt103Date,
-          act_report_number: exec.actReportNo,
-          act_report_date: exec.actReportDate,
+            // Extra metadata
+            transaction_status_number: exec.transactionStatusNo,
+            transaction_status_date: exec.transactionStatusDate,
+            mt103_number: exec.mt103No,
+            mt103_date: exec.mt103Date,
+            act_report_number: exec.actReportNo,
+            act_report_date: exec.actReportDate,
 
-          // Filter helpers
-          executed: true,
-          status: 'executed',
-        };
-      }).filter(Boolean);
+            // Filter helpers
+            executed: true,
+            status: 'executed',
+          };
+        })
+        .filter(Boolean);
 
       return joined;
     },
   });
 
   const filteredOrders = useMemo(() => {
-    const filtered = orders.filter(order => {
+    const filtered = orders.filter((order) => {
       if (search) {
         const s = search.toLowerCase();
-        return order.order_number?.toLowerCase().includes(s) ||
-          order.beneficiary_name?.toLowerCase().includes(s);
+        return order.order_number?.toLowerCase().includes(s) || order.beneficiary_name?.toLowerCase().includes(s);
       }
       return true;
     });
@@ -134,16 +152,14 @@ export default function ExecutedOrders() {
                 </Button>
               </Link>
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img
-                  src="/gan.png"
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                />
+                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">{t('clientDashboard')}</span>
+                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">
+                    {t('clientDashboard')}
+                  </span>
                 </div>
                 <p className="text-slate-300 text-sm">{t('executedOrders')}</p>
               </div>
@@ -177,7 +193,8 @@ export default function ExecutedOrders() {
         {filteredOrders.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-slate-500">
-              {t('showing')} {startIndex}-{endIndex} {t('ofLabel')} {filteredOrders.length} {filteredOrders.length === 1 ? t('orderLabel') : t('ordersLabel')}
+              {t('showing')} {startIndex}-{endIndex} {t('ofLabel')} {filteredOrders.length}{' '}
+              {filteredOrders.length === 1 ? t('orderLabel') : t('ordersLabel')}
             </p>
             <p className="text-xs text-slate-400 italic">{t('clickToViewDetails')}</p>
           </div>
@@ -200,9 +217,13 @@ export default function ExecutedOrders() {
                 <TableHead className="text-sm font-medium text-slate-900 py-3">{t('amountLabel')}</TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3">{t('beneficiaryLabel')}</TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3">{t('bankLabel')}</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">{t('txStatusHeader')}</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">
+                  {t('txStatusHeader')}
+                </TableHead>
                 <TableHead className="text-sm font-medium text-slate-900 py-3 text-center">MT103</TableHead>
-                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center pr-6">{t('actReport')}</TableHead>
+                <TableHead className="text-sm font-medium text-slate-900 py-3 text-center pr-6">
+                  {t('actReport')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -221,62 +242,83 @@ export default function ExecutedOrders() {
                     <p className="text-slate-500">{t('noExecutedOrders')}</p>
                   </TableCell>
                 </TableRow>
-              ) : paginatedOrders.map((order) => (
-                <TableRow
-                  key={order.id}
-                  className="hover:bg-blue-50/50 cursor-pointer transition-colors border-b border-slate-100 last:border-0"
-                  onClick={() => {
-                    setSelectedOrder(order);
-                    setDrawerOpen(true);
-                  }}
-                >
-                  <TableCell className="py-4">
-                    <span className="text-sm text-slate-900">{order.order_number}</span>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <span className="text-sm text-slate-900">{format(new Date(order.updated_date), 'dd/MM/yyyy')}</span>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <span className="text-sm font-semibold text-blue-600 tabular-nums">
-                      {Number(order.amount)?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {order.currency}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <span className="text-sm text-slate-900">{order.beneficiary_name}</span>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <span className="text-sm text-slate-900">{order.bank_name}</span>
-                  </TableCell>
-                  <TableCell className="text-center py-4">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}>
-                      {order.transaction_status_received ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center py-4">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}>
-                      {order.mt103_received ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center py-4 pr-6">
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.act_report_status === 'signed' ? 'bg-green-100' :
-                      order.act_report_status === 'on_sign' ? 'bg-amber-100' : 'bg-red-100'
-                      }`}>
-                      {order.act_report_status === 'signed' ?
-                        <CheckCircle className="w-5 h-5 text-green-600" /> :
-                        order.act_report_status === 'on_sign' ?
-                          <MinusCircle className="w-5 h-5 text-amber-600" /> :
+              ) : (
+                paginatedOrders.map((order) => (
+                  <TableRow
+                    key={order.id}
+                    className="hover:bg-blue-50/50 cursor-pointer transition-colors border-b border-slate-100 last:border-0"
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setDrawerOpen(true);
+                    }}
+                  >
+                    <TableCell className="py-4">
+                      <span className="text-sm text-slate-900">{order.order_number}</span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm text-slate-900">
+                        {format(new Date(order.updated_date), 'dd/MM/yyyy')}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm font-semibold text-blue-600 tabular-nums">
+                        {Number(order.amount)?.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        {order.currency}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm text-slate-900">{order.beneficiary_name}</span>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-sm text-slate-900">{order.bank_name}</span>
+                    </TableCell>
+                    <TableCell className="text-center py-4">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.transaction_status_received ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
                           <XCircle className="w-5 h-5 text-red-600" />
-                      }
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center py-4">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.mt103_received ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center py-4 pr-6">
+                      <div
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
+                          order.act_report_status === 'signed'
+                            ? 'bg-green-100'
+                            : order.act_report_status === 'on_sign'
+                              ? 'bg-amber-100'
+                              : 'bg-red-100'
+                        }`}
+                      >
+                        {order.act_report_status === 'signed' ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : order.act_report_status === 'on_sign' ? (
+                          <MinusCircle className="w-5 h-5 text-amber-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
 
@@ -284,10 +326,13 @@ export default function ExecutedOrders() {
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
-                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                  setItemsPerPage(Number(val));
-                  setCurrentPage(1);
-                }}>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
+                    setCurrentPage(1);
+                  }}
+                >
                   <SelectTrigger className="w-20 h-9">
                     <SelectValue />
                   </SelectTrigger>
@@ -302,7 +347,7 @@ export default function ExecutedOrders() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="h-9 w-9"
                 >
@@ -314,7 +359,7 @@ export default function ExecutedOrders() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="h-9 w-9"
                 >
