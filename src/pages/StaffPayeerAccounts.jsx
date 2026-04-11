@@ -4,18 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter
-} from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, Pencil, Trash2, Globe } from 'lucide-react';
 
 import CountrySelector from '../components/kyc/CountrySelector';
@@ -35,7 +31,7 @@ export default function StaffPayeerAccounts() {
     bank_corr_account: '',
     bank_bic: '',
     bank_country: '',
-    active: true
+    active: true,
   });
 
   const queryClient = useQueryClient();
@@ -55,9 +51,9 @@ export default function StaffPayeerAccounts() {
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['payeer-accounts'],
-    queryFn: async () => {
-      const data = await apiClient.getPayeerAccounts();
-      return data.map(acc => ({
+    queryFn: () => apiClient.getPayeerAccounts(),
+    select: (data) =>
+      data.map((acc) => ({
         id: acc.account_no,
         account_number: acc.account_no,
         alias: acc.alias || '',
@@ -67,9 +63,8 @@ export default function StaffPayeerAccounts() {
         bank_bic: acc.bank_bic || '',
         bank_country: acc.bank_country || '',
         currency: acc.currency || 'USD',
-        active: acc.status !== 'inactive'
-      }));
-    },
+        active: acc.status !== 'inactive',
+      })),
   });
 
   const saveMutation = useMutation({
@@ -83,7 +78,7 @@ export default function StaffPayeerAccounts() {
         bank_address: data.bank_address || null,
         bank_corr_account: data.bank_corr_account || null,
         bank_bic: data.bank_bic || null,
-        bank_country: data.bank_country || null
+        bank_country: data.bank_country || null,
       };
 
       if (editingAccount) {
@@ -101,7 +96,7 @@ export default function StaffPayeerAccounts() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => {
-      const account = accounts.find(acc => acc.id === id);
+      const account = accounts.find((acc) => acc.id === id);
       return apiClient.deletePayeerAccount(account?.account_number || id);
     },
     onSuccess: () => {
@@ -122,7 +117,7 @@ export default function StaffPayeerAccounts() {
       bank_corr_account: '',
       bank_bic: '',
       bank_country: '',
-      active: true
+      active: true,
     });
     setDrawerOpen(true);
   };
@@ -138,7 +133,7 @@ export default function StaffPayeerAccounts() {
       bank_corr_account: account.bank_corr_account || '',
       bank_bic: account.bank_bic || '',
       bank_country: account.bank_country || '',
-      active: account.active !== false
+      active: account.active !== false,
     });
     setDrawerOpen(true);
   };
@@ -216,32 +211,38 @@ export default function StaffPayeerAccounts() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">Loading...</TableCell>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">
+                    Loading...
+                  </TableCell>
                 </TableRow>
               ) : accounts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">No accounts found</TableCell>
-                </TableRow>
-              ) : accounts.map((account) => (
-                <TableRow
-                  key={account.id}
-                  className="border-slate-200 hover:bg-slate-100 cursor-pointer"
-                  onClick={() => openEditDrawer(account)}
-                >
-                  <TableCell>
-                    <Badge className="bg-[#f5a623] text-white">{account.currency}</Badge>
-                  </TableCell>
-                  <TableCell className="text-slate-700">{account.alias || '-'}</TableCell>
-                  <TableCell className="text-[#1e3a5f] font-mono">{account.account_number}</TableCell>
-                  <TableCell className="text-slate-700">{account.bank_name || '-'}</TableCell>
-                  <TableCell className="text-slate-600">{account.bank_country || '-'}</TableCell>
-                  <TableCell>
-                    <Badge className={account.active !== false ? 'bg-emerald-600' : 'bg-slate-400'}>
-                      {account.active !== false ? 'Active' : 'Inactive'}
-                    </Badge>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">
+                    No accounts found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                accounts.map((account) => (
+                  <TableRow
+                    key={account.id}
+                    className="border-slate-200 hover:bg-slate-100 cursor-pointer"
+                    onClick={() => openEditDrawer(account)}
+                  >
+                    <TableCell>
+                      <Badge className="bg-[#f5a623] text-white">{account.currency}</Badge>
+                    </TableCell>
+                    <TableCell className="text-slate-700">{account.alias || '-'}</TableCell>
+                    <TableCell className="text-[#1e3a5f] font-mono">{account.account_number}</TableCell>
+                    <TableCell className="text-slate-700">{account.bank_name || '-'}</TableCell>
+                    <TableCell className="text-slate-600">{account.bank_country || '-'}</TableCell>
+                    <TableCell>
+                      <Badge className={account.active !== false ? 'bg-emerald-600' : 'bg-slate-400'}>
+                        {account.active !== false ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -250,9 +251,7 @@ export default function StaffPayeerAccounts() {
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
           <SheetHeader className="border-b border-slate-200 pb-4">
-            <SheetTitle className="text-[#1e3a5f]">
-              {editingAccount ? 'Edit Account' : 'Add Payeer Account'}
-            </SheetTitle>
+            <SheetTitle className="text-[#1e3a5f]">{editingAccount ? 'Edit Account' : 'Add Payeer Account'}</SheetTitle>
           </SheetHeader>
 
           <div className="space-y-4 py-6">
@@ -267,7 +266,9 @@ export default function StaffPayeerAccounts() {
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -368,7 +369,11 @@ export default function StaffPayeerAccounts() {
             <Button variant="outline" onClick={closeDrawer} className="border-slate-300 text-slate-600">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={saveMutation.isPending} className="bg-[#1e3a5f] hover:bg-[#152a45]">
+            <Button
+              onClick={handleSubmit}
+              disabled={saveMutation.isPending}
+              className="bg-[#1e3a5f] hover:bg-[#152a45]"
+            >
               {saveMutation.isPending ? 'Saving...' : 'Save'}
             </Button>
           </SheetFooter>
