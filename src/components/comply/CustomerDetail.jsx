@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import RiskBadge from './RiskBadge';
+import HitDetailsDrawer from './HitDetailsDrawer';
 import {
   ArrowLeft,
   User,
@@ -20,6 +21,7 @@ import {
   Shield,
   TrendingUp,
   Bell,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -34,6 +36,8 @@ export default function CustomerDetail({ customer, onBack }) {
   const [caseComment, setCaseComment] = useState('');
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [riskOverride, setRiskOverride] = useState({ level: '', reason: '' });
+  // selectedAlertId — id алерта для HitDetailsDrawer
+  const [selectedAlertId, setSelectedAlertId] = useState(null);
 
   const setLoad = (key, val) => setLoading((p) => ({ ...p, [key]: val }));
 
@@ -412,12 +416,17 @@ export default function CustomerDetail({ customer, onBack }) {
             alerts.map((a) => (
               <Card
                 key={a.id}
-                className={`border-l-4 ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}
+                className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}
+                onClick={() => setSelectedAlertId(a.id)}
+                data-testid={`alert-card-${a.id}`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-800">{a.title || a.match_type || `Alert ${a.id}`}</div>
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-800">
+                        {a.title || a.match_type || `Alert ${a.id}`}
+                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                      </div>
                       {a.description && <div className="text-sm text-slate-500 mt-0.5">{a.description}</div>}
                       {a.match_details?.aml_types?.length > 0 && (
                         <div className="flex gap-1.5 mt-1.5 flex-wrap">
@@ -471,11 +480,14 @@ export default function CustomerDetail({ customer, onBack }) {
                       </div>
                     </div>
                     {a.status === 'pending' && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="sm"
                           className="bg-emerald-600 hover:bg-emerald-700 text-xs"
-                          onClick={() => handleAlertAction(a.id, 'confirm')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAlertAction(a.id, 'confirm');
+                          }}
                           disabled={loading[`alert_${a.id}`]}
                         >
                           Confirm
@@ -484,7 +496,10 @@ export default function CustomerDetail({ customer, onBack }) {
                           size="sm"
                           variant="outline"
                           className="text-xs"
-                          onClick={() => handleAlertAction(a.id, 'dismiss')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAlertAction(a.id, 'dismiss');
+                          }}
                           disabled={loading[`alert_${a.id}`]}
                         >
                           Dismiss
@@ -649,6 +664,14 @@ export default function CustomerDetail({ customer, onBack }) {
           )}
         </div>
       )}
+
+      <HitDetailsDrawer
+        alertId={selectedAlertId}
+        open={!!selectedAlertId}
+        onOpenChange={(o) => {
+          if (!o) setSelectedAlertId(null);
+        }}
+      />
     </div>
   );
 }

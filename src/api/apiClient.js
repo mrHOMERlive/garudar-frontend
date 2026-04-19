@@ -832,6 +832,10 @@ class ApiClient {
     return this.request(`/aml/alerts${qs ? '?' + qs : ''}`);
   }
 
+  async getAmlAlertDetails(id) {
+    return this.request(`/aml/alerts/${id}/details`);
+  }
+
   async confirmAlert(id) {
     return this.request(`/aml/alerts/${id}/confirm`, { method: 'POST' });
   }
