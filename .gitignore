@@ -31,6 +31,7 @@ tests/
 test-results/
 playwright-report/
 playwright.config.js
+test-payeer.png
 # Claude Code
 .claude/
 CLAUDE.md
