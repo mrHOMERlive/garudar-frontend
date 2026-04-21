@@ -736,6 +736,53 @@ export default function CustomerDetail({ customer, onBack }) {
             </Card>
           )}
 
+          {/* Risk Breakdown (P1): категории BASIC_INFO/AML/COUNTRY/PRODUCT/CHANNEL
+              из CA /customers/{id}/scores. Если blob пустой или categories нет — блок скрыт. */}
+          {Array.isArray(riskScore?.breakdown?.category_results) && riskScore.breakdown.category_results.length > 0 && (
+            <Card className="border-slate-200" data-testid="risk-breakdown">
+              <CardHeader>
+                <CardTitle className="text-[#1e3a5f] text-base flex items-center gap-2">
+                  <Shield className="w-5 h-5" /> Risk Breakdown by Category
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-slate-500 border-b border-slate-200">
+                      <th className="py-2 font-medium">Category</th>
+                      <th className="py-2 font-medium text-right">Score</th>
+                      <th className="py-2 font-medium text-right">Weight</th>
+                      <th className="py-2 font-medium text-right">Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {riskScore.breakdown.category_results.map((c, i) => (
+                      <tr key={i} className="border-b border-slate-100 last:border-0">
+                        <td className="py-2 text-slate-700">{(c.category || '').replace(/_/g, ' ')}</td>
+                        <td className="py-2 text-right tabular-nums text-slate-800">
+                          {typeof c.score === 'number' ? c.score.toFixed(1) : '—'}
+                        </td>
+                        <td className="py-2 text-right tabular-nums text-slate-500">
+                          {typeof c.weight === 'number' ? c.weight.toFixed(2) : '—'}
+                        </td>
+                        <td className="py-2 text-right">
+                          <RiskBadge level={(c.level || 'unknown').toLowerCase()} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {riskScore.breakdown.overall_result?.level && (
+                  <div className="text-xs text-slate-400 mt-3">
+                    Overall from CA: {riskScore.breakdown.overall_result.level}
+                    {typeof riskScore.breakdown.overall_result.score === 'number' &&
+                      ` (${riskScore.breakdown.overall_result.score.toFixed(1)})`}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-slate-200">
             <CardHeader>
               <CardTitle className="text-[#1e3a5f] text-base">Override Risk Level</CardTitle>
