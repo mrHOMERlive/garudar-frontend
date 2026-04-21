@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Bell, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import HitDetailsDrawer from './HitDetailsDrawer';
 
 export default function AlertsPanel() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('pending');
   const [acting, setActing] = useState({});
+  // Клик по карточке алерта открывает HitDetailsDrawer (тот же паттерн что в CustomerDetail).
+  const [selectedAlertId, setSelectedAlertId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,7 +84,9 @@ export default function AlertsPanel() {
           {data.map((a) => (
             <Card
               key={a.id}
-              className={`border-l-4 ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}
+              onClick={() => setSelectedAlertId(a.id)}
+              data-testid={`alerts-panel-card-${a.id}`}
+              className={`border-l-4 cursor-pointer hover:bg-slate-50 transition-colors ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -155,7 +160,10 @@ export default function AlertsPanel() {
                       <Button
                         size="sm"
                         className="bg-emerald-600 hover:bg-emerald-700 text-xs"
-                        onClick={() => handleAction(a.id, 'confirm')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAction(a.id, 'confirm');
+                        }}
                         disabled={acting[a.id]}
                       >
                         {acting[a.id] ? <Loader2 className="w-3 h-3 animate-spin" /> : null} Confirm
@@ -164,7 +172,10 @@ export default function AlertsPanel() {
                         size="sm"
                         variant="outline"
                         className="text-xs"
-                        onClick={() => handleAction(a.id, 'dismiss')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAction(a.id, 'dismiss');
+                        }}
                         disabled={acting[a.id]}
                       >
                         Dismiss
@@ -177,6 +188,14 @@ export default function AlertsPanel() {
           ))}
         </div>
       )}
+
+      <HitDetailsDrawer
+        alertId={selectedAlertId}
+        open={!!selectedAlertId}
+        onOpenChange={(o) => {
+          if (!o) setSelectedAlertId(null);
+        }}
+      />
     </div>
   );
 }
