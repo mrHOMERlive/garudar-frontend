@@ -836,6 +836,22 @@ class ApiClient {
     return this.request(`/aml/alerts/${id}/details`);
   }
 
+  // AML Audit (P0): прокси к ComplyAdvantage /v2/audit/customers/{id}
+  async getAmlCustomerAudit(customerId, params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return this.request(`/aml/customers/${customerId}/audit${qs ? '?' + qs : ''}`);
+  }
+
+  // AML Screening Report (P0): запросить PDF у CA, сохранить в MinIO, вернуть presigned URL
+  async generateAmlScreeningReport(screeningId) {
+    return this.request(`/aml/screenings/${screeningId}/report`, { method: 'POST' });
+  }
+
+  // AML Screening Report (P0): fresh presigned URL для уже сохранённого PDF (без CA)
+  async downloadAmlScreeningReport(screeningId) {
+    return this.request(`/aml/screenings/${screeningId}/report/download`);
+  }
+
   async confirmAlert(id) {
     return this.request(`/aml/alerts/${id}/confirm`, { method: 'POST' });
   }

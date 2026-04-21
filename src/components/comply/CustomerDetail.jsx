@@ -22,8 +22,159 @@ import {
   TrendingUp,
   Bell,
   ChevronRight,
+  Download,
+  FileText,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Human-readable labels for known CA audit event types.
+// Unknown types are rendered as raw `type` + `detail` in a collapsible block.
+const AUDIT_EVENT_LABELS = {
+  CUSTOMER_CREATED: 'Customer created',
+  CUSTOMER_INFO_UPDATED: 'Customer info updated',
+  CUSTOMER_STATUS_UPDATED: 'Customer status changed',
+  CUSTOMER_SCREENED: 'Customer screened',
+  CUSTOMER_LABELS_UPDATED: 'Customer labels updated',
+  CUSTOMER_SEGMENTS_UPDATED: 'Customer segments updated',
+  CUSTOMER_MIGRATED: 'Customer migrated',
+  CUSTOMER_MONITORING_CONFIGURATION_UPDATED: 'Monitoring configuration changed',
+  CUSTOMER_PRODUCT_UPDATED: 'Customer products updated',
+  RISK_SCORE_CALCULATED: 'Risk score recalculated',
+  CASE_CREATED: 'Case opened',
+  CASE_ASSIGNED: 'Case assigned',
+  CASE_STAGE_TRANSITIONED: 'Case stage changed',
+  ALERT_ADDED_TO_CASE: 'Alert added to case',
+  ALERT_STATE_UPDATED: 'Alert state changed',
+  ALERT_MUTED_FOR_RISK: 'Alert muted',
+  ALERT_UNMUTED_FOR_RISK: 'Alert unmuted',
+  NOTE_CREATED_TO_CUSTOMER: 'Note added to customer',
+  NOTE_CREATED_TO_CASE_ACTION: 'Note added to case action',
+  NOTE_TO_CASE_OBJECT: 'Note added to case',
+  NOTE_TO_RISK: 'Note added to risk',
+  RISK_CODE_UNMUTED_FOR_ENTITY: 'Risk code unmuted',
+  RISK_STATUS_UPDATED: 'Risk status updated',
+  PAYMENT_SCREENED: 'Payment screened',
+  TRANSACTION_MONITORED: 'Transaction monitored',
+  TRANSACTION_RECEIVED: 'Transaction received',
+  TRANSACTION_RELEASE_DECISION: 'Transaction release decision',
+  TRANSACTION_ADDED_TO_CASE: 'Transaction added to case',
+};
+
+function AuditTimeline({ customerId }) {
+  const [items, setItems] = React.useState([]);
+  const [totalCount, setTotalCount] = React.useState(null);
+  const [pageNumber, setPageNumber] = React.useState(1);
+  const [nextPage, setNextPage] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+
+  const load = React.useCallback(
+    async (pn) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await apiClient.getAmlCustomerAudit(customerId, {
+          page_number: pn,
+          page_size: 50,
+          sort: '-occurred_at',
+        });
+        setItems((prev) => (pn === 1 ? data.items || [] : [...prev, ...(data.items || [])]));
+        setTotalCount(data.totalCount ?? null);
+        setNextPage(data.nextPageNumber ?? null);
+        setPageNumber(pn);
+      } catch (e) {
+        setError(e.message || 'Failed to load audit log');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [customerId]
+  );
+
+  React.useEffect(() => {
+    if (customerId) load(1);
+  }, [customerId, load]);
+
+  if (loading && items.length === 0) {
+    return (
+      <div className="flex items-center gap-2 text-slate-500 py-8 justify-center">
+        <Loader2 className="w-5 h-5 animate-spin" /> Loading audit log...
+      </div>
+    );
+  }
+  if (error) {
+    return <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded p-3">{error}</div>;
+  }
+  if (items.length === 0) {
+    return (
+      <div className="text-center text-slate-400 py-10 bg-white border border-slate-200 rounded-lg">
+        <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" />
+        <p>No audit records for this customer</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2" data-testid="audit-timeline">
+      {totalCount !== null && (
+        <p className="text-sm text-slate-500">
+          {items.length} of {totalCount} events
+        </p>
+      )}
+      {items.map((ev) => {
+        const label = AUDIT_EVENT_LABELS[ev.type] || ev.type;
+        const actor =
+          ev.actionedByType === 'SYSTEM'
+            ? 'System'
+            : ev.actionedByType === 'USER'
+              ? `User ${ev.actionedByIdentifier ? ev.actionedByIdentifier.slice(0, 8) : '?'}`
+              : '—';
+        return (
+          <Card key={ev.identifier} className="border-slate-200" data-testid={`audit-event-${ev.identifier}`}>
+            <CardContent className="p-3">
+              <div className="flex items-start gap-3">
+                <Clock className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-slate-800 text-sm">{label}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    {ev.occurredAt ? new Date(ev.occurredAt).toLocaleString('en-GB') : ''} · {actor}
+                  </div>
+                  {ev.detail && Object.keys(ev.detail).length > 0 && (
+                    <details className="mt-1.5">
+                      <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-700">
+                        Raw detail
+                      </summary>
+                      <pre className="mt-1 text-[11px] bg-slate-900 text-slate-200 p-2 rounded overflow-x-auto max-h-40">
+                        {JSON.stringify(ev.detail, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+                <Badge variant="outline" className="text-[10px] font-mono flex-shrink-0">
+                  {ev.type}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+      {nextPage && (
+        <div className="flex justify-center pt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => load(nextPage)}
+            disabled={loading}
+            data-testid="audit-load-more"
+          >
+            {loading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null} Load more
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CustomerDetail({ customer, onBack }) {
   const [data, setData] = useState(customer);
@@ -40,6 +191,35 @@ export default function CustomerDetail({ customer, onBack }) {
   const [selectedAlertId, setSelectedAlertId] = useState(null);
 
   const setLoad = (key, val) => setLoading((p) => ({ ...p, [key]: val }));
+
+  // AML screening report (PDF): первый клик → генерация + скачивание в MinIO,
+  // повторные — просто берут сохранённый presigned URL без обращения к CA.
+  const handleDownloadScreeningReport = async (screeningId, alreadySaved) => {
+    const key = `report_${screeningId}`;
+    setLoad(key, true);
+    try {
+      const resp = alreadySaved
+        ? await apiClient.downloadAmlScreeningReport(screeningId)
+        : await apiClient.generateAmlScreeningReport(screeningId);
+
+      if (resp?.status === 'ready' && resp?.downloadUrl) {
+        window.open(resp.downloadUrl, '_blank', 'noopener,noreferrer');
+      } else if (resp?.status === 'pending') {
+        toast.info('Report is being generated by ComplyAdvantage', {
+          description: 'Please try again in a minute — CA generates the PDF asynchronously.',
+        });
+      } else {
+        toast.error('Unexpected response from server');
+      }
+      // Обновим список screenings, чтобы подтянуть report_s3_key.
+      const fresh = await apiClient.getCustomerScreenings(data.id).catch(() => null);
+      if (fresh) setScreenings(fresh);
+    } catch (e) {
+      toast.error(e.message || 'Failed to fetch PDF report');
+    } finally {
+      setLoad(key, false);
+    }
+  };
 
   const loadAll = useCallback(async () => {
     setLoad('cases', true);
@@ -155,7 +335,7 @@ export default function CustomerDetail({ customer, onBack }) {
     }
   };
 
-  const tabs = ['overview', 'cases', 'alerts', 'risk', 'screenings'];
+  const tabs = ['overview', 'cases', 'alerts', 'risk', 'screenings', 'audit'];
 
   return (
     <div>
@@ -656,6 +836,23 @@ export default function CustomerDetail({ customer, onBack }) {
                           {s.match_count} match{s.match_count !== 1 ? 'es' : ''}
                         </span>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadScreeningReport(s.id, Boolean(s.report_s3_key))}
+                        disabled={loading[`report_${s.id}`]}
+                        data-testid={`download-report-${s.id}`}
+                        title={s.report_s3_key ? 'Download saved PDF' : 'Generate and download PDF'}
+                      >
+                        {loading[`report_${s.id}`] ? (
+                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : s.report_s3_key ? (
+                          <FileText className="w-3 h-3 mr-1" />
+                        ) : (
+                          <Download className="w-3 h-3 mr-1" />
+                        )}
+                        PDF
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -664,6 +861,8 @@ export default function CustomerDetail({ customer, onBack }) {
           )}
         </div>
       )}
+
+      {activeTab === 'audit' && <AuditTimeline customerId={data.id} />}
 
       <HitDetailsDrawer
         alertId={selectedAlertId}
