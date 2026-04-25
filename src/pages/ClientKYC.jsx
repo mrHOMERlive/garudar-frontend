@@ -25,7 +25,7 @@ export default function ClientKYC() {
   // 1. Get Current User
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => apiClient.getCurrentUser()
+    queryFn: () => apiClient.getCurrentUser(),
   });
 
   // 2. Get Current Client
@@ -37,14 +37,14 @@ export default function ClientKYC() {
         const myClient = await apiClient.getMyClient();
         return myClient;
       } catch (e) {
-        // If not found, creating a new one might be part of registration flow, 
+        // If not found, creating a new one might be part of registration flow,
         // but here we assume client exists or we just fail gracefully.
         // For migration safety, if 404, we might redirect or show error.
-        console.error("Client fetch error", e);
+        console.error('Client fetch error', e);
         return null;
       }
     },
-    enabled: !!user
+    enabled: !!user,
   });
 
   // 3. Get KYC Profile
@@ -65,21 +65,21 @@ export default function ClientKYC() {
           ...data.corporate,
           ...data.banking,
           ...data.declaration,
-          declaration_confirmed: data.declaration?.declaration_confirmed
+          declaration_confirmed: data.declaration?.declaration_confirmed,
         };
       } catch (err) {
         // If 404 (profile not found), return empty object to initialize form
         return {};
       }
     },
-    enabled: !!client?.client_id // client_id needed
+    enabled: !!client?.client_id, // client_id needed
   });
 
   // 4. Get UBOs
   const { data: ubos = [] } = useQuery({
     queryKey: ['ubos', client?.client_id],
     queryFn: () => apiClient.listUbos(client.client_id),
-    enabled: !!client?.client_id
+    enabled: !!client?.client_id,
   });
 
   const [formData, setFormData] = useState({});
@@ -87,7 +87,7 @@ export default function ClientKYC() {
   // Effect to populate formData when kycData loads
   React.useEffect(() => {
     if (kycData) {
-      setFormData(prev => ({ ...prev, ...kycData }));
+      setFormData((prev) => ({ ...prev, ...kycData }));
     }
   }, [kycData]);
 
@@ -124,7 +124,7 @@ export default function ClientKYC() {
         signature_date: dataToSave.signature_date,
         authorized_person_position: dataToSave.authorized_person_position,
         signature_location: dataToSave.signature_location,
-        signed_kyc_document_url: dataToSave.signed_kyc_document_url
+        signed_kyc_document_url: dataToSave.signed_kyc_document_url,
       };
 
       return await apiClient.updateKycProfile(client.client_id, payload);
@@ -135,7 +135,7 @@ export default function ClientKYC() {
     },
     onError: (err) => {
       toast.error('Failed to save: ' + err.message);
-    }
+    },
   });
 
   const submitKYCMutation = useMutation({
@@ -150,11 +150,11 @@ export default function ClientKYC() {
     },
     onError: (err) => {
       toast.error('Failed to submit: ' + err.message);
-    }
+    },
   });
 
   const handleFormChange = (updates) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
   };
 
   const handleSaveProgress = async () => {
@@ -182,7 +182,7 @@ export default function ClientKYC() {
     { title: t('kycStepDocuments'), component: KYCDocuments },
     { title: t('kycStepBanking'), component: KYCBankingDetails },
     { title: t('kycStepOwnership'), component: KYCOwnership },
-    { title: t('kycStepDeclaration'), component: KYCDeclaration }
+    { title: t('kycStepDeclaration'), component: KYCDeclaration },
   ];
 
   const CurrentStepComponent = steps[currentStep].component;
@@ -217,7 +217,7 @@ export default function ClientKYC() {
     in_progress: { icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50', text: t('kycStatusInProgress') },
     submitted: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', text: t('kycStatusUnderReview') },
     approved: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50', text: t('kycStatusApproved') },
-    rejected: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50', text: t('kycStatusRejected') }
+    rejected: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50', text: t('kycStatusRejected') },
   };
 
   const status = statusConfig[client.kyc_status] || statusConfig.created;
@@ -225,45 +225,45 @@ export default function ClientKYC() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-[#1e3a5f] shadow-lg">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
             <Link to={createPageUrl('UserDashboard')}>
-              <Button variant="ghost" className="text-white hover:bg-white/10">
+              <Button variant="ghost" className="text-white hover:bg-white/10 -ml-2 sm:ml-0">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t('backToDashboardBtn')}
               </Button>
             </Link>
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${status.bg}`}>
-              <status.icon className={`w-5 h-5 ${status.color}`} />
-              <span className={`font-semibold ${status.color}`}>{status.text}</span>
+            <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg ${status.bg}`}>
+              <status.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${status.color}`} />
+              <span className={`text-sm sm:text-base font-semibold ${status.color}`}>{status.text}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1 sm:mb-2">
                 {t('kycVerificationTitle')}
               </h1>
-              <p className="text-slate-600">
-                {t('kycVerificationDesc')}
-              </p>
+              <p className="text-sm sm:text-base text-slate-600">{t('kycVerificationDesc')}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <Button
                 variant={language === 'en' ? 'default' : 'outline'}
                 onClick={() => setLanguage('en')}
-                className={language === 'en' ? 'bg-[#1e3a5f]' : ''}
+                size="sm"
+                className={`${language === 'en' ? 'bg-[#1e3a5f]' : ''} flex-1 sm:flex-initial`}
               >
                 English
               </Button>
               <Button
                 variant={language === 'id' ? 'default' : 'outline'}
                 onClick={() => setLanguage('id')}
-                className={language === 'id' ? 'bg-[#1e3a5f]' : ''}
+                size="sm"
+                className={`${language === 'id' ? 'bg-[#1e3a5f]' : ''} flex-1 sm:flex-initial`}
               >
                 Bahasa
               </Button>
@@ -271,15 +271,14 @@ export default function ClientKYC() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-5 sm:mb-6 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0">
           {steps.map((step, idx) => (
             <button
               key={idx}
               onClick={() => handleStepChange(idx)}
-              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${idx === currentStep
-                ? 'bg-[#1e3a5f] text-white'
-                : 'bg-white text-slate-600 hover:bg-slate-100'
-                }`}
+              className={`px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base transition-all flex-shrink-0 ${
+                idx === currentStep ? 'bg-[#1e3a5f] text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+              }`}
             >
               {idx + 1}. {step.title}
             </button>
@@ -287,7 +286,7 @@ export default function ClientKYC() {
         </div>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-4 sm:pb-6">
             <CurrentStepComponent
               formData={formData}
               onChange={handleFormChange}
@@ -300,20 +299,22 @@ export default function ClientKYC() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between mt-6">
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 mt-5 sm:mt-6">
           <Button
             variant="outline"
             onClick={() => handleStepChange(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
+            className="w-full sm:w-auto"
           >
             {t('previousBtn')}
           </Button>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
             <Button
               variant="outline"
               onClick={handleSaveProgress}
               disabled={saveKYCMutation.isPending}
+              className="w-full sm:w-auto"
             >
               {t('saveProgressBtn')}
             </Button>
@@ -321,15 +322,19 @@ export default function ClientKYC() {
             {currentStep < steps.length - 1 ? (
               <Button
                 onClick={() => handleStepChange(currentStep + 1)}
-                className="bg-[#1e3a5f] hover:bg-[#152a45]"
+                className="w-full sm:w-auto bg-[#1e3a5f] hover:bg-[#152a45]"
               >
                 {t('nextBtn')}
               </Button>
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={submitKYCMutation.isPending || (!kycData?.profile_id && !saveKYCMutation.isSuccess) || !formData.declaration_confirmed}
-                className="bg-green-600 hover:bg-green-700"
+                disabled={
+                  submitKYCMutation.isPending ||
+                  (!kycData?.profile_id && !saveKYCMutation.isSuccess) ||
+                  !formData.declaration_confirmed
+                }
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
               >
                 <Send className="w-4 h-4 mr-2" />
                 {t('submitKYCBtn')}

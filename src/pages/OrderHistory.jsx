@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from "@/components/ui/button";
-import { Plus, FileDown, FileText, Home, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Plus, FileDown, FileText, Home } from 'lucide-react';
 import OrderFilters from '@/components/orders/OrderFilters';
 import OrdersTable from '@/components/orders/OrdersTable';
 import OrderDetailsDrawer from '@/components/orders/OrderDetailsDrawer';
+import ClientPageHeader from '@/components/user/ClientPageHeader';
 import { exportOrdersToCSV } from '@/components/remittance/utils/csvGenerator';
 import {
   Pagination,
@@ -17,7 +18,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -27,7 +28,7 @@ export default function OrderHistory() {
     status: 'all',
     currency: 'all',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -41,7 +42,7 @@ export default function OrderHistory() {
   });
 
   const filteredOrders = useMemo(() => {
-    return orders.filter(order => {
+    return orders.filter((order) => {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -82,13 +83,10 @@ export default function OrderHistory() {
   }, [orders, filters]);
 
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const handleFilterChange = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
     setCurrentPage(1);
   };
 
@@ -98,7 +96,7 @@ export default function OrderHistory() {
       status: 'all',
       currency: 'all',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
     });
     setCurrentPage(1);
   };
@@ -115,77 +113,58 @@ export default function OrderHistory() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (order) => apiClient.updateOrder(order.orderId, {
-      deleted: true
-    }),
+    mutationFn: (order) =>
+      apiClient.updateOrder(order.orderId, {
+        deleted: true,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success('Order deleted successfully');
     },
   });
 
-
   const handleDelete = (order) => {
     deleteMutation.mutate(order);
   };
 
-
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-4">
-              <Link to={createPageUrl('UserDashboard')}>
-                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2.5 shadow-lg">
-                <img
-                  src="/gan.png"
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
-                </div>
-                <p className="text-sm text-teal-300">Order History</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link to={createPageUrl('UserDashboard')}>
-                <Button
-                  variant="outline"
-                  className="border-teal-400 text-teal-100 hover:bg-teal-800/50 bg-transparent"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  Dashboard
-                </Button>
-              </Link>
-              <Link to={createPageUrl('CreateOrder')}>
-                <Button className="bg-teal-700 hover:bg-teal-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Order
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ClientPageHeader
+        sticky
+        subtitle="Order History"
+        badgeLabel="CLIENT"
+        actions={
+          <>
+            <Link to={createPageUrl('UserDashboard')}>
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+                <Home className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link to={createPageUrl('CreateOrder')}>
+              <Button className="bg-[#f5a623] hover:bg-[#e09000] text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Order
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6">
+        {/* Mobile-only action row (desktop has these in header) */}
+        <div className="sm:hidden">
+          <Link to={createPageUrl('CreateOrder')}>
+            <Button className="w-full bg-[#f5a623] hover:bg-[#e09000] text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Order
+            </Button>
+          </Link>
+        </div>
+
         {/* Filters */}
-        <OrderFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onClear={handleClearFilters}
-        />
+        <OrderFilters filters={filters} onFilterChange={handleFilterChange} onClear={handleClearFilters} />
 
         {/* Results Summary */}
         <div className="flex items-center justify-between text-sm text-slate-600">
@@ -213,8 +192,8 @@ export default function OrderHistory() {
             <h3 className="text-lg font-semibold text-slate-800 mb-2">No orders yet</h3>
             <p className="text-slate-600 mb-6">
               {orders.length === 0
-                ? "Create your first remittance order to get started."
-                : "No orders match your current filters."}
+                ? 'Create your first remittance order to get started.'
+                : 'No orders match your current filters.'}
             </p>
             {orders.length === 0 ? (
               <Link to={createPageUrl('CreateOrder')}>
@@ -231,11 +210,7 @@ export default function OrderHistory() {
           </div>
         ) : (
           <>
-            <OrdersTable
-              orders={paginatedOrders}
-              onViewDetails={handleViewDetails}
-              onDelete={handleDelete}
-            />
+            <OrdersTable orders={paginatedOrders} onViewDetails={handleViewDetails} onDelete={handleDelete} />
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -243,7 +218,7 @@ export default function OrderHistory() {
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
@@ -251,11 +226,7 @@ export default function OrderHistory() {
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
                     // Show first, last, and pages around current
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
+                    if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
                       return (
                         <PaginationItem key={page}>
                           <PaginationLink
@@ -280,7 +251,7 @@ export default function OrderHistory() {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
@@ -292,11 +263,7 @@ export default function OrderHistory() {
       </main>
 
       {/* Details Drawer */}
-      <OrderDetailsDrawer
-        order={selectedOrder}
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      />
+      <OrderDetailsDrawer order={selectedOrder} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );
 }

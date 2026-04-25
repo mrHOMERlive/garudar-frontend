@@ -5,13 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { Send, Download, Copy, Mail, History, Upload, XCircle } from 'lucide-react';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText } from 'lucide-react';
+import ClientPageHeader from '@/components/user/ClientPageHeader';
 import ThresholdBanner from '../components/orders/ThresholdBanner';
 import ThresholdConfirmDialog from '../components/orders/ThresholdConfirmDialog';
 import { isAboveThreshold } from '../components/orders/thresholdUtils';
@@ -302,38 +302,22 @@ export default function CreateOrder() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-[#1e3a5f] shadow-lg border-b border-[#1e3a5f]/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
-                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl md:text-3xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">CLIENT</span>
-                </div>
-                <p className="text-slate-300 text-sm">{t('createPaymentOrder')}</p>
-              </div>
-            </Link>
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher variant="ghost" />
-              <Link to={createPageUrl('UserDashboard')}>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
-                  <History className="w-4 h-4 mr-2" />
-                  {t('dashboard')}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClientPageHeader
+        subtitle={t('createPaymentOrder')}
+        badgeLabel="CLIENT"
+        actions={
+          <Link to={createPageUrl('UserDashboard')}>
+            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+              <History className="w-4 h-4 mr-2" />
+              {t('dashboard')}
+            </Button>
+          </Link>
+        }
+      />
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
+        <div className="space-y-4 sm:space-y-6">
           <AmountCurrencySection
             formData={formData}
             onChange={handleFormChange}
@@ -366,22 +350,24 @@ export default function CreateOrder() {
           />
 
           {/* Invoice & Documents Info Block */}
-          <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Mail className="w-5 h-5 text-amber-700" />
               </div>
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 min-w-0 space-y-4">
                 <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">{t('invoiceRequired')}</h3>
-                  <p className="text-sm text-amber-800 mb-3">{t('invoiceInstructions')}</p>
-                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-200">
-                    <code className="text-sm font-mono text-slate-800 flex-1">{INVOICE_EMAIL}</code>
+                  <h3 className="font-semibold text-amber-900 mb-2 text-sm sm:text-base">{t('invoiceRequired')}</h3>
+                  <p className="text-xs sm:text-sm text-amber-800 mb-3">{t('invoiceInstructions')}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-white rounded-lg p-3 border border-amber-200">
+                    <code className="text-xs sm:text-sm font-mono text-slate-800 flex-1 break-all">
+                      {INVOICE_EMAIL}
+                    </code>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={copyInvoiceEmail}
-                      className="border-amber-300 hover:bg-amber-50"
+                      className="border-amber-300 hover:bg-amber-50 w-full sm:w-auto"
                     >
                       <Copy className="w-4 h-4 mr-2" />
                       {t('copy')}
@@ -493,10 +479,10 @@ export default function CreateOrder() {
           </div>
 
           {/* Terms & Conditions */}
-          <div className="bg-slate-100 border-2 border-slate-300 rounded-xl p-6">
-            <div className="flex items-start gap-4">
+          <div className="bg-slate-100 border-2 border-slate-300 rounded-xl p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
               <Checkbox id="terms" checked={termsAccepted} onCheckedChange={setTermsAccepted} className="mt-1" />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <label htmlFor="terms" className="text-sm font-medium text-slate-900 cursor-pointer">
                   {t('iAcceptThe')}{' '}
                   <Dialog>
@@ -505,9 +491,9 @@ export default function CreateOrder() {
                         {t('termsAndConditions')}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl h-[90vh] sm:h-auto sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-[#1e3a5f]">
+                        <DialogTitle className="text-xl sm:text-2xl font-bold text-[#1e3a5f]">
                           Terms & Conditions / Syarat & Ketentuan
                         </DialogTitle>
                       </DialogHeader>
@@ -562,11 +548,11 @@ export default function CreateOrder() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-3 sm:gap-4">
             <Button
               onClick={handleSubmit}
               disabled={createOrderMutation.isPending || !termsAccepted}
-              className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold px-8 py-6 text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createOrderMutation.isPending ? (
                 <>{t('processing')}</>

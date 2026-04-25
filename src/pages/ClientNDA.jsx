@@ -17,7 +17,7 @@ export default function ClientNDA() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => apiClient.getCurrentUser()
+    queryFn: () => apiClient.getCurrentUser(),
   });
 
   const { data: client, isLoading: clientLoading } = useQuery({
@@ -25,7 +25,7 @@ export default function ClientNDA() {
     queryFn: async () => {
       return await apiClient.getMyClient();
     },
-    enabled: !!user
+    enabled: !!user,
   });
 
   const { data: ndaRequest } = useQuery({
@@ -34,7 +34,7 @@ export default function ClientNDA() {
       const requests = await apiClient.getNdaRequests({ client_id: client.client_id });
       return requests[0];
     },
-    enabled: !!client
+    enabled: !!client,
   });
 
   const [formData, setFormData] = useState({
@@ -51,7 +51,7 @@ export default function ClientNDA() {
     partner_contact_name: '',
     partner_contact_email: '',
     partner_contact_phone: '',
-    paper_copy_required: false
+    paper_copy_required: false,
   });
 
   const createNDAMutation = useMutation({
@@ -65,14 +65,14 @@ export default function ClientNDA() {
     onSuccess: () => {
       queryClient.invalidateQueries(['ndaRequest']);
       toast.success('NDA information saved');
-    }
+    },
   });
 
   const submitNDAMutation = useMutation({
     mutationFn: async () => {
       await apiClient.updateNdaRequest(ndaRequest.id, {
         status: 'submitted',
-        submitted_at: new Date().toISOString()
+        submitted_at: new Date().toISOString(),
       });
       // Client status update happens on backend usually, but if needed:
       // await apiClient.updateClient(client.client_id, { nda_status: 'submitted' });
@@ -84,7 +84,7 @@ export default function ClientNDA() {
       queryClient.invalidateQueries(['ndaRequest']);
       queryClient.invalidateQueries(['currentClient']);
       toast.success('NDA submitted for review!');
-    }
+    },
   });
 
   const handleFileUpload = async (file) => {
@@ -108,7 +108,7 @@ export default function ClientNDA() {
   };
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
@@ -139,9 +139,9 @@ export default function ClientNDA() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-[#1e3a5f] shadow-lg">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
           <Link to={createPageUrl('UserDashboard')}>
-            <Button variant="ghost" className="text-white hover:bg-white/10">
+            <Button variant="ghost" className="text-white hover:bg-white/10 -ml-2 sm:ml-0">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -149,18 +149,18 @@ export default function ClientNDA() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">NDA Request</h1>
-          <p className="text-slate-600">Submit your Non-Disclosure Agreement information</p>
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1 sm:mb-2">NDA Request</h1>
+          <p className="text-sm sm:text-base text-slate-600">Submit your Non-Disclosure Agreement information</p>
         </div>
 
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Partner Information</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Partner Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+          <CardContent className="space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Effective Date *</Label>
                 <Input
@@ -210,7 +210,7 @@ export default function ClientNDA() {
               />
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Contact Name</Label>
                 <Input
@@ -241,19 +241,21 @@ export default function ClientNDA() {
                 checked={formData.paper_copy_required || ndaRequest?.paper_copy_required || false}
                 onCheckedChange={(checked) => handleChange('paper_copy_required', checked)}
               />
-              <label htmlFor="paper_copy" className="text-sm">Paper copy required</label>
+              <label htmlFor="paper_copy" className="text-sm">
+                Paper copy required
+              </label>
             </div>
           </CardContent>
         </Card>
 
         {ndaRequest?.generated_file_url && (
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Generated NDA</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Generated NDA</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
               <a href={ndaRequest.generated_file_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Download className="w-4 h-4 mr-2" />
                   Download Generated NDA
                 </Button>
@@ -263,10 +265,10 @@ export default function ClientNDA() {
         )}
 
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Upload Signed NDA</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Upload Signed NDA</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
             <label>
               <input
                 type="file"
@@ -280,6 +282,7 @@ export default function ClientNDA() {
                 variant="outline"
                 disabled={uploading || !ndaRequest}
                 onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                className="w-full sm:w-auto"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 {uploading ? 'Uploading...' : 'Upload Signed NDA'}
@@ -288,7 +291,7 @@ export default function ClientNDA() {
             {ndaRequest?.signed_file_url && (
               <div className="mt-3">
                 <a href={ndaRequest.signed_file_url} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto">
                     <Download className="w-4 h-4 mr-2" />
                     View Uploaded NDA
                   </Button>
@@ -298,18 +301,19 @@ export default function ClientNDA() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
           <Button
             variant="outline"
             onClick={handleSave}
             disabled={createNDAMutation.isPending}
+            className="w-full sm:w-auto"
           >
             Save Progress
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitNDAMutation.isPending || !ndaRequest}
-            className="bg-[#1e3a5f] hover:bg-[#152a45]"
+            className="w-full sm:w-auto bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             <Send className="w-4 h-4 mr-2" />
             Submit NDA

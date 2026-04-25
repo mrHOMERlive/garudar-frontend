@@ -7,18 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import {
-  ArrowLeft,
-  Search,
-  Globe,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  XCircle,
-  MinusCircle,
-} from 'lucide-react';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { Search, Globe, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import ClientPageHeader from '@/components/user/ClientPageHeader';
+import OrderMobileCard from '@/components/user/OrderMobileCard';
 import { t } from '@/components/utils/language';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ClientExecutedDrawer from '@/components/client/ClientExecutedDrawer';
@@ -142,42 +133,20 @@ export default function ExecutedOrders() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-[#1e3a5f] border-b border-[#1e3a5f]/20 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to={createPageUrl('UserDashboard')}>
-                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
-                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-white">GTrans</h1>
-                  <span className="text-xs bg-emerald-500 px-2 py-1 rounded text-white font-medium">
-                    {t('clientDashboard')}
-                  </span>
-                </div>
-                <p className="text-slate-300 text-sm">{t('executedOrders')}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <LanguageSwitcher variant="ghost" />
-              <Link to={createPageUrl('GTrans')}>
-                <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
-                  <Globe className="w-4 h-4 mr-2" />
-                  {t('publicSite')}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ClientPageHeader
+        subtitle={t('executedOrders')}
+        badgeLabel={t('clientDashboard')}
+        actions={
+          <Link to={createPageUrl('GTrans')}>
+            <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+              <Globe className="w-4 h-4 mr-2" />
+              {t('publicSite')}
+            </Button>
+          </Link>
+        }
+      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
@@ -200,7 +169,88 @@ export default function ExecutedOrders() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+        {/* Mobile card view (<md) */}
+        <div className="md:hidden space-y-3">
+          {isLoading ? (
+            <div className="bg-white rounded-xl p-8 text-center text-slate-500">
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                {t('loadingDots')}
+              </div>
+            </div>
+          ) : filteredOrders.length === 0 ? (
+            <div className="bg-white rounded-xl p-8 text-center text-slate-500">{t('noExecutedOrders')}</div>
+          ) : (
+            paginatedOrders.map((order) => (
+              <OrderMobileCard
+                key={order.id}
+                order={{
+                  ...order,
+                  orderId: order.order_number,
+                  beneficiaryName: order.beneficiary_name,
+                  bankName: order.bank_name,
+                }}
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setDrawerOpen(true);
+                }}
+                dateField="updated_date"
+                showStatus={false}
+                extraBottom={
+                  <div className="flex items-center gap-3 pt-3 mt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5" title={t('txStatusHeader')}>
+                      <div
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${order.transaction_status_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.transaction_status_received ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500">{t('txStatusHeader')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5" title="MT103">
+                      <div
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${order.mt103_received ? 'bg-green-100' : 'bg-red-100'}`}
+                      >
+                        {order.mt103_received ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500">MT103</span>
+                    </div>
+                    <div className="flex items-center gap-1.5" title={t('actReport')}>
+                      <div
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                          order.act_report_status === 'signed'
+                            ? 'bg-green-100'
+                            : order.act_report_status === 'on_sign'
+                              ? 'bg-amber-100'
+                              : 'bg-red-100'
+                        }`}
+                      >
+                        {order.act_report_status === 'signed' ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : order.act_report_status === 'on_sign' ? (
+                          <MinusCircle className="w-4 h-4 text-amber-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500">{t('actReport')}</span>
+                    </div>
+                  </div>
+                }
+              />
+            ))
+          )}
+        </div>
+
+        {/* Desktop table view (≥md) */}
+        <div className="hidden md:block bg-white rounded-xl overflow-hidden shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-slate-200 bg-slate-50">
@@ -321,11 +371,13 @@ export default function ExecutedOrders() {
               )}
             </TableBody>
           </Table>
+        </div>
 
-          {filteredOrders.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-slate-600">{t('rowsPerPage')}</span>
+        {filteredOrders.length > 0 && (
+          <div className="bg-white rounded-xl mt-3 md:mt-0 md:rounded-none md:border-t md:border-slate-200 md:-mt-[1px]">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="text-xs sm:text-sm text-slate-600">{t('rowsPerPage')}</span>
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(val) => {
@@ -343,7 +395,7 @@ export default function ExecutedOrders() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between sm:justify-end gap-2">
                 <Button
                   variant="outline"
                   size="icon"
@@ -353,7 +405,7 @@ export default function ExecutedOrders() {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-sm text-slate-600 min-w-[100px] text-center">
+                <span className="text-xs sm:text-sm text-slate-600 min-w-[100px] text-center">
                   {t('pageLabel')} {currentPage} {t('ofLabel')} {totalPages}
                 </span>
                 <Button
@@ -367,8 +419,8 @@ export default function ExecutedOrders() {
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       <ClientExecutedDrawer
