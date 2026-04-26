@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, FileDown, FileText, Home } from 'lucide-react';
+import { Plus, FileText, Home } from 'lucide-react';
+import { t } from '@/components/utils/language';
 import OrderFilters from '@/components/orders/OrderFilters';
 import OrdersTable from '@/components/orders/OrdersTable';
 import OrderDetailsDrawer from '@/components/orders/OrderDetailsDrawer';
@@ -119,7 +120,7 @@ export default function OrderHistory() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      toast.success('Order deleted successfully');
+      toast.success(t('toastOrderDeleted'));
     },
   });
 
@@ -131,20 +132,20 @@ export default function OrderHistory() {
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader
         sticky
-        subtitle="Order History"
-        badgeLabel="CLIENT"
+        subtitle={t('orderHistorySubtitle')}
+        badgeLabel={t('clientDashboard')}
         actions={
           <>
             <Link to={createPageUrl('UserDashboard')}>
               <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                 <Home className="w-4 h-4 mr-2" />
-                Dashboard
+                {t('dashboard')}
               </Button>
             </Link>
             <Link to={createPageUrl('CreateOrder')}>
               <Button className="bg-[#f5a623] hover:bg-[#e09000] text-white">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Order
+                {t('createOrder')}
               </Button>
             </Link>
           </>
@@ -158,7 +159,7 @@ export default function OrderHistory() {
           <Link to={createPageUrl('CreateOrder')}>
             <Button className="w-full bg-[#f5a623] hover:bg-[#e09000] text-white">
               <Plus className="w-4 h-4 mr-2" />
-              Create Order
+              {t('createOrder')}
             </Button>
           </Link>
         </div>
@@ -169,11 +170,12 @@ export default function OrderHistory() {
         {/* Results Summary */}
         <div className="flex items-center justify-between text-sm text-slate-600">
           <span>
-            {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''} found
+            {filteredOrders.length} {filteredOrders.length !== 1 ? t('ordersLabel') : t('orderLabel')}{' '}
+            {t('ordersFoundText')}
           </span>
           {filteredOrders.length > 0 && (
             <span>
-              Page {currentPage} of {totalPages}
+              {t('pageOfText')} {currentPage} {t('ofLabel')} {totalPages}
             </span>
           )}
         </div>
@@ -182,29 +184,27 @@ export default function OrderHistory() {
         {isLoading ? (
           <div className="bg-white border border-slate-200 rounded-lg p-12 text-center">
             <div className="animate-spin w-8 h-8 border-2 border-blue-900 border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-slate-600">Loading orders...</p>
+            <p className="text-slate-600">{t('loadingOrdersText')}</p>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-lg p-12 text-center">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FileText className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">No orders yet</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">{t('noOrdersYetTitle')}</h3>
             <p className="text-slate-600 mb-6">
-              {orders.length === 0
-                ? 'Create your first remittance order to get started.'
-                : 'No orders match your current filters.'}
+              {orders.length === 0 ? t('createFirstOrderHint') : t('noOrdersMatchFilter')}
             </p>
             {orders.length === 0 ? (
               <Link to={createPageUrl('CreateOrder')}>
                 <Button className="bg-teal-700 hover:bg-teal-600">
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Order
+                  {t('createOrder')}
                 </Button>
               </Link>
             ) : (
               <Button variant="outline" onClick={handleClearFilters}>
-                Clear filters
+                {t('clearFiltersBtnLabel')}
               </Button>
             )}
           </div>

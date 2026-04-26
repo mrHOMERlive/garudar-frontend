@@ -1,34 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/apiClient';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Building, AlertCircle, Search } from 'lucide-react';
 import { validateAccountNumber, validateBIC, IBAN_COUNTRIES } from './utils/validators';
 import { t } from '@/components/utils/language';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 export default function BankDetailsSection({ formData, onChange, errors, setErrors, countries = [] }) {
   const [bicSearchOpen, setBicSearchOpen] = useState(false);
   const [bicSearchQuery, setBicSearchQuery] = useState('');
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [countrySearchQuery, setCountrySearchQuery] = useState('');
-
 
   // Загрузка BIC по выбранной стране
   const { data: bicData = [], isLoading: bicLoading } = useQuery({
@@ -38,29 +27,21 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   });
 
   // Фильтрация активных BIC (isDelete=false, isInactive=false)
-  const activeBics = useMemo(() =>
-    bicData.filter(bic => !bic.isDelete && !bic.isInactive),
-    [bicData]
-  );
+  const activeBics = useMemo(() => bicData.filter((bic) => !bic.isDelete && !bic.isInactive), [bicData]);
 
   // Поиск BIC по запросу
   const bicSearchResults = useMemo(() => {
     if (!bicSearchQuery) return [];
     const query = bicSearchQuery.toUpperCase();
-    return activeBics.filter(bic =>
-      bic.bicSwiftCd?.startsWith(query)
-    ).slice(0, 20);
+    return activeBics.filter((bic) => bic.bicSwiftCd?.startsWith(query)).slice(0, 20);
   }, [activeBics, bicSearchQuery]);
-
-
 
   // Поиск стран по началу названия или кода
   const countrySearchResults = useMemo(() => {
     if (!countrySearchQuery) return countries;
     const query = countrySearchQuery.toUpperCase();
-    return countries.filter(country =>
-      country.name.toUpperCase().startsWith(query) ||
-      country.code.toUpperCase().startsWith(query)
+    return countries.filter(
+      (country) => country.name.toUpperCase().startsWith(query) || country.code.toUpperCase().startsWith(query)
     );
   }, [countries, countrySearchQuery]);
 
@@ -69,9 +50,9 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
     if (formData.country_bank) {
       const validation = validateAccountNumber(value, formData.country_bank);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        destination_account: validation.valid ? null : validation.error
+        destination_account: validation.valid ? null : validation.error,
       }));
     }
   };
@@ -82,18 +63,18 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
     // Revalidate account if exists
     if (formData.destination_account) {
       const validation = validateAccountNumber(formData.destination_account, countryCode);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        destination_account: validation.valid ? null : validation.error
+        destination_account: validation.valid ? null : validation.error,
       }));
     }
 
     // Revalidate BIC if exists (skip if manual override is enabled)
     if (formData.bic && !formData.bank_manual_override) {
       const validation = validateBIC(formData.bic, countryCode);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        bic: validation.valid ? null : validation.error
+        bic: validation.valid ? null : validation.error,
       }));
     }
   };
@@ -103,22 +84,20 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   };
 
   const handleBICSelect = (bicItem) => {
-    const address = [bicItem.addr1, bicItem.addr2, bicItem.addr3, bicItem.cityNm]
-      .filter(Boolean)
-      .join(', ');
+    const address = [bicItem.addr1, bicItem.addr2, bicItem.addr3, bicItem.cityNm].filter(Boolean).join(', ');
 
     onChange({
       bic: bicItem.bicSwiftCd,
       bank_name: bicItem.nm,
       bank_address: address,
-      bank_manual_override: false
+      bank_manual_override: false,
     });
 
     // Validate BIC
     const validation = validateBIC(bicItem.bicSwiftCd, formData.country_bank);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      bic: validation.valid ? null : validation.error
+      bic: validation.valid ? null : validation.error,
     }));
 
     setBicSearchOpen(false);
@@ -130,22 +109,20 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
 
     if (value.length >= 8 && !formData.bank_manual_override) {
       const validation = validateBIC(value, formData.country_bank);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        bic: validation.valid ? null : validation.error
+        bic: validation.valid ? null : validation.error,
       }));
 
       // Try to auto-fill bank details from API data
-      const foundBic = activeBics.find(b => b.bicSwiftCd === value.toUpperCase());
+      const foundBic = activeBics.find((b) => b.bicSwiftCd === value.toUpperCase());
       if (foundBic) {
-        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm]
-          .filter(Boolean)
-          .join(', ');
+        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm].filter(Boolean).join(', ');
         onChange({
           bic: value,
           bank_name: foundBic.nm,
           bank_address: address,
-          bank_manual_override: false
+          bank_manual_override: false,
         });
       }
     }
@@ -154,21 +131,19 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
   const handleManualOverride = (checked) => {
     onChange({ bank_manual_override: checked });
     if (!checked && formData.bic) {
-      const foundBic = activeBics.find(b => b.bicSwiftCd === formData.bic.toUpperCase());
+      const foundBic = activeBics.find((b) => b.bicSwiftCd === formData.bic.toUpperCase());
       if (foundBic) {
-        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm]
-          .filter(Boolean)
-          .join(', ');
+        const address = [foundBic.addr1, foundBic.addr2, foundBic.addr3, foundBic.cityNm].filter(Boolean).join(', ');
         onChange({
           bank_name: foundBic.nm,
-          bank_address: address
+          bank_address: address,
         });
       }
     }
   };
 
   const isIBANCountry = IBAN_COUNTRIES.includes(formData.country_bank);
-  const selectedCountry = countries.find(c => c.code === formData.country_bank);
+  const selectedCountry = countries.find((c) => c.code === formData.country_bank);
 
   return (
     <Card className="border-slate-200 shadow-sm">
@@ -191,7 +166,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
             id="destination_account"
             value={formData.destination_account || ''}
             onChange={(e) => handleAccountChange(e.target.value)}
-            placeholder={isIBANCountry ? 'DE89370400440532013000' : 'Account number'}
+            placeholder={isIBANCountry ? 'DE89370400440532013000' : t('accountNumberPlainPlaceholder')}
             className={`border-slate-200 focus:border-teal-600 focus:ring-teal-600 ${errors.destination_account ? 'border-red-500' : ''}`}
             required
           />
@@ -208,13 +183,11 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
           <Label className="text-slate-700 font-medium">{t('countryBank')}</Label>
           <Popover open={countrySearchOpen} onOpenChange={setCountrySearchOpen} modal={true}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                className="w-full justify-between border-slate-200"
-              >
+              <Button variant="outline" role="combobox" className="w-full justify-between border-slate-200">
                 {selectedCountry ? (
-                  <span>{selectedCountry.name} ({selectedCountry.code})</span>
+                  <span>
+                    {selectedCountry.name} ({selectedCountry.code})
+                  </span>
                 ) : (
                   <span className="text-slate-400">{t('selectCountry')}</span>
                 )}
@@ -282,10 +255,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
               avoidCollisions={false}
             >
               <Command>
-                <CommandInput
-                  placeholder={t('searchBIC')}
-                  onValueChange={handleBICSearch}
-                />
+                <CommandInput placeholder={t('searchBIC')} onValueChange={handleBICSearch} />
                 <CommandEmpty>
                   <div className="p-4 text-sm">
                     <p>{t('noBICFound')}</p>
@@ -354,10 +324,7 @@ export default function BankDetailsSection({ formData, onChange, errors, setErro
                   checked={formData.bank_manual_override}
                   onCheckedChange={handleManualOverride}
                 />
-                <label
-                  htmlFor="manual_override"
-                  className="text-sm text-slate-600 cursor-pointer"
-                >
+                <label htmlFor="manual_override" className="text-sm text-slate-600 cursor-pointer">
                   {t('manualEntry')}
                 </label>
               </div>

@@ -78,10 +78,10 @@ export default function CreateOrder() {
     const newErrors = {};
 
     if (!formData.amount || formData.amount <= 0) {
-      newErrors.amount = 'Amount is required';
+      newErrors.amount = t('valAmountRequired');
     }
     if (!formData.currency) {
-      newErrors.currency = 'Currency is required';
+      newErrors.currency = t('valCurrencyRequired');
     }
     const nameValidation = validateLatinText(formData.beneficiary_name, 70);
     if (!nameValidation.valid) {
@@ -92,30 +92,30 @@ export default function CreateOrder() {
       newErrors.beneficiary_address = addressValidation.error;
     }
     if (!formData.beneficiary_country) {
-      newErrors.beneficiary_country = 'Beneficiary country is required';
+      newErrors.beneficiary_country = t('valBeneficiaryCountryRequired');
     }
     if (!formData.destination_account) {
-      newErrors.destination_account = 'Account number is required';
+      newErrors.destination_account = t('valAccountNumberRequired');
     }
     if (!formData.country_bank) {
-      newErrors.country_bank = 'Country is required';
+      newErrors.country_bank = t('valBankCountryRequired');
     }
     if (!formData.bic) {
-      newErrors.bic = 'BIC is required';
+      newErrors.bic = t('valBicRequired');
     }
     if (!formData.bank_name) {
-      newErrors.bank_name = 'Bank name is required';
+      newErrors.bank_name = t('valBankNameRequired');
     }
     if (!formData.bank_address) {
-      newErrors.bank_address = 'Bank address is required';
+      newErrors.bank_address = t('valBankAddressRequired');
     }
     if (!formData.transaction_remark) {
-      newErrors.transaction_remark = 'Transaction remark is required';
+      newErrors.transaction_remark = t('valTransactionRemarkRequired');
     }
 
     // Check for manual override requirement
     if (formData.bic && !formData.bank_name && !formData.bank_manual_override) {
-      newErrors.bank_name = 'Enable manual override to fill bank details';
+      newErrors.bank_name = t('valEnableManualOverride');
     }
 
     setErrors(newErrors);
@@ -163,8 +163,8 @@ export default function CreateOrder() {
     },
     onSuccess: async (data) => {
       setCreatedOrder(data);
-      toast.success('Order created successfully!', {
-        description: `Order #${data.orderId}`,
+      toast.success(t('orderCreatedSuccess'), {
+        description: `${t('order')} #${data.orderId}`,
       });
 
       await uploadDocumentsAfterOrder(data.orderId);
@@ -172,7 +172,7 @@ export default function CreateOrder() {
       setShowInvoiceModal(true);
     },
     onError: (error) => {
-      toast.error('Failed to create order', {
+      toast.error(t('failedCreateOrder'), {
         description: error.message,
       });
     },
@@ -180,7 +180,7 @@ export default function CreateOrder() {
 
   const handleSubmit = () => {
     if (!termsAccepted) {
-      toast.error('Please accept the Terms & Conditions to proceed');
+      toast.error(t('valTermsRequired'));
       return;
     }
     if (validateForm()) {
@@ -190,7 +190,7 @@ export default function CreateOrder() {
         createOrderMutation.mutate(formData);
       }
     } else {
-      toast.error('Please fix all errors before submitting');
+      toast.error(t('valFixErrorsBeforeSubmit'));
     }
   };
 
@@ -201,7 +201,7 @@ export default function CreateOrder() {
 
   const copyInvoiceEmail = () => {
     navigator.clipboard.writeText(INVOICE_EMAIL);
-    toast.success('Email copied to clipboard');
+    toast.success(t('emailCopiedToClipboard'));
   };
 
   const handleFileUpload = (file, type) => {
@@ -216,7 +216,7 @@ export default function CreateOrder() {
 
     if (setFile) {
       setFile(file);
-      toast.success('Document selected', {
+      toast.success(t('documentSelected'), {
         description: file.name,
       });
     }
@@ -256,10 +256,10 @@ export default function CreateOrder() {
     try {
       for (const upload of uploads) {
         await apiClient.uploadOrderDocument(orderId, upload.file, upload.docType);
-        toast.success(`${upload.name} uploaded successfully`);
+        toast.success(`${upload.name} ${t('uploadedSuccessfully')}`);
       }
     } catch (error) {
-      toast.error('Failed to upload some documents', {
+      toast.error(t('failedUploadSomeDocuments'), {
         description: error.message,
       });
     } finally {
@@ -275,11 +275,11 @@ export default function CreateOrder() {
       if (response && (response.presigned_url || response.url)) {
         window.open(response.presigned_url || response.url, '_blank', 'noopener,noreferrer');
       } else {
-        toast.error('Could not open Terms & Conditions');
+        toast.error(t('couldNotOpenTerms'));
       }
     } catch (error) {
       console.error('Failed to get terms:', error);
-      toast.error('Failed to load Terms & Conditions');
+      toast.error(t('failedLoadTerms'));
     }
   };
 
@@ -512,29 +512,25 @@ export default function CreateOrder() {
                         <div className="bg-slate-50 rounded-lg p-6 space-y-4">
                           <h3 className="font-bold text-lg text-[#1e3a5f]">{t('keyPoints')}</h3>
                           <ul className="list-disc list-inside space-y-2 text-sm text-slate-700">
-                            <li>
-                              All fund transfers comply with Indonesian regulations including Anti-Money Laundering laws
-                            </li>
-                            <li>
-                              PT GARUDA ARMA NUSA will execute transfers as mandated in signed Fund Transfer Orders
-                            </li>
-                            <li>Orders must be submitted at least 1 hour before currency cut-off time</li>
-                            <li>Payment must be received 30 minutes before cut-off time</li>
-                            <li>Orders are valid only once on the stated date</li>
-                            <li>Authorized signatories must be documented per Customer Data Form</li>
+                            <li>{t('termsKeyPoint1')}</li>
+                            <li>{t('termsKeyPoint2')}</li>
+                            <li>{t('termsKeyPoint3')}</li>
+                            <li>{t('termsKeyPoint4')}</li>
+                            <li>{t('termsKeyPoint5')}</li>
+                            <li>{t('termsKeyPoint6')}</li>
                           </ul>
                         </div>
 
                         <div className="text-xs text-slate-600 leading-relaxed space-y-2">
                           <p>
-                            <strong>Regulations Applied:</strong>
+                            <strong>{t('termsRegulationsApplied')}</strong>
                           </p>
                           <ul className="list-disc list-inside ml-4">
-                            <li>Law No. 8/2010 - Prevention and Eradication of Money Laundering</li>
-                            <li>Law No. 3/2011 - Fund Transfers</li>
-                            <li>Law No. 9/2013 - Prevention of Terrorism Financing</li>
-                            <li>Law No. 27/2022 - Personal Data Protection</li>
-                            <li>Bank Indonesia Regulations on Payment Services</li>
+                            <li>{t('termsRegulation1')}</li>
+                            <li>{t('termsRegulation2')}</li>
+                            <li>{t('termsRegulation3')}</li>
+                            <li>{t('termsRegulation4')}</li>
+                            <li>{t('termsRegulation5')}</li>
                           </ul>
                         </div>
                       </div>

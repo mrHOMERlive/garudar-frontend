@@ -29,40 +29,40 @@ const ACTIVE_STATUSES = ['created', 'check', 'pending_payment', 'on_execution'];
 
 const STATUS_CONFIG = {
   created: {
-    label: 'Created',
+    labelKey: 'created',
     icon: Clock,
     color: 'bg-blue-500',
     light: 'bg-blue-50 border-blue-200',
     text: 'text-blue-700',
     dot: 'bg-blue-500',
-    desc: 'Order placed, awaiting review',
+    descKey: 'statusCreatedDesc',
   },
   check: {
-    label: 'Under Review',
+    labelKey: 'statusUnderReviewLabel',
     icon: AlertCircle,
     color: 'bg-amber-500',
     light: 'bg-amber-50 border-amber-200',
     text: 'text-amber-700',
     dot: 'bg-amber-500',
-    desc: 'Our team is reviewing your order',
+    descKey: 'statusUnderReviewDesc',
   },
   pending_payment: {
-    label: 'Pending Payment',
+    labelKey: 'pending_payment',
     icon: CreditCard,
     color: 'bg-orange-500',
     light: 'bg-orange-50 border-orange-200',
     text: 'text-orange-700',
     dot: 'bg-orange-500',
-    desc: 'Awaiting your payment',
+    descKey: 'statusPendingPaymentDesc',
   },
   on_execution: {
-    label: 'In Progress',
+    labelKey: 'statusInProgressLabel',
     icon: Loader2,
     color: 'bg-indigo-500',
     light: 'bg-indigo-50 border-indigo-200',
     text: 'text-indigo-700',
     dot: 'bg-indigo-500',
-    desc: 'Transfer is being processed',
+    descKey: 'statusInProgressDesc',
   },
 };
 
@@ -237,7 +237,7 @@ export default function CurrentOrders() {
               <div key={status} className={`rounded-2xl border-2 ${cfg.light} p-4 shadow-sm`}>
                 <div className="flex items-center gap-2 mb-2">
                   <Icon className={`w-4 h-4 ${cfg.text}`} />
-                  <span className={`text-xs font-semibold ${cfg.text}`}>{cfg.label}</span>
+                  <span className={`text-xs font-semibold ${cfg.text}`}>{t(cfg.labelKey)}</span>
                 </div>
                 <div className={`text-3xl font-bold ${cfg.text}`}>{s.count}</div>
                 <div className="mt-1 space-y-0.5">
@@ -310,9 +310,9 @@ export default function CurrentOrders() {
                   >
                     <div className="flex items-center gap-3">
                       <Icon className={`w-4 h-4 ${cfg.text}`} />
-                      <span className={`font-semibold text-sm ${cfg.text}`}>{cfg.label}</span>
+                      <span className={`font-semibold text-sm ${cfg.text}`}>{t(cfg.labelKey)}</span>
                       <Badge className={`${cfg.color} text-white text-xs px-2`}>{group.length}</Badge>
-                      <span className={`text-xs hidden sm:block ${cfg.text} opacity-70`}>{cfg.desc}</span>
+                      <span className={`text-xs hidden sm:block ${cfg.text} opacity-70`}>{t(cfg.descKey)}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="hidden sm:flex gap-3 text-xs text-slate-500">

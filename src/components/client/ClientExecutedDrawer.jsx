@@ -8,6 +8,7 @@ import { apiClient } from '@/api/apiClient';
 import { toast } from 'sonner';
 import { Download, Upload } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { t } from '@/components/utils/language';
 
 export default function ClientExecutedDrawer({ order, open, onClose, onUpdate }) {
   const [uploadingActReport, setUploadingActReport] = useState(false);
@@ -41,28 +42,21 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
     setUploadingActReport(true);
     try {
-      // Upload document using apiClient
-      // DocType 'act_report_signed_client' maps to the client upload permission
-      const response = await apiClient.uploadOrderDocument(order.id, file, 'act_report_signed_client');
+      await apiClient.uploadOrderDocument(order.id, file, 'act_report_signed_client');
 
-      toast.success('Signed Act Report uploaded successfully');
-
-      // Update local state if needed (though onUpdate refetching usually handles it)
-      // Note: apiClient upload doesn't return file_url directly in the same way,
-      // but the order refetch will get the new status.
-      // If we need the URL immediately, we might need a separate call or rely on refetch.
+      toast.success(t('signedActReportUploadedToast'));
 
       refetchDocuments();
       onUpdate?.();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to upload Act Report');
+      toast.error(t('failedUploadActReportToast'));
     } finally {
       setUploadingActReport(false);
     }
   };
 
-  const handleDownload = async (docId, fileName) => {
+  const handleDownload = async (docId) => {
     try {
       const response = await apiClient.downloadDocument(order.id, docId);
       if (response && response.presigned_url) {
@@ -74,11 +68,11 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
         link.click();
         document.body.removeChild(link);
       } else {
-        toast.error('Failed to get download URL');
+        toast.error(t('failedDownloadUrlToast'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to download document');
+      toast.error(t('toastFailedDownloadDoc'));
     }
   };
 
@@ -86,9 +80,11 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
     <Sheet open={open} onOpenChange={(val) => !val && onClose()}>
       <SheetContent className="w-full sm:max-w-2xl bg-white border-slate-200 text-slate-900 flex flex-col overflow-hidden">
         <SheetHeader className="mb-4 flex-shrink-0">
-          <SheetTitle className="text-slate-900 flex items-center gap-3">Order #{order.order_number}</SheetTitle>
+          <SheetTitle className="text-slate-900 flex items-center gap-3">
+            {t('order')} #{order.order_number}
+          </SheetTitle>
           <SheetDescription className="text-slate-500">
-            Details for executed order #{order.order_number}
+            {t('executedDetailsSubtitle')} #{order.order_number}
           </SheetDescription>
         </SheetHeader>
 
@@ -97,21 +93,21 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
             {/* Order Info */}
             <div className="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-200">
               <div>
-                <span className="text-slate-500 font-medium">Client:</span>{' '}
+                <span className="text-slate-500 font-medium">{t('clientShortLabel')}:</span>{' '}
                 <span className="text-slate-900">{client?.client_name || order.client_name || order.client_id}</span>
               </div>
               <div>
-                <span className="text-slate-500 font-medium">Amount:</span>{' '}
+                <span className="text-slate-500 font-medium">{t('drawerAmountLabel')}:</span>{' '}
                 <span className="text-emerald-600 font-semibold">
                   {order.amount?.toLocaleString()} {order.currency}
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 font-medium">Beneficiary:</span>{' '}
+                <span className="text-slate-500 font-medium">{t('beneficiaryShortLabel')}:</span>{' '}
                 <span className="text-slate-900">{order.beneficiary_name}</span>
               </div>
               <div>
-                <span className="text-slate-500 font-medium">Bank:</span>{' '}
+                <span className="text-slate-500 font-medium">{t('bankShortLabel')}:</span>{' '}
                 <span className="text-slate-900">
                   {order.bank_name} ({order.bic})
                 </span>
@@ -122,22 +118,22 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
             {/* Transaction Status */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Transaction Status</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('transactionStatusUppercase')}</h3>
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-xs text-slate-600">Status</Label>
+                  <Label className="text-xs text-slate-600">{t('status')}</Label>
                   <Badge className={order.transaction_status_received ? 'bg-emerald-600' : 'bg-slate-400'}>
-                    {order.transaction_status_received ? 'Received' : 'Not Received'}
+                    {order.transaction_status_received ? t('statusReceivedLabel') : t('statusNotReceivedLabel')}
                   </Badge>
                 </div>
                 {order.transaction_status_number && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.transaction_status_number}
+                    <span className="text-slate-500">{t('drawerNumberLabel')}:</span> {order.transaction_status_number}
                   </div>
                 )}
                 {order.transaction_status_date && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span>{' '}
+                    <span className="text-slate-500">{t('drawerDateLabel')}:</span>{' '}
                     {new Date(order.transaction_status_date).toLocaleDateString()}
                   </div>
                 )}
@@ -154,7 +150,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download Transaction Status
+                    {t('downloadTransactionStatusBtn')}
                   </Button>
                 )}
               </div>
@@ -164,22 +160,23 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
             {/* MT103 */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">MT103</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('mt103Title')}</h3>
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-xs text-slate-600">Status</Label>
+                  <Label className="text-xs text-slate-600">{t('status')}</Label>
                   <Badge className={order.mt103_received ? 'bg-emerald-600' : 'bg-slate-400'}>
-                    {order.mt103_received ? 'Received' : 'Not Received'}
+                    {order.mt103_received ? t('statusReceivedLabel') : t('statusNotReceivedLabel')}
                   </Badge>
                 </div>
                 {order.mt103_number && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.mt103_number}
+                    <span className="text-slate-500">{t('drawerNumberLabel')}:</span> {order.mt103_number}
                   </div>
                 )}
                 {order.mt103_date && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span> {new Date(order.mt103_date).toLocaleDateString()}
+                    <span className="text-slate-500">{t('drawerDateLabel')}:</span>{' '}
+                    {new Date(order.mt103_date).toLocaleDateString()}
                   </div>
                 )}
                 {documents?.find((d) => d.doc_type === 'mt103') && (
@@ -195,7 +192,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download MT103
+                    {t('downloadMt103Btn')}
                   </Button>
                 )}
               </div>
@@ -205,7 +202,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
             {/* Act Report */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Act Report</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('actReportTitle')}</h3>
               <div
                 className={`rounded-lg p-3 border mb-3 ${
                   order.act_report_status === 'signed'
@@ -214,7 +211,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-xs text-slate-600">Status</Label>
+                  <Label className="text-xs text-slate-600">{t('status')}</Label>
                   <Badge
                     className={
                       order.act_report_status === 'signed'
@@ -225,20 +222,21 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     {order.act_report_status === 'signed'
-                      ? 'Signed'
+                      ? t('actSignedLabel')
                       : order.act_report_status === 'on_sign'
-                        ? 'On Sign'
-                        : 'Not Made'}
+                        ? t('actOnSignLabel')
+                        : t('actNotMadeLabel')}
                   </Badge>
                 </div>
                 {order.act_report_number && (
                   <div className="text-sm text-slate-900 mb-1">
-                    <span className="text-slate-500">Number:</span> {order.act_report_number}
+                    <span className="text-slate-500">{t('drawerNumberLabel')}:</span> {order.act_report_number}
                   </div>
                 )}
                 {order.act_report_date && (
                   <div className="text-sm text-slate-900 mb-2">
-                    <span className="text-slate-500">Date:</span> {new Date(order.act_report_date).toLocaleDateString()}
+                    <span className="text-slate-500">{t('drawerDateLabel')}:</span>{' '}
+                    {new Date(order.act_report_date).toLocaleDateString()}
                   </div>
                 )}
                 {order.act_report_status === 'signed'
@@ -255,7 +253,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                         }
                       >
                         <Download className="w-3 h-3 mr-2" />
-                        Download Act Report
+                        {t('downloadActReportBtn')}
                       </Button>
                     )
                   : documents?.find((d) => d.doc_type === 'act_report_unsigned') && (
@@ -271,14 +269,16 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                         }
                       >
                         <Download className="w-3 h-3 mr-2" />
-                        Download Unsigned Act Report
+                        {t('downloadUnsignedActReportBtn')}
                       </Button>
                     )}
               </div>
 
               {order.act_report_status !== 'signed' && (
                 <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                  <Label className="text-xs text-slate-700 mb-2 block font-medium">Upload Signed Act Report</Label>
+                  <Label className="text-xs text-slate-700 mb-2 block font-medium">
+                    {t('uploadSignedActReportLabel')}
+                  </Label>
                   <div className="flex items-center gap-2">
                     <label className="flex-1">
                       <input
@@ -296,7 +296,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                         disabled={uploadingActReport}
                       >
                         <Upload className="w-3 h-3 mr-2" />
-                        {uploadingActReport ? 'Uploading...' : 'Upload Signed Act Report'}
+                        {uploadingActReport ? t('uploadingDots') : t('uploadSignedActReportBtn')}
                       </Button>
                     </label>
                     {documents?.find((d) => d.doc_type === 'act_report_signed_client') && (
@@ -323,11 +323,11 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
             {/* Other Documents */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Documents</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('documentsHeader')}</h3>
 
               {documents?.find((d) => d.doc_type === 'sales_contract') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Sales Contract</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('salesContractDrawerLabel')}</Label>
                   <Button
                     size="sm"
                     variant="outline"
@@ -340,14 +340,14 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download
+                    {t('downloadShortLabel')}
                   </Button>
                 </div>
               )}
 
               {documents?.find((d) => d.doc_type === 'invoice') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Invoice</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('invoiceDrawerLabel')}</Label>
                   <Button
                     size="sm"
                     variant="outline"
@@ -360,14 +360,14 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download
+                    {t('downloadShortLabel')}
                   </Button>
                 </div>
               )}
 
               {documents?.find((d) => d.doc_type === 'other') && (
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Other Documents</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('otherDocumentsDrawerLabel')}</Label>
                   <Button
                     size="sm"
                     variant="outline"
@@ -380,7 +380,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                     }
                   >
                     <Download className="w-3 h-3 mr-2" />
-                    Download
+                    {t('downloadShortLabel')}
                   </Button>
                 </div>
               )}
@@ -390,11 +390,11 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
 
             {/* Order Information */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('orderInformationSection')}</h3>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Amount</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('drawerAmountLabel')}</div>
                   <div className="font-semibold text-slate-900">
                     {order.currency}{' '}
                     {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -402,17 +402,17 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Remittance Currency</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('remittanceCurrencyLabel')}</div>
                   <div className="font-semibold text-slate-900">{order.currency}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Debit Account</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('debitAccountLabel')}</div>
                   <div className="font-semibold text-slate-900">{debitAccount}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('transactionReferenceLabel')}</div>
                   <div className="font-semibold text-slate-900 text-xs break-all">
                     {order.transaction_reference || '-'}
                   </div>
@@ -420,44 +420,44 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Beneficiary Name</div>
+                <div className="text-xs text-slate-500 mb-1">{t('beneficiaryNameDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900">{order.beneficiary_name}</div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
+                <div className="text-xs text-slate-500 mb-1">{t('beneficiaryAddressDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900 text-sm">{order.beneficiary_address}</div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Destination Account</div>
+                <div className="text-xs text-slate-500 mb-1">{t('destinationAccountDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900">{order.destination_account}</div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Bank Country</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('bankCountryLabel')}</div>
                   <div className="font-semibold text-slate-900">{order.country_bank}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">BIC/SWIFT</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('bicSwiftLabel')}</div>
                   <div className="font-semibold text-slate-900">{order.bic}</div>
                 </div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Bank Name</div>
+                <div className="text-xs text-slate-500 mb-1">{t('bankNameDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900">{order.bank_name}</div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Bank Address</div>
+                <div className="text-xs text-slate-500 mb-1">{t('bankAddressDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900 text-sm">{order.bank_address || '-'}</div>
               </div>
 
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-xs text-slate-500 mb-1">Transaction Remark</div>
+                <div className="text-xs text-slate-500 mb-1">{t('transactionRemarkDrawerLabel')}</div>
                 <div className="font-semibold text-slate-900 text-sm whitespace-pre-wrap">
                   {order.transaction_remark}
                 </div>
@@ -469,7 +469,7 @@ export default function ClientExecutedDrawer({ order, open, onClose, onUpdate })
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200">
           <Button type="button" onClick={onClose} className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">
-            Close
+            {t('closeBtn')}
           </Button>
         </div>
       </SheetContent>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Globe, Upload, FileText, CheckCircle, Download, Loader2 } from 'lucide-react';
 import ClientPageHeader from '@/components/user/ClientPageHeader';
+import { t } from '@/components/utils/language';
 
 export default function ClientSubmitNDA() {
   const [uploadingNDA, setUploadingNDA] = useState(false);
@@ -31,7 +32,6 @@ export default function ClientSubmitNDA() {
     queryKey: ['nda-badge', client?.client_id],
     queryFn: async () => {
       const response = await apiClient.getClientBadges(client.client_id);
-      // Assuming response is array or object with items
       const badges = Array.isArray(response) ? response : response.items || [];
       return badges.find((b) => b.badge_type === 'other_submit');
     },
@@ -50,7 +50,7 @@ export default function ClientSubmitNDA() {
     mutationFn: (data) => apiClient.updateBadge(badge.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nda-badge'] });
-      toast.success('NDA submitted successfully');
+      toast.success(t('ndaUploadSuccessToast'));
     },
   });
 
@@ -67,7 +67,7 @@ export default function ClientSubmitNDA() {
         status: 'submitted',
       });
     } catch (error) {
-      toast.error('Upload failed');
+      toast.error(t('ndaUploadFailedToast'));
     } finally {
       setUploadingNDA(false);
     }
@@ -76,13 +76,13 @@ export default function ClientSubmitNDA() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader
-        subtitle="Submit NDA Document"
-        badgeLabel="CLIENT"
+        subtitle={t('submitNdaSubtitle')}
+        badgeLabel={t('clientDashboard')}
         actions={
           <Link to={createPageUrl('GTrans')}>
             <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
               <Globe className="w-4 h-4 mr-2" />
-              Public Site
+              {t('publicSite')}
             </Button>
           </Link>
         }
@@ -93,10 +93,10 @@ export default function ClientSubmitNDA() {
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-[#1e3a5f] flex items-center gap-2 text-lg sm:text-xl">
               <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
-              NDA Document Submission
+              {t('ndaDocumentSubmissionTitle')}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              {badge?.staff_comment || 'Please download, sign, and upload the NDA document.'}
+              {badge?.staff_comment || t('pleaseDownloadSignAndUpload')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
@@ -109,16 +109,14 @@ export default function ClientSubmitNDA() {
                       <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-medium text-[#1e3a5f] text-sm sm:text-base">NDA Template</h3>
-                      <p className="text-xs sm:text-sm text-slate-500">
-                        Download this document, sign it, and upload below
-                      </p>
+                      <h3 className="font-medium text-[#1e3a5f] text-sm sm:text-base">{t('ndaTemplateLabel')}</h3>
+                      <p className="text-xs sm:text-sm text-slate-500">{t('downloadSignAndUploadHint')}</p>
                     </div>
                   </div>
                   <a href={badge.document_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                     <Button className="bg-[#1e3a5f] hover:bg-[#152a45] w-full sm:w-auto">
                       <Download className="w-4 h-4 mr-2" />
-                      Download
+                      {t('download')}
                     </Button>
                   </a>
                 </div>
@@ -131,13 +129,13 @@ export default function ClientSubmitNDA() {
                 <div className="space-y-4">
                   <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto" />
                   <div>
-                    <h3 className="text-lg font-semibold text-emerald-600">Document Submitted</h3>
-                    <p className="text-sm text-slate-500 mt-1">Your NDA has been submitted and is under review</p>
+                    <h3 className="text-lg font-semibold text-emerald-600">{t('documentSubmittedTitle')}</h3>
+                    <p className="text-sm text-slate-500 mt-1">{t('ndaUnderReviewMsg')}</p>
                   </div>
                   <a href={badge.submitted_document_url} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="border-slate-300">
                       <Download className="w-4 h-4 mr-2" />
-                      View Submitted Document
+                      {t('viewSubmittedDocumentBtn')}
                     </Button>
                   </a>
                 </div>
@@ -145,8 +143,8 @@ export default function ClientSubmitNDA() {
                 <div className="space-y-4">
                   <Upload className="w-16 h-16 text-slate-400 mx-auto" />
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1e3a5f]">Upload Signed NDA</h3>
-                    <p className="text-sm text-slate-500 mt-1">Upload the signed NDA document (PDF format)</p>
+                    <h3 className="text-lg font-semibold text-[#1e3a5f]">{t('uploadSignedNdaTitle')}</h3>
+                    <p className="text-sm text-slate-500 mt-1">{t('uploadSignedNdaPdfHelp')}</p>
                   </div>
                   <div>
                     <input
@@ -163,12 +161,12 @@ export default function ClientSubmitNDA() {
                           {uploadingNDA ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Uploading...
+                              {t('uploading')}
                             </>
                           ) : (
                             <>
                               <Upload className="w-4 h-4 mr-2" />
-                              Select File
+                              {t('selectFileBtn')}
                             </>
                           )}
                         </span>
@@ -182,7 +180,7 @@ export default function ClientSubmitNDA() {
             {/* Status Badge */}
             {badge && (
               <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-600">{t('statusColon')}</span>
                 <span
                   className={`font-medium ${
                     badge.status === 'submitted'

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { ArrowLeft, Send, Download, Upload } from 'lucide-react';
+import { t } from '@/components/utils/language';
 
 export default function ClientNDA() {
   const queryClient = useQueryClient();
@@ -43,8 +44,8 @@ export default function ClientNDA() {
     term_en: '',
     partner_inn: '',
     partner_name_ru: '',
-    partner_address_ru: '',
     partner_name_en: '',
+    partner_address_ru: '',
     partner_address_en: '',
     partner_signatory_ru: '',
     partner_signatory_en: '',
@@ -64,7 +65,7 @@ export default function ClientNDA() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['ndaRequest']);
-      toast.success('NDA information saved');
+      toast.success(t('ndaInformationSavedToast'));
     },
   });
 
@@ -74,16 +75,11 @@ export default function ClientNDA() {
         status: 'submitted',
         submitted_at: new Date().toISOString(),
       });
-      // Client status update happens on backend usually, but if needed:
-      // await apiClient.updateClient(client.client_id, { nda_status: 'submitted' });
-      // Leaving it out if backend handles side effects, or uncomment if frontend must do it.
-      // Based on summary: "PUT /api/v1/nda-requests ... обновление (при submitted -> submitted_at + nda_status)"
-      // So backend handles it.
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['ndaRequest']);
       queryClient.invalidateQueries(['currentClient']);
-      toast.success('NDA submitted for review!');
+      toast.success(t('ndaSubmittedForReviewToast'));
     },
   });
 
@@ -93,15 +89,12 @@ export default function ClientNDA() {
     setUploading(true);
     try {
       const response = await apiClient.uploadFile(file, client.client_id, ndaRequest.id);
-      // Assuming uploadFile returns { file_url: ... } or { url: ... } or just uses the filename/path
-      // If the API response structure is known (from uploadFile implementation or backend), use it.
-      // apiClient.js uploadFile returns response.json().
       const file_url = response.file_url || response.url || response.path;
       await apiClient.updateNdaRequest(ndaRequest.id, { signed_file_url: file_url });
       queryClient.invalidateQueries(['ndaRequest']);
-      toast.success('Signed NDA uploaded');
+      toast.success(t('signedNdaUploadedToast'));
     } catch (error) {
-      toast.error('Failed to upload file');
+      toast.error(t('failedUploadFile'));
     } finally {
       setUploading(false);
     }
@@ -117,7 +110,7 @@ export default function ClientNDA() {
 
   const handleSubmit = () => {
     if (!ndaRequest) {
-      toast.error('Please save NDA information first');
+      toast.error(t('saveNdaFirst'));
       return;
     }
     submitNDAMutation.mutate();
@@ -128,13 +121,13 @@ export default function ClientNDA() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#1e3a5f] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+          <p className="text-slate-600">{t('loading')}</p>
         </div>
       </div>
     );
   }
 
-  if (!client) return <div>Error loading client data</div>;
+  if (!client) return <div>{t('errorLoadingClient')}</div>;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -143,7 +136,7 @@ export default function ClientNDA() {
           <Link to={createPageUrl('UserDashboard')}>
             <Button variant="ghost" className="text-white hover:bg-white/10 -ml-2 sm:ml-0">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t('backToDashboard')}
             </Button>
           </Link>
         </div>
@@ -151,18 +144,18 @@ export default function ClientNDA() {
 
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1 sm:mb-2">NDA Request</h1>
-          <p className="text-sm sm:text-base text-slate-600">Submit your Non-Disclosure Agreement information</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1 sm:mb-2">{t('ndaRequestTitle')}</h1>
+          <p className="text-sm sm:text-base text-slate-600">{t('ndaRequestSubtitle')}</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">Partner Information</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('partnerInformation')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Effective Date *</Label>
+                <Label>{t('effectiveDateLabel')}</Label>
                 <Input
                   type="date"
                   value={formData.effective_date || ndaRequest?.effective_date || ''}
@@ -170,7 +163,7 @@ export default function ClientNDA() {
                 />
               </div>
               <div>
-                <Label>Partner INN</Label>
+                <Label>{t('partnerInnLabel')}</Label>
                 <Input
                   value={formData.partner_inn || ndaRequest?.partner_inn || ''}
                   onChange={(e) => handleChange('partner_inn', e.target.value)}
@@ -179,7 +172,7 @@ export default function ClientNDA() {
             </div>
 
             <div>
-              <Label>Partner Name (Russian) *</Label>
+              <Label>{t('partnerNameRu')}</Label>
               <Input
                 value={formData.partner_name_ru || ndaRequest?.partner_name_ru || ''}
                 onChange={(e) => handleChange('partner_name_ru', e.target.value)}
@@ -187,7 +180,7 @@ export default function ClientNDA() {
             </div>
 
             <div>
-              <Label>Partner Name (English) *</Label>
+              <Label>{t('partnerNameEn')}</Label>
               <Input
                 value={formData.partner_name_en || ndaRequest?.partner_name_en || ''}
                 onChange={(e) => handleChange('partner_name_en', e.target.value)}
@@ -195,7 +188,7 @@ export default function ClientNDA() {
             </div>
 
             <div>
-              <Label>Partner Address (Russian)</Label>
+              <Label>{t('partnerAddressRu')}</Label>
               <Input
                 value={formData.partner_address_ru || ndaRequest?.partner_address_ru || ''}
                 onChange={(e) => handleChange('partner_address_ru', e.target.value)}
@@ -203,7 +196,7 @@ export default function ClientNDA() {
             </div>
 
             <div>
-              <Label>Partner Address (English)</Label>
+              <Label>{t('partnerAddressEn')}</Label>
               <Input
                 value={formData.partner_address_en || ndaRequest?.partner_address_en || ''}
                 onChange={(e) => handleChange('partner_address_en', e.target.value)}
@@ -212,14 +205,14 @@ export default function ClientNDA() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Contact Name</Label>
+                <Label>{t('contactNameLabel')}</Label>
                 <Input
                   value={formData.partner_contact_name || ndaRequest?.partner_contact_name || ''}
                   onChange={(e) => handleChange('partner_contact_name', e.target.value)}
                 />
               </div>
               <div>
-                <Label>Contact Email</Label>
+                <Label>{t('contactEmailLabel')}</Label>
                 <Input
                   type="email"
                   value={formData.partner_contact_email || ndaRequest?.partner_contact_email || ''}
@@ -227,7 +220,7 @@ export default function ClientNDA() {
                 />
               </div>
               <div>
-                <Label>Contact Phone</Label>
+                <Label>{t('contactPhoneLabel')}</Label>
                 <Input
                   value={formData.partner_contact_phone || ndaRequest?.partner_contact_phone || ''}
                   onChange={(e) => handleChange('partner_contact_phone', e.target.value)}
@@ -242,7 +235,7 @@ export default function ClientNDA() {
                 onCheckedChange={(checked) => handleChange('paper_copy_required', checked)}
               />
               <label htmlFor="paper_copy" className="text-sm">
-                Paper copy required
+                {t('paperCopyRequired')}
               </label>
             </div>
           </CardContent>
@@ -251,13 +244,13 @@ export default function ClientNDA() {
         {ndaRequest?.generated_file_url && (
           <Card className="mb-6">
             <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-lg sm:text-xl">Generated NDA</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">{t('generatedNdaTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
               <a href={ndaRequest.generated_file_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" className="w-full sm:w-auto">
                   <Download className="w-4 h-4 mr-2" />
-                  Download Generated NDA
+                  {t('downloadGeneratedNda')}
                 </Button>
               </a>
             </CardContent>
@@ -266,7 +259,7 @@ export default function ClientNDA() {
 
         <Card className="mb-6">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">Upload Signed NDA</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('uploadSignedNdaTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
             <label>
@@ -285,7 +278,7 @@ export default function ClientNDA() {
                 className="w-full sm:w-auto"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {uploading ? 'Uploading...' : 'Upload Signed NDA'}
+                {uploading ? t('uploading') : t('uploadSignedNdaBtnLabel')}
               </Button>
             </label>
             {ndaRequest?.signed_file_url && (
@@ -293,7 +286,7 @@ export default function ClientNDA() {
                 <a href={ndaRequest.signed_file_url} target="_blank" rel="noopener noreferrer">
                   <Button size="sm" variant="outline" className="w-full sm:w-auto">
                     <Download className="w-4 h-4 mr-2" />
-                    View Uploaded NDA
+                    {t('viewUploadedNda')}
                   </Button>
                 </a>
               </div>
@@ -308,7 +301,7 @@ export default function ClientNDA() {
             disabled={createNDAMutation.isPending}
             className="w-full sm:w-auto"
           >
-            Save Progress
+            {t('saveProgressLabel')}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -316,7 +309,7 @@ export default function ClientNDA() {
             className="w-full sm:w-auto bg-[#1e3a5f] hover:bg-[#152a45]"
           >
             <Send className="w-4 h-4 mr-2" />
-            Submit NDA
+            {t('submitNdaLabel')}
           </Button>
         </div>
       </div>

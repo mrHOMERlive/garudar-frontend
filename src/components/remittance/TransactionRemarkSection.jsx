@@ -50,12 +50,12 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
       if (remark.length > 500) {
         setErrors((prev) => ({
           ...prev,
-          transaction_remark: 'Transaction remark exceeds 500 characters',
+          transaction_remark: t('valTransactionRemarkExceeds500'),
         }));
       } else if (!remark) {
         setErrors((prev) => ({
           ...prev,
-          transaction_remark: 'Please add at least one document',
+          transaction_remark: t('valAddAtLeastOneDocument'),
         }));
       } else {
         setErrors((prev) => ({
@@ -242,7 +242,7 @@ export default function TransactionRemarkSection({ formData, onChange, errors, s
                         <Input
                           value={doc.number}
                           onChange={(e) => updateDocument(index, 'number', e.target.value)}
-                          placeholder="e.g., 24543"
+                          placeholder={t('docNumberExamplePlaceholder')}
                           className="border-slate-200"
                           maxLength={32}
                         />

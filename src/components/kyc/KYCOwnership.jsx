@@ -8,8 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 import CountrySelector from './CountrySelector';
+import { t } from '@/components/utils/language';
 
-export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycProfileId, language = 'en' }) {
+export default function KYCOwnership({ ubos = [], clientId, kycProfileId }) {
   const queryClient = useQueryClient();
   const [countries, setCountries] = useState([]);
 
@@ -35,69 +36,63 @@ export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycPr
     mutationFn: (data) => apiClient.createUbo(clientId, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['ubos']);
-      toast.success(language === 'en' ? 'Shareholder added' : 'Pemegang saham ditambahkan');
-    }
+      toast.success(t('kycShareholderAddedToast'));
+    },
   });
 
   const deleteUBOMutation = useMutation({
     mutationFn: (id) => apiClient.deleteUbo(clientId, id),
     onSuccess: () => {
       queryClient.invalidateQueries(['ubos']);
-      toast.success(language === 'en' ? 'Shareholder removed' : 'Pemegang saham dihapus');
-    }
+      toast.success(t('kycShareholderRemovedToast'));
+    },
   });
 
   const handleAddUBO = () => {
     if (!clientId) {
-      toast.error(language === 'en' ? 'Client ID missing' : 'ID Klien hilang');
+      toast.error(t('kycClientIdMissingToast'));
       return;
     }
     addUBOMutation.mutate({
       ubo_name: '',
       shareholding_percent: 0,
       nationality: '',
-      residence_country: ''
+      residence_country: '',
     });
   };
 
   const handleUpdateUBO = async (uboId, field, value) => {
     try {
-      const currentUbo = ubos.find(u => u.id === uboId);
+      const currentUbo = ubos.find((u) => u.id === uboId);
       const payload = {
         ubo_name: currentUbo?.ubo_name,
         shareholding_percent: currentUbo?.shareholding_percent,
         nationality: currentUbo?.nationality,
         residence_country: currentUbo?.residence_country,
-        [field]: value
+        [field]: value,
       };
 
       await apiClient.updateUbo(clientId, uboId, payload);
       queryClient.invalidateQueries(['ubos']);
     } catch (error) {
       console.error('Update failed:', error);
-      toast.error(language === 'en' ? 'Failed to update' : 'Gagal memperbarui');
+      toast.error(t('kycFailedToUpdateToast'));
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-[#1e3a5f]">
-          {language === 'en' ? '4. Ownership Information' : '4. Informasi Kepemilikan'}
-        </h3>
+        <h3 className="text-xl font-semibold text-[#1e3a5f]">{t('kycOwnershipTitle')}</h3>
         <Button onClick={handleAddUBO} size="sm" disabled={!kycProfileId}>
           <Plus className="w-4 h-4 mr-2" />
-          {language === 'en' ? 'Add Shareholder' : 'Tambah Pemegang Saham'}
+          {t('kycAddShareholder')}
         </Button>
       </div>
 
       {sortedUbos.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center text-slate-500">
-            {language === 'en'
-              ? 'No shareholders added yet. Click "Add Shareholder" to begin.'
-              : 'Belum ada pemegang saham. Klik "Tambah Pemegang Saham" untuk memulai.'}
-          </CardContent>
+          <CardContent className="py-8 text-center text-slate-500">{t('kycNoShareholdersYet')}</CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -106,7 +101,6 @@ export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycPr
               key={ubo.id}
               ubo={ubo}
               index={idx}
-              language={language}
               countries={countries}
               onUpdate={handleUpdateUBO}
               onDelete={(id) => deleteUBOMutation.mutate(id)}
@@ -118,12 +112,12 @@ export default function KYCOwnership({ formData = {}, ubos = [], clientId, kycPr
   );
 }
 
-function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }) {
+function ShareholderItem({ ubo, index, countries, onUpdate, onDelete }) {
   const [localState, setLocalState] = useState({
     ubo_name: ubo.ubo_name || '',
     shareholding_percent: ubo.shareholding_percent || 0,
     nationality: ubo.nationality || '',
-    residence_country: ubo.residence_country || ''
+    residence_country: ubo.residence_country || '',
   });
   const dirtyFields = useRef(new Set());
 
@@ -135,13 +129,13 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
       ubo_name: ubo.ubo_name || '',
       shareholding_percent: ubo.shareholding_percent || 0,
       nationality: ubo.nationality || '',
-      residence_country: ubo.residence_country || ''
+      residence_country: ubo.residence_country || '',
     });
   }, [ubo.ubo_name, ubo.shareholding_percent, ubo.nationality, ubo.residence_country]);
 
   const handleChange = (field, value) => {
     dirtyFields.current.add(field);
-    setLocalState(prev => ({ ...prev, [field]: value }));
+    setLocalState((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleBlur = (field, value) => {
@@ -158,20 +152,20 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
           <div className="flex-1 grid gap-4">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-semibold text-[#1e3a5f]">
-                {language === 'en' ? `Shareholder ${index + 1}` : `Pemegang Saham ${index + 1}`}
+                {t('kycShareholderLabel')} {index + 1}
               </h4>
             </div>
             <div>
-              <Label>4.1 {language === 'en' ? 'Shareholder and UBO Name (As per Passport or License document)' : 'Nama Pemegang Saham dan UBO (Sesuai Paspor atau Dokumen Izin)'} *</Label>
+              <Label>4.1 {t('kycShareholderNameLabel')} *</Label>
               <Input
-                placeholder={language === 'en' ? 'Enter shareholder name' : 'Masukkan nama pemegang saham'}
+                placeholder={t('kycShareholderNamePlaceholder')}
                 value={localState.ubo_name}
                 onChange={(e) => handleChange('ubo_name', e.target.value)}
                 onBlur={(e) => handleBlur('ubo_name', e.target.value)}
               />
             </div>
             <div>
-              <Label>4.2 {language === 'en' ? 'Shareholding %' : 'Persentase Kepemilikan %'} *</Label>
+              <Label>4.2 {t('kycShareholdingLabel')} *</Label>
               <Input
                 type="number"
                 min="0"
@@ -179,8 +173,8 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
                 value={localState.shareholding_percent}
                 onChange={(e) => {
                   let val = e.target.value;
-                  if (parseFloat(val) > 100) val = "100";
-                  if (parseFloat(val) < 0) val = "0";
+                  if (parseFloat(val) > 100) val = '100';
+                  if (parseFloat(val) < 0) val = '0';
                   handleChange('shareholding_percent', val);
                 }}
                 onBlur={(e) => {
@@ -193,10 +187,10 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
               />
             </div>
             <div>
-              <Label>4.3 {language === 'en' ? 'Nationality and Country of Residence' : 'Kewarganegaraan dan Negara Tempat Tinggal'}</Label>
+              <Label>4.3 {t('kycNationalityResidence')}</Label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  placeholder={language === 'en' ? 'Nationality' : 'Kewarganegaraan'}
+                  placeholder={t('kycNationalityPlaceholder')}
                   value={localState.nationality}
                   onChange={(e) => handleChange('nationality', e.target.value)}
                   onBlur={(e) => handleBlur('nationality', e.target.value)}
@@ -206,14 +200,13 @@ function ShareholderItem({ ubo, index, language, countries, onUpdate, onDelete }
                   onChange={(value) => {
                     // Ensure we send the code, not the name
                     let finalValue = value;
-                    const countryObj = countries.find(c => c.name === value || c.code === value);
+                    const countryObj = countries.find((c) => c.name === value || c.code === value);
                     if (countryObj) {
                       finalValue = countryObj.code;
                     }
                     handleChange('residence_country', finalValue);
                     handleBlur('residence_country', finalValue);
                   }}
-                  language={language}
                   countries={countries}
                 />
               </div>

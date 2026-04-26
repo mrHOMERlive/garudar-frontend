@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import CountrySelector from './CountrySelector';
+import { t } from '@/components/utils/language';
 
 export default function KYCCorporateDetails({ formData = {}, onChange, language }) {
   const [countries, setCountries] = useState([]);
@@ -27,30 +28,22 @@ export default function KYCCorporateDetails({ formData = {}, onChange, language 
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-[#1e3a5f]">
-        {language === 'en' ? 'Corporate Details' : 'Detail Perusahaan'}
-      </h3>
+      <h3 className="text-xl font-semibold text-[#1e3a5f]">{t('kycStepCorporate')}</h3>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <Label>Company Name *</Label>
-          <Input
-            value={formData.company_name || ''}
-            onChange={(e) => handleChange('company_name', e.target.value)}
-          />
+          <Label>{t('kycCompanyNameLabel')}</Label>
+          <Input value={formData.company_name || ''} onChange={(e) => handleChange('company_name', e.target.value)} />
         </div>
         <div>
-          <Label>Trading Name</Label>
-          <Input
-            value={formData.trading_name || ''}
-            onChange={(e) => handleChange('trading_name', e.target.value)}
-          />
+          <Label>{t('kycTradingNameLabel')}</Label>
+          <Input value={formData.trading_name || ''} onChange={(e) => handleChange('trading_name', e.target.value)} />
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <Label>Incorporation Date</Label>
+          <Label>{t('kycIncorporationDateLabel')}</Label>
           <Input
             type="date"
             value={formData.incorporation_date || ''}
@@ -58,7 +51,7 @@ export default function KYCCorporateDetails({ formData = {}, onChange, language 
           />
         </div>
         <div>
-          <Label>Incorporation Country</Label>
+          <Label>{t('kycIncorporationCountryLabel')}</Label>
           <CountrySelector
             value={formData.incorporation_country}
             onChange={(value) => handleChange('incorporation_country', value)}
@@ -70,7 +63,7 @@ export default function KYCCorporateDetails({ formData = {}, onChange, language 
       </div>
 
       <div>
-        <Label>Registered Address *</Label>
+        <Label>{t('kycRegisteredAddressLabel')}</Label>
         <Textarea
           value={formData.registered_address || ''}
           onChange={(e) => handleChange('registered_address', e.target.value)}
@@ -80,35 +73,25 @@ export default function KYCCorporateDetails({ formData = {}, onChange, language 
 
       <div className="grid md:grid-cols-3 gap-4">
         <div>
-          <Label>Tax ID</Label>
-          <Input
-            value={formData.tax_id || ''}
-            onChange={(e) => handleChange('tax_id', e.target.value)}
-          />
+          <Label>{t('kycTaxIdLabel')}</Label>
+          <Input value={formData.tax_id || ''} onChange={(e) => handleChange('tax_id', e.target.value)} />
         </div>
         <div>
-          <Label>Registration Number</Label>
+          <Label>{t('kycRegistrationNumberLabel')}</Label>
           <Input
             value={formData.registration_number || ''}
             onChange={(e) => handleChange('registration_number', e.target.value)}
           />
         </div>
         <div>
-          <Label>Telephone</Label>
-          <Input
-            value={formData.telephone || ''}
-            onChange={(e) => handleChange('telephone', e.target.value)}
-          />
+          <Label>{t('kycTelephoneLabel')}</Label>
+          <Input value={formData.telephone || ''} onChange={(e) => handleChange('telephone', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <Label>Website</Label>
-        <Input
-          type="url"
-          value={formData.website || ''}
-          onChange={(e) => handleChange('website', e.target.value)}
-        />
+        <Label>{t('kycWebsiteLabel')}</Label>
+        <Input type="url" value={formData.website || ''} onChange={(e) => handleChange('website', e.target.value)} />
       </div>
     </div>
   );

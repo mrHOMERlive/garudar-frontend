@@ -131,10 +131,10 @@ export default function ClientKYC() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['kycProfile']);
-      toast.success('Progress saved');
+      toast.success(t('kycProgressSavedToast'));
     },
     onError: (err) => {
-      toast.error('Failed to save: ' + err.message);
+      toast.error(t('kycFailedToSaveToast') + err.message);
     },
   });
 
@@ -145,11 +145,11 @@ export default function ClientKYC() {
     onSuccess: () => {
       queryClient.invalidateQueries(['kycProfile']);
       queryClient.invalidateQueries(['currentClient']);
-      toast.success('KYC submitted for review!');
+      toast.success(t('kycSubmittedForReviewToast'));
       navigate(createPageUrl('UserDashboard'));
     },
     onError: (err) => {
-      toast.error('Failed to submit: ' + err.message);
+      toast.error(t('kycFailedSubmitToast') + err.message);
     },
   });
 
@@ -172,7 +172,7 @@ export default function ClientKYC() {
       // Try to save first if not saved yet (simplified logic)
       handleSaveProgress();
       // ideally we wait for save then submit, but for now let's just warn
-      toast.info('Saving changes first...');
+      toast.info(t('kycSavingChangesFirst'));
     }
     submitKYCMutation.mutate();
   };
@@ -203,7 +203,7 @@ export default function ClientKYC() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <p className="text-slate-600">Client not found. Please contact support.</p>
+          <p className="text-slate-600">{t('kycClientNotFound')}</p>
           <Link to={createPageUrl('UserDashboard')}>
             <Button className="mt-4">{t('backToDashboard')}</Button>
           </Link>

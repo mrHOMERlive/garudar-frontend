@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Download, Upload, CheckCircle, AlertCircle, FileText, ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { t } from '@/components/utils/language';
 
 const SERVICE_AGREEMENT_URL =
   'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/3d1a5e4fc_ServiceAgreement-GAN02022026.docx';
@@ -48,10 +49,10 @@ export default function ClientServiceAgreement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['client-badges'] });
-      toast.success('Signed Service Agreement uploaded successfully');
+      toast.success(t('signedSaUploadSuccessToast'));
     },
     onError: () => {
-      toast.error('Failed to upload document');
+      toast.error(t('failedToUploadDocumentToast'));
     },
   });
 
@@ -71,8 +72,6 @@ export default function ClientServiceAgreement() {
     if (!client) return;
     setIsGenerating(true);
     try {
-      // We pass empty fields because the backend should have logic to fill them
-      // based on the client_id, or we might need to update this later if specific fields are required frontend-side.
       const blob = await apiClient.generateServiceAgreement(
         {
           fields: {},
@@ -89,10 +88,10 @@ export default function ClientServiceAgreement() {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-      toast.success('Service Agreement generated successfully');
+      toast.success(t('saGeneratedSuccessToast'));
     } catch (error) {
       console.error('Failed to generate agreement:', error);
-      toast.error('Failed to generate Service Agreement');
+      toast.error(t('failedGenerateSaToast'));
     } finally {
       setIsGenerating(false);
     }
@@ -101,7 +100,7 @@ export default function ClientServiceAgreement() {
   if (!client) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-600">Loading...</p>
+        <p className="text-slate-600">{t('loading')}</p>
       </div>
     );
   }
@@ -119,15 +118,15 @@ export default function ClientServiceAgreement() {
             className="inline-flex items-center text-white hover:text-slate-200 mb-3 sm:mb-4 text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-3 shadow-lg flex-shrink-0">
               <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-white">Service Agreement</h1>
-              <p className="text-slate-300 text-xs sm:text-sm">Download, sign, and upload the agreement</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">{t('saSubtitle')}</h1>
+              <p className="text-slate-300 text-xs sm:text-sm">{t('saHeaderSubtitle')}</p>
             </div>
           </div>
         </div>
@@ -141,10 +140,8 @@ export default function ClientServiceAgreement() {
             <div className="flex items-center gap-3">
               <CheckCircle className="w-6 h-6 text-emerald-600" />
               <div>
-                <h3 className="font-semibold text-emerald-900">Agreement Accepted</h3>
-                <p className="text-sm text-emerald-700">
-                  Your Service Agreement has been reviewed and accepted by GTrans.
-                </p>
+                <h3 className="font-semibold text-emerald-900">{t('agreementAcceptedTitle')}</h3>
+                <p className="text-sm text-emerald-700">{t('saAcceptedDesc')}</p>
               </div>
             </div>
           </div>
@@ -155,8 +152,8 @@ export default function ClientServiceAgreement() {
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-blue-600" />
               <div>
-                <h3 className="font-semibold text-blue-900">Under Review</h3>
-                <p className="text-sm text-blue-700">Your signed Service Agreement is being reviewed by our team.</p>
+                <h3 className="font-semibold text-blue-900">{t('underReviewTitle')}</h3>
+                <p className="text-sm text-blue-700">{t('saUnderReviewDesc')}</p>
               </div>
             </div>
           </div>
@@ -165,8 +162,8 @@ export default function ClientServiceAgreement() {
         {/* Instructions */}
         <Card className="mb-6 border-slate-200">
           <CardHeader>
-            <CardTitle className="text-[#1e3a5f]">Instructions</CardTitle>
-            <CardDescription>Follow these steps to complete the Service Agreement</CardDescription>
+            <CardTitle className="text-[#1e3a5f]">{t('instructionsTitle')}</CardTitle>
+            <CardDescription>{t('saInstructionsDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start gap-3">
@@ -174,10 +171,8 @@ export default function ClientServiceAgreement() {
                 1
               </div>
               <div>
-                <h4 className="font-semibold text-slate-900">Download the Agreement</h4>
-                <p className="text-sm text-slate-600">
-                  Click the download button below to get the Service Agreement document.
-                </p>
+                <h4 className="font-semibold text-slate-900">{t('step1Heading')}</h4>
+                <p className="text-sm text-slate-600">{t('step1Desc')}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -185,10 +180,8 @@ export default function ClientServiceAgreement() {
                 2
               </div>
               <div>
-                <h4 className="font-semibold text-slate-900">Review and Sign</h4>
-                <p className="text-sm text-slate-600">
-                  Read the agreement carefully and sign it with authorized signatory.
-                </p>
+                <h4 className="font-semibold text-slate-900">{t('step2Heading')}</h4>
+                <p className="text-sm text-slate-600">{t('step2Desc')}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -196,8 +189,8 @@ export default function ClientServiceAgreement() {
                 3
               </div>
               <div>
-                <h4 className="font-semibold text-slate-900">Upload Signed Copy</h4>
-                <p className="text-sm text-slate-600">Upload the signed agreement using the upload button below.</p>
+                <h4 className="font-semibold text-slate-900">{t('step3Heading')}</h4>
+                <p className="text-sm text-slate-600">{t('step3Desc')}</p>
               </div>
             </div>
           </CardContent>
@@ -206,15 +199,15 @@ export default function ClientServiceAgreement() {
         {/* Download Section */}
         <Card className="mb-6 border-slate-200">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">Step 1: Download Agreement</CardTitle>
+            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">{t('step1DownloadTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex items-center gap-3 min-w-0">
                 <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-[#1e3a5f] flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-medium text-slate-900 text-sm sm:text-base">Service Agreement</div>
-                  <div className="text-xs sm:text-sm text-slate-600">DOCX Document</div>
+                  <div className="font-medium text-slate-900 text-sm sm:text-base">{t('saSubtitle')}</div>
+                  <div className="text-xs sm:text-sm text-slate-600">{t('saDocxDocument')}</div>
                 </div>
               </div>
               <Button
@@ -227,16 +220,16 @@ export default function ClientServiceAgreement() {
                 ) : (
                   <Download className="w-4 h-4 mr-2" />
                 )}
-                {isGenerating ? 'Generating...' : 'Download'}
+                {isGenerating ? t('generatingDots') : t('download')}
               </Button>
             </div>
             {badge?.document_url && badge.document_url !== SERVICE_AGREEMENT_URL && (
               <div className="mt-4">
-                <p className="text-sm text-slate-600 mb-2">Alternative document provided by staff:</p>
+                <p className="text-sm text-slate-600 mb-2">{t('alternativeStaffDoc')}</p>
                 <a href={badge.document_url} download>
                   <Button variant="outline" size="sm">
                     <Download className="w-3 h-3 mr-2" />
-                    Download Staff Document
+                    {t('downloadStaffDocument')}
                   </Button>
                 </a>
               </div>
@@ -247,10 +240,10 @@ export default function ClientServiceAgreement() {
         {/* Upload Section */}
         <Card className="border-slate-200">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">Step 2: Upload Signed Agreement</CardTitle>
+            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">{t('step2UploadTitle')}</CardTitle>
             {badge?.staff_comment && (
               <CardDescription className="text-amber-700 font-medium text-xs sm:text-sm">
-                Note from GTrans: {badge.staff_comment}
+                {t('noteFromGtrans')} {badge.staff_comment}
               </CardDescription>
             )}
           </CardHeader>
@@ -261,8 +254,10 @@ export default function ClientServiceAgreement() {
                   <div className="flex items-center gap-3 min-w-0">
                     <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-medium text-emerald-900 text-sm sm:text-base">Signed Agreement Uploaded</div>
-                      <div className="text-xs sm:text-sm text-emerald-700">Your signed document has been submitted</div>
+                      <div className="font-medium text-emerald-900 text-sm sm:text-base">
+                        {t('signedAgreementUploaded')}
+                      </div>
+                      <div className="text-xs sm:text-sm text-emerald-700">{t('yourSignedDocSubmitted')}</div>
                     </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
@@ -274,7 +269,7 @@ export default function ClientServiceAgreement() {
                     >
                       <Button size="sm" variant="outline" className="w-full">
                         <Download className="w-3 h-3 mr-2" />
-                        View
+                        {t('viewLabelBtn')}
                       </Button>
                     </a>
                     <label className="flex-1 sm:flex-initial">
@@ -293,7 +288,7 @@ export default function ClientServiceAgreement() {
                         className="w-full"
                       >
                         <Upload className="w-3 h-3 mr-2" />
-                        Replace
+                        {t('replaceLabelBtn')}
                       </Button>
                     </label>
                   </div>
@@ -314,11 +309,11 @@ export default function ClientServiceAgreement() {
                   onClick={(e) => e.currentTarget.previousElementSibling?.click()}
                 >
                   <Upload className="w-5 h-5 mr-2" />
-                  {uploading ? 'Uploading...' : 'Upload Signed Agreement'}
+                  {uploading ? t('uploadingDots') : t('uploadSignedAgreementBtn')}
                 </Button>
               </label>
             )}
-            <p className="text-xs text-slate-600 text-center">Accepted formats: PDF, DOC, DOCX</p>
+            <p className="text-xs text-slate-600 text-center">{t('acceptedFormatsHint')}</p>
           </CardContent>
         </Card>
       </div>
