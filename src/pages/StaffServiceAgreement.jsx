@@ -12,6 +12,7 @@ import { ArrowLeft, Upload, Download, CheckCircle, AlertCircle, Clock, FileText,
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { t } from '@/components/utils/language';
 
 const DEFAULT_MASTER_URL =
   'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/3d1a5e4fc_ServiceAgreement-GAN02022026.docx';
@@ -37,11 +38,11 @@ export default function StaffServiceAgreement() {
     mutationFn: ({ id, data }) => apiClient.updateBadge(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-agreement-badges'] });
-      toast.success('Updated successfully');
+      toast.success(t('saUpdatedSuccessfully'));
       setSelectedClient(null);
     },
     onError: () => {
-      toast.error('Failed to update');
+      toast.error(t('saFailedToUpdate'));
     },
   });
 
@@ -49,7 +50,7 @@ export default function StaffServiceAgreement() {
     mutationFn: ({ client_id, ...data }) => apiClient.createServiceAgreementBadge(client_id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-agreement-badges'] });
-      toast.success('Badge created successfully');
+      toast.success(t('saBadgeCreatedSuccess'));
     },
   });
 
@@ -60,7 +61,7 @@ export default function StaffServiceAgreement() {
     setUploadingMaster(true);
     try {
       const { file_url } = await apiClient.uploadFile(file);
-      toast.success('Master document uploaded');
+      toast.success(t('saMasterDocUploaded'));
 
       // Update all active badges with new master document
       const activeBadges = badges.filter((b) => b.is_active);
@@ -71,7 +72,7 @@ export default function StaffServiceAgreement() {
       }
       queryClient.invalidateQueries({ queryKey: ['service-agreement-badges'] });
     } catch (error) {
-      toast.error('Failed to upload master document');
+      toast.error(t('saFailedUploadMasterDoc'));
     } finally {
       setUploadingMaster(false);
     }
@@ -94,10 +95,10 @@ export default function StaffServiceAgreement() {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-      toast.success('Master Agreement generated successfully');
+      toast.success(t('saMasterAgreementGenerated'));
     } catch (error) {
       console.error('Failed to generate agreement:', error);
-      toast.error('Failed to generate Master Agreement');
+      toast.error(t('saFailedGenerateMaster'));
     } finally {
       setIsGenerating(false);
     }
@@ -329,7 +330,7 @@ export default function StaffServiceAgreement() {
                                   setSelectedClient(badge.id);
                                   setEditingComment(badge.staff_comment || '');
                                 }}
-                                placeholder="Add notes for client..."
+                                placeholder={t('saAddNotesPlaceholder')}
                                 className="flex-1"
                                 rows={2}
                               />

@@ -163,11 +163,11 @@ export default function StaffClients() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success(editingClient ? 'Client updated' : 'Client created');
+      toast.success(editingClient ? t('clClientUpdatedToast') : t('clClientCreatedToast'));
       closeDialog();
     },
     onError: (error) => {
-      toast.error(error?.message || 'Failed to save client');
+      toast.error(error?.message || t('clFailedSaveClientToast'));
     },
   });
 
@@ -175,13 +175,13 @@ export default function StaffClients() {
     mutationFn: (id) => apiClient.deleteClient(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Client deleted');
+      toast.success(t('clClientDeletedToast'));
       setDeleteDialogOpen(false);
       setClientToDelete(null);
       closeDialog();
     },
     onError: (error) => {
-      toast.error(error?.message || 'Failed to delete client');
+      toast.error(error?.message || t('clFailedDeleteClientToast'));
     },
   });
 
@@ -189,7 +189,7 @@ export default function StaffClients() {
     mutationFn: (client) => apiClient.updateClient(client.client_id, { is_active: !client.active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Client status updated');
+      toast.success(t('clClientStatusUpdatedToast'));
     },
   });
 
@@ -256,11 +256,11 @@ export default function StaffClients() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.email) {
-      toast.error('Please fill all required fields');
+      toast.error(t('payeerFillRequired'));
       return;
     }
     if (!editingClient && (!formData.login || !formData.password)) {
-      toast.error('Username and password are required for new clients');
+      toast.error(t('payeerFillRequired'));
       return;
     }
     saveMutation.mutate(formData);

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { t } from '@/components/utils/language';
 import RiskBadge from '@/components/comply/RiskBadge';
 import ScreeningForm from '@/components/comply/ScreeningForm';
 import CustomerDetail from '@/components/comply/CustomerDetail';
@@ -44,15 +45,15 @@ function CustomerSearchPanel({ onSelectCustomer, reloadSignal = 0 }) {
       try {
         const params = {};
         const s = opts.search ?? search;
-        const t = opts.typeFilter ?? typeFilter;
+        const tf = opts.typeFilter ?? typeFilter;
         const r = opts.riskFilter ?? riskFilter;
         if (s) params.search = s;
-        if (t && t !== 'all') params.type = t;
+        if (tf && tf !== 'all') params.type = tf;
         if (r && r !== 'all') params.risk_level = r;
         const data = await apiClient.searchAmlCustomers(params);
         setResults(data);
       } catch (err) {
-        toast.error(err.message || 'Search failed');
+        toast.error(err.message || t('caSearchFailedToast'));
       } finally {
         setLoading(false);
       }
@@ -85,7 +86,7 @@ function CustomerSearchPanel({ onSelectCustomer, reloadSignal = 0 }) {
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by name or external ID..."
+            placeholder={t('caSearchByNamePlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}

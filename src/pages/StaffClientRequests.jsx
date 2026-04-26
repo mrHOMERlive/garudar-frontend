@@ -25,6 +25,7 @@ import {
   Clock,
   Globe,
 } from 'lucide-react';
+import { t } from '@/components/utils/language';
 
 const BADGE_TYPES = [
   { value: 'kyc', label: 'KYC Verification', icon: FileCheck },
@@ -91,7 +92,7 @@ export default function StaffClientRequests() {
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <Input
-              placeholder="Search clients..."
+              placeholder={t('crSearchClientsPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-white border-slate-300"
@@ -210,7 +211,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
     mutationFn: (data) => apiClient.updateClient(client.client_id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Account status updated');
+      toast.success(t('clClientStatusUpdatedToast'));
     },
   });
 
@@ -274,12 +275,12 @@ function ClientBadgeDrawer({ client, open, onClose }) {
 
     try {
       await Promise.all(promises);
-      toast.success('All changes saved successfully');
+      toast.success(t('saUpdatedSuccessfully'));
       setEditedBadges({});
       onClose();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to save some changes');
+      toast.error(t('saFailedToUpdate'));
     }
   };
 
@@ -323,7 +324,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
                 <Textarea
                   value={holdReason}
                   onChange={(e) => setHoldReason(e.target.value)}
-                  placeholder="Reason for hold..."
+                  placeholder={t('crReasonForHoldPlaceholder')}
                   className="bg-white border-slate-300"
                   rows={2}
                 />

@@ -141,7 +141,7 @@ export default function StaffExecutedOrders() {
     mutationFn: ({ id, data }) => apiClient.updateOrder(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-executed-orders'] });
-      toast.success('Order updated');
+      toast.success(t('eoOrderUpdatedToast'));
     },
   });
 

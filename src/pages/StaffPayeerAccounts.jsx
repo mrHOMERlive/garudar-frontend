@@ -12,9 +12,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Pencil, Trash2, Globe } from 'lucide-react';
+import { ArrowLeft, Plus, Globe } from 'lucide-react';
 
 import CountrySelector from '../components/kyc/CountrySelector';
+import { t } from '@/components/utils/language';
 
 const CURRENCIES = ['USD', 'EUR', 'CNY', 'IDR', 'RUB', 'BRL', 'AED', 'INR', 'ARS', 'COP', 'PEN'];
 
@@ -89,7 +90,7 @@ export default function StaffPayeerAccounts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
-      toast.success(editingAccount ? 'Account updated' : 'Account created');
+      toast.success(editingAccount ? t('payeerAccountUpdated') : t('payeerAccountCreated'));
       closeDrawer();
     },
   });
@@ -101,7 +102,7 @@ export default function StaffPayeerAccounts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payeer-accounts'] });
-      toast.success('Account deleted');
+      toast.success(t('payeerAccountDeleted'));
       closeDrawer();
     },
   });
@@ -144,14 +145,14 @@ export default function StaffPayeerAccounts() {
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this account?')) {
+    if (window.confirm(t('payeerConfirmDelete'))) {
       deleteMutation.mutate(editingAccount.id);
     }
   };
 
   const handleSubmit = () => {
     if (!formData.currency || !formData.account_number) {
-      toast.error('Please fill all required fields');
+      toast.error(t('payeerFillRequired'));
       return;
     }
     saveMutation.mutate(formData);
@@ -173,9 +174,9 @@ export default function StaffPayeerAccounts() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
+                  <h1 className="text-xl font-bold text-white">{t('payeerGTransStaff')}</h1>
                   <span className="text-white/60">•</span>
-                  <span className="text-white">Payeer Accounts</span>
+                  <span className="text-white">{t('payeerAccountsTitle')}</span>
                 </div>
               </div>
             </div>
@@ -183,12 +184,12 @@ export default function StaffPayeerAccounts() {
               <Link to={createPageUrl('GTrans')}>
                 <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                   <Globe className="w-4 h-4 mr-1" />
-                  Public Site
+                  {t('publicSite')}
                 </Button>
               </Link>
               <Button onClick={openCreateDrawer} className="bg-[#f5a623] hover:bg-[#e09000] text-white">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Account
+                {t('payeerAddAccount')}
               </Button>
             </div>
           </div>
@@ -200,25 +201,25 @@ export default function StaffPayeerAccounts() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold w-24">Currency</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Alias</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Account Number</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Bank Name</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold">Country</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-24">Status</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">{t('payeerCurrencyHeader')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('payeerAliasHeader')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('payeerAccountNumberHeader')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('payeerBankNameHeader')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('payeerCountryHeader')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">{t('payeerStatusHeader')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-slate-500 py-8">
-                    Loading...
+                    {t('loading')}
                   </TableCell>
                 </TableRow>
               ) : accounts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-slate-500 py-8">
-                    No accounts found
+                    {t('payeerNoAccountsFound')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -237,7 +238,7 @@ export default function StaffPayeerAccounts() {
                     <TableCell className="text-slate-600">{account.bank_country || '-'}</TableCell>
                     <TableCell>
                       <Badge className={account.active !== false ? 'bg-emerald-600' : 'bg-slate-400'}>
-                        {account.active !== false ? 'Active' : 'Inactive'}
+                        {account.active !== false ? t('payeerStatusActive') : t('payeerStatusInactive')}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -251,12 +252,14 @@ export default function StaffPayeerAccounts() {
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
           <SheetHeader className="border-b border-slate-200 pb-4">
-            <SheetTitle className="text-[#1e3a5f]">{editingAccount ? 'Edit Account' : 'Add Payeer Account'}</SheetTitle>
+            <SheetTitle className="text-[#1e3a5f]">
+              {editingAccount ? t('payeerEditAccount') : t('payeerAddPayeerAccount')}
+            </SheetTitle>
           </SheetHeader>
 
           <div className="space-y-4 py-6">
             <div className="space-y-2">
-              <Label className="text-slate-700">Currency *</Label>
+              <Label className="text-slate-700">{t('payeerCurrencyLabel')}</Label>
               <Select
                 value={formData.currency}
                 onValueChange={(value) => setFormData({ ...formData, currency: value })}
@@ -275,79 +278,78 @@ export default function StaffPayeerAccounts() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Alias</Label>
+              <Label className="text-slate-700">{t('payeerAliasLabel')}</Label>
               <Input
                 value={formData.alias}
                 onChange={(e) => setFormData({ ...formData, alias: e.target.value })}
-                placeholder="Short name to identify this account"
+                placeholder={t('payeerAliasPlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Account Number *</Label>
+              <Label className="text-slate-700">{t('payeerAccountNumberLabel')}</Label>
               <Input
                 value={formData.account_number}
                 onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
-                placeholder="Account number"
+                placeholder={t('payeerAccountNumberPlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Bank Name</Label>
+              <Label className="text-slate-700">{t('payeerBankNameLabel')}</Label>
               <Input
                 value={formData.bank_name}
                 onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                placeholder="Bank name"
+                placeholder={t('payeerBankNamePlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Bank Address</Label>
+              <Label className="text-slate-700">{t('payeerBankAddressLabel')}</Label>
               <Input
                 value={formData.bank_address}
                 onChange={(e) => setFormData({ ...formData, bank_address: e.target.value })}
-                placeholder="Bank address"
+                placeholder={t('payeerBankAddressPlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Bank Correspondent Account</Label>
+              <Label className="text-slate-700">{t('payeerBankCorrAccountLabel')}</Label>
               <Input
                 value={formData.bank_corr_account}
                 onChange={(e) => setFormData({ ...formData, bank_corr_account: e.target.value })}
-                placeholder="Correspondent account"
+                placeholder={t('payeerBankCorrAccountPlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Bank BIC/SWIFT</Label>
+              <Label className="text-slate-700">{t('payeerBankBicLabel')}</Label>
               <Input
                 value={formData.bank_bic}
                 onChange={(e) => setFormData({ ...formData, bank_bic: e.target.value })}
-                placeholder="BIC/SWIFT code"
+                placeholder={t('payeerBankBicPlaceholder')}
                 className="bg-white border-slate-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Bank Country</Label>
+              <Label className="text-slate-700">{t('payeerBankCountryLabel')}</Label>
               <CountrySelector
                 value={formData.bank_country}
                 onChange={(value) => setFormData({ ...formData, bank_country: value })}
-                language="en"
                 countries={countries}
                 saveName={true}
-                placeholder="Select country"
+                placeholder={t('payeerBankCountryPlaceholder')}
               />
             </div>
 
             <div className="flex items-center justify-between pt-2">
-              <Label className="text-slate-700">Active</Label>
+              <Label className="text-slate-700">{t('payeerActiveLabel')}</Label>
               <Switch
                 checked={formData.active}
                 onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
@@ -363,18 +365,18 @@ export default function StaffPayeerAccounts() {
                 disabled={deleteMutation.isPending}
                 className="bg-red-500 hover:bg-red-600 text-white mr-auto"
               >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                {deleteMutation.isPending ? t('payeerDeletingDots') : t('payeerDeleteBtn')}
               </Button>
             )}
             <Button variant="outline" onClick={closeDrawer} className="border-slate-300 text-slate-600">
-              Cancel
+              {t('payeerCancelBtn')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={saveMutation.isPending}
               className="bg-[#1e3a5f] hover:bg-[#152a45]"
             >
-              {saveMutation.isPending ? 'Saving...' : 'Save'}
+              {saveMutation.isPending ? t('payeerSavingDots') : t('payeerSaveBtn')}
             </Button>
           </SheetFooter>
         </SheetContent>

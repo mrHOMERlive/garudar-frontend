@@ -17,6 +17,7 @@ import { downloadWordTemplate } from '@/components/staff/utils/wordTemplateGener
 import { format } from 'date-fns';
 import SuspiciousTransactionAlert from '@/components/orders/SuspiciousTransactionAlert';
 import { isAboveThreshold, formatThreshold } from '@/components/orders/thresholdUtils';
+import { t } from '@/components/utils/language';
 
 const ALL_STATUSES = [
   'created',
@@ -310,7 +311,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        toast.error('Please fill in all required fields');
+        toast.error(t('payeerFillRequired'));
         setSaving(false);
         return;
       }
@@ -337,12 +338,12 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       };
 
       await onSave(updates);
-      toast.success('Order updated successfully');
+      toast.success(t('aoOrderUpdatedToast'));
       queryClient.invalidateQueries({ queryKey: ['order-terms', order.orderId] });
       refetchDocuments(); // Refresh docs just in case
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update order: ' + (error.message || 'Unknown error'));
+      toast.error(t('saFailedToUpdate') + ': ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -354,10 +355,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       if (response && response.presigned_url) {
         window.open(response.presigned_url, '_blank');
       } else {
-        toast.error('No download URL returned');
+        toast.error(t('failedDownloadUrlToast'));
       }
     } catch (error) {
-      toast.error('Failed to download: ' + error.message);
+      toast.error(t('toastFailedDownloadDoc') + ': ' + error.message);
     }
   };
 
@@ -372,10 +373,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success('Excel downloaded successfully');
+      toast.success(t('toastExcelDownloaded'));
     } catch (error) {
       console.error(error);
-      toast.error('Failed to download Excel: ' + error.message);
+      toast.error(t('toastFailedDownloadExcel') + ': ' + error.message);
     }
   };
 
@@ -388,10 +389,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     setUploadingProof(true);
     try {
       await apiClient.uploadOrderDocument(order.orderId, file, 'payment_proof');
-      toast.success('Payment proof uploaded successfully');
+      toast.success(t('toastPaymentProofUploaded'));
       refetchDocuments();
     } catch (error) {
-      toast.error('Failed to upload payment proof: ' + (error.message || 'Unknown error'));
+      toast.error(t('toastFailedUploadPaymentProof') + ': ' + (error.message || 'Unknown error'));
     } finally {
       setUploadingProof(false);
     }
@@ -416,10 +417,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
     setLoading(true);
     try {
       await apiClient.uploadOrderDocument(order.orderId, file, type);
-      toast.success('Document uploaded successfully');
+      toast.success(t('kycFileUploadedSuccess'));
       refetchDocuments();
     } catch (error) {
-      toast.error('Failed to upload document: ' + (error.message || 'Unknown error'));
+      toast.error(t('kycFailedUploadFile') + ': ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -511,7 +512,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   <SelectTrigger
                     className={`mt-1 bg-white ${errors.paymentAccount ? 'border-red-500' : 'border-slate-300'}`}
                   >
-                    <SelectValue placeholder="Select account from Payeer Accounts..." />
+                    <SelectValue placeholder={t('drSelectAccountFromPayeer')} />
                   </SelectTrigger>
                   <SelectContent>
                     {payeerLoading ? (
@@ -851,7 +852,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   <Label className="text-xs text-slate-600">Executing Bank</Label>
                   <Select value={executingBank} onValueChange={setExecutingBank}>
                     <SelectTrigger className="mt-1 bg-white border-slate-300">
-                      <SelectValue placeholder="Select executing bank..." />
+                      <SelectValue placeholder={t('drSelectExecutingBank')} />
                     </SelectTrigger>
                     <SelectContent>
                       {payeerLoading ? (
@@ -1186,7 +1187,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <Label className="text-xs text-slate-600">Statement IN Type</Label>
                     <Select value={bankStatementInType} onValueChange={setBankStatementInType}>
                       <SelectTrigger className="mt-1 bg-white border-slate-300">
-                        <SelectValue placeholder="Select type..." />
+                        <SelectValue placeholder={t('drSelectType')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="mandiri_statement">Mandiri Statement</SelectItem>
@@ -1210,7 +1211,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <Label className="text-xs text-slate-600">Statement OUT Type</Label>
                     <Select value={bankStatementOutType} onValueChange={setBankStatementOutType}>
                       <SelectTrigger className="mt-1 bg-white border-slate-300">
-                        <SelectValue placeholder="Select type..." />
+                        <SelectValue placeholder={t('drSelectType')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="mandiri_statement">Mandiri Statement</SelectItem>

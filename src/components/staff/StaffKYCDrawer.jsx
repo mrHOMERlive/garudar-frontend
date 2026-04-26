@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import { t } from '@/components/utils/language';
 
 export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos = [], isLoading }) {
   const queryClient = useQueryClient();
@@ -35,12 +36,12 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
     onSuccess: () => {
       queryClient.invalidateQueries(['kycQueue']);
       queryClient.invalidateQueries(['kycProfile', clientId]);
-      toast.success('KYC decision recorded successfully');
+      toast.success(t('drKycDecisionRecorded'));
       onClose();
     },
     onError: (error) => {
-      toast.error(`Failed to record decision: ${error.message}`);
-    }
+      toast.error(`${t('drFailedRecordDecision')}: ${error.message}`);
+    },
   });
 
   const handleApprove = () => {
@@ -49,7 +50,7 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
 
   const handleReject = () => {
     if (!comment) {
-      toast.error('Please provide a reason for rejection');
+      toast.error(t('drFailedRecordDecision'));
       return;
     }
     decisionMutation.mutate({ status: 'rejected', comment });
@@ -57,11 +58,11 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
 
   const handleNeedsFix = () => {
     if (!comment) {
-      toast.error('Please provide details heavily what needs to be fixed');
+      toast.error(t('drFailedRecordDecision'));
       return;
     }
     decisionMutation.mutate({ status: 'needs_fix', comment });
-  }
+  };
 
   const handleDownload = async (doc) => {
     try {
@@ -110,11 +111,22 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
             <h4 className="font-semibold mb-2 text-[#1e3a5f]">Client Information</h4>
             <CardBox>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600">
-                <div><span className="font-medium text-slate-800">Client Name:</span> {client.client_name || client.username}</div>
-                <div><span className="font-medium text-slate-800">Email:</span> {client.client_mail || client.email}</div>
-                <div><span className="font-medium text-slate-800">Status:</span> <Badge variant={status === 'approved' ? 'success' : 'secondary'}>{status.toUpperCase()}</Badge></div>
+                <div>
+                  <span className="font-medium text-slate-800">Client Name:</span>{' '}
+                  {client.client_name || client.username}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Email:</span> {client.client_mail || client.email}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Status:</span>{' '}
+                  <Badge variant={status === 'approved' ? 'success' : 'secondary'}>{status.toUpperCase()}</Badge>
+                </div>
                 {kycProfile.submitted_at && (
-                  <div className="col-span-2"><span className="font-medium text-slate-800">Submitted:</span> {new Date(kycProfile.submitted_at).toLocaleString()}</div>
+                  <div className="col-span-2">
+                    <span className="font-medium text-slate-800">Submitted:</span>{' '}
+                    {new Date(kycProfile.submitted_at).toLocaleString()}
+                  </div>
                 )}
               </div>
             </CardBox>
@@ -124,13 +136,27 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
             <h4 className="font-semibold mb-2 text-[#1e3a5f]">Corporate Details</h4>
             <CardBox>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600">
-                <div className="col-span-2"><span className="font-medium text-slate-800">Company Name:</span> {corporate.company_name}</div>
-                <div className="col-span-2"><span className="font-medium text-slate-800">Trading Name:</span> {corporate.trading_name || '-'}</div>
-                <div><span className="font-medium text-slate-800">Country:</span> {corporate.incorporation_country}</div>
-                <div><span className="font-medium text-slate-800">Date:</span> {corporate.incorporation_date}</div>
-                <div><span className="font-medium text-slate-800">Tax ID:</span> {corporate.tax_id}</div>
-                <div><span className="font-medium text-slate-800">Reg. Num:</span> {corporate.registration_number}</div>
-                <div className="col-span-2"><span className="font-medium text-slate-800">Address:</span> {corporate.registered_address}</div>
+                <div className="col-span-2">
+                  <span className="font-medium text-slate-800">Company Name:</span> {corporate.company_name}
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium text-slate-800">Trading Name:</span> {corporate.trading_name || '-'}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Country:</span> {corporate.incorporation_country}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Date:</span> {corporate.incorporation_date}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Tax ID:</span> {corporate.tax_id}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Reg. Num:</span> {corporate.registration_number}
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium text-slate-800">Address:</span> {corporate.registered_address}
+                </div>
               </div>
             </CardBox>
           </div>
@@ -139,11 +165,22 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
             <h4 className="font-semibold mb-2 text-[#1e3a5f]">Banking Details</h4>
             <CardBox>
               <div className="grid grid-cols-1 gap-y-2 text-sm text-slate-600">
-                <div><span className="font-medium text-slate-800">Bank Name:</span> {banking.principal_bankers}</div>
-                <div><span className="font-medium text-slate-800">SWIFT/BIC:</span> {banking.swift_bic}</div>
-                <div><span className="font-medium text-slate-800">Account Number:</span> {banking.bank_account_number}</div>
-                <div><span className="font-medium text-slate-800">Account Currency:</span> {banking.bank_account_currency}</div>
-                <div><span className="font-medium text-slate-800">Bank Address:</span> {banking.bank_branch_address}, {banking.bank_city_country}</div>
+                <div>
+                  <span className="font-medium text-slate-800">Bank Name:</span> {banking.principal_bankers}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">SWIFT/BIC:</span> {banking.swift_bic}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Account Number:</span> {banking.bank_account_number}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Account Currency:</span> {banking.bank_account_currency}
+                </div>
+                <div>
+                  <span className="font-medium text-slate-800">Bank Address:</span> {banking.bank_branch_address},{' '}
+                  {banking.bank_city_country}
+                </div>
               </div>
             </CardBox>
           </div>
@@ -159,10 +196,19 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
                     <div key={ubo.id} className="p-3 bg-slate-50 rounded border border-slate-100">
                       <div className="font-medium text-slate-800 mb-1">Shareholder {idx + 1}</div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600">
-                        <div><span className="font-medium text-slate-800">Name:</span> {ubo.ubo_name || '-'}</div>
-                        <div><span className="font-medium text-slate-800">Shareholding:</span> {ubo.shareholding_percent != null ? `${ubo.shareholding_percent}%` : '-'}</div>
-                        <div><span className="font-medium text-slate-800">Nationality:</span> {ubo.nationality || '-'}</div>
-                        <div><span className="font-medium text-slate-800">Residence:</span> {ubo.residence_country || '-'}</div>
+                        <div>
+                          <span className="font-medium text-slate-800">Name:</span> {ubo.ubo_name || '-'}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-800">Shareholding:</span>{' '}
+                          {ubo.shareholding_percent != null ? `${ubo.shareholding_percent}%` : '-'}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-800">Nationality:</span> {ubo.nationality || '-'}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-800">Residence:</span> {ubo.residence_country || '-'}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -178,10 +224,18 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
                 <div className="text-sm text-slate-500 italic">No documents uploaded.</div>
               ) : (
                 <div className="space-y-2">
-                  {documents.map(doc => (
-                    <div key={doc.doc_id} className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded border border-slate-100">
+                  {documents.map((doc) => (
+                    <div
+                      key={doc.doc_id}
+                      className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded border border-slate-100"
+                    >
                       <span className="font-medium capitalize text-slate-700">{doc.doc_type.replace(/_/g, ' ')}</span>
-                      <Button variant="ghost" size="sm" onClick={() => handleDownload(doc)} className="h-8 text-blue-600 hover:text-blue-800">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDownload(doc)}
+                        className="h-8 text-blue-600 hover:text-blue-800"
+                      >
                         <Download className="w-4 h-4 mr-2" />
                         {doc.file_name}
                       </Button>
@@ -197,7 +251,7 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Add comments about your decision (required for Rejection or Request Changes)..."
+              placeholder={t('drAddCommentsAboutDecision')}
               className="min-h-[100px]"
             />
           </div>

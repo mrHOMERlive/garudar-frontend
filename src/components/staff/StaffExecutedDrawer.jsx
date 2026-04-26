@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { parseStatusHistory } from '@/components/utils/statusHistoryHelper';
 
 import { toast } from 'sonner';
 import { Download, Upload, FileText } from 'lucide-react';
 import apiClient from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { t } from '@/components/utils/language';
 
 export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -32,14 +31,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
         mt103_received: order.mt103_received || false,
         transaction_status_number: order.transaction_status_no || order.transaction_status_number || '',
         transaction_status_date: order.transaction_status_date || '',
-        transaction_status_received: (order.transaction_status_status === 'Y') || order.transaction_status_received || false,
+        transaction_status_received:
+          order.transaction_status_status === 'Y' || order.transaction_status_received || false,
         act_report_number: order.act_report_no || order.act_report_number || '',
         act_report_date: order.act_report_date || '',
         act_report_status: order.doc_package_status || order.act_report_status || 'not_made',
         settled: order.settled_status || order.settled || 'NA',
-        refund: (order.refund_flag === 'Y') || order.refund || false,
+        refund: order.refund_flag === 'Y' || order.refund || false,
         staff_description: order.staff_description || '',
-        closed: order.closed || false
+        closed: order.closed || false,
       });
     }
   }, [order]);
@@ -53,14 +53,12 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
   });
 
   // Find documents by type
-  const mt103Doc = documents.find(d => d.doc_type === 'mt103');
-  const txStatusDoc = documents.find(d => d.doc_type === 'transaction_status');
-  const actReportDoc = documents.find(d => d.doc_type === 'act_report_unsigned'); // Unsigned
-  const actReportSignedDoc = documents.find(d => d.doc_type === 'act_report_signed_staff'); // Signed Staff
+  const mt103Doc = documents.find((d) => d.doc_type === 'mt103');
+  const txStatusDoc = documents.find((d) => d.doc_type === 'transaction_status');
+  const actReportDoc = documents.find((d) => d.doc_type === 'act_report_unsigned'); // Unsigned
+  const actReportSignedDoc = documents.find((d) => d.doc_type === 'act_report_signed_staff'); // Signed Staff
 
   if (!order) return null;
-
-
 
   const handleSave = async () => {
     try {
@@ -79,7 +77,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
         transaction_status_status: formData.transaction_status_received ? 'Y' : 'N',
 
         act_report_no: formData.act_report_number,
-        act_report_date: formData.act_report_date || null
+        act_report_date: formData.act_report_date || null,
       };
 
       const idToUpdate = order.sourceOrderId || order.orderId;
@@ -87,17 +85,17 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
       onUpdate(formData);
       onClose();
-      toast.success('Changes saved successfully');
+      toast.success(t('saUpdatedSuccessfully'));
     } catch (error) {
       console.error(error);
-      toast.error('Failed to save changes');
+      toast.error(t('saFailedToUpdate'));
     }
   };
 
   const handleFileUpload = async (file, field) => {
     if (!file) return;
 
-    setUploading(prev => ({ ...prev, [field]: true }));
+    setUploading((prev) => ({ ...prev, [field]: true }));
     try {
       const orderId = order.sourceOrderId || order.orderId;
       let docType = null;
@@ -115,12 +113,12 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
       // Refresh documents list
       await refetchDocuments();
 
-      toast.success('Document uploaded successfully');
+      toast.success(t('kycFileUploadedSuccess'));
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Failed to upload document');
     } finally {
-      setUploading(prev => ({ ...prev, [field]: false }));
+      setUploading((prev) => ({ ...prev, [field]: false }));
     }
   };
 
@@ -138,15 +136,14 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Failed to download document');
+      toast.error(t('toastFailedDownloadDoc'));
     }
   };
 
   const handleCreateActReport = async () => {
-    setUploading(prev => ({ ...prev, create_act_report: true }));
+    setUploading((prev) => ({ ...prev, create_act_report: true }));
     try {
       const id = order.sourceOrderId || order.orderId;
       const blob = await apiClient.generateExecutedOrderActReport(id);
@@ -161,12 +158,12 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success('Act Report generated successfully');
+      toast.success(t('signedActReportUploadedToast'));
     } catch (error) {
       console.error(error);
-      toast.error('Failed to generate Act Report');
+      toast.error(t('failedUploadActReportToast'));
     } finally {
-      setUploading(prev => ({ ...prev, create_act_report: false }));
+      setUploading((prev) => ({ ...prev, create_act_report: false }));
     }
   };
 
@@ -174,7 +171,10 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent aria-describedby={undefined} className="w-full sm:max-w-2xl overflow-y-auto bg-white border-slate-200 text-slate-900">
+      <SheetContent
+        aria-describedby={undefined}
+        className="w-full sm:max-w-2xl overflow-y-auto bg-white border-slate-200 text-slate-900"
+      >
         <SheetHeader>
           <SheetTitle className="text-slate-900 flex items-center gap-3">
             Order #{order.order_number}
@@ -189,11 +189,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               <div className="text-slate-500">Client:</div>
               <div className="text-slate-900">{order.client_name || '-'}</div>
               <div className="text-slate-500">Amount:</div>
-              <div className="font-medium text-emerald-700">{order.amount?.toLocaleString()} {order.currency}</div>
+              <div className="font-medium text-emerald-700">
+                {order.amount?.toLocaleString()} {order.currency}
+              </div>
               <div className="text-slate-500">Beneficiary:</div>
               <div className="text-slate-900">{order.beneficiary_name}</div>
               <div className="text-slate-500">Bank:</div>
-              <div className="text-slate-900">{order.bank_name} ({order.bic})</div>
+              <div className="text-slate-900">
+                {order.bank_name} ({order.bic})
+              </div>
             </div>
           </div>
 
@@ -439,11 +443,11 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   variant="outline"
                   className="flex-1 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
                   onClick={() => {
-                    const doc = documents.find(d => d.doc_type === 'act_report_signed_client');
+                    const doc = documents.find((d) => d.doc_type === 'act_report_signed_client');
                     if (doc) {
                       handleDownload(doc.doc_id, doc.file_name);
                     } else {
-                      toast.error('Document not found');
+                      toast.error(t('toastFailedDownloadDoc'));
                     }
                   }}
                 >
@@ -496,7 +500,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
             <Textarea
               value={formData.staff_description || ''}
               onChange={(e) => setFormData({ ...formData, staff_description: e.target.value })}
-              placeholder="Additional notes..."
+              placeholder={t('drAdditionalNotesPlaceholder')}
               className="bg-white border-slate-300 min-h-[80px]"
             />
           </div>

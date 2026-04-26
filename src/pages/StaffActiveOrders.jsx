@@ -348,7 +348,7 @@ export default function StaffActiveOrders() {
     mutationFn: (ids) => Promise.all(ids.map((id) => apiClient.deleteOrder(id))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
-      toast.success('Orders deleted');
+      toast.success(t('aoOrdersDeletedToast'));
       setSelectedIds(new Set());
       setDeleteDialogOpen(false);
     },
@@ -368,13 +368,13 @@ export default function StaffActiveOrders() {
 
   const handleStatusChange = (order, newStatus) => {
     updateMutation.mutate({ id: order.orderId, data: { status: newStatus } });
-    toast.success(`Status changed to ${newStatus}`);
+    toast.success(`${t('aoStatusChangedToText')} ${newStatus}`);
   };
 
   const handleCreateInstruction = async () => {
     const selectedOrderIds = Array.from(selectedIds);
     if (selectedOrderIds.length === 0) {
-      toast.error('No orders selected');
+      toast.error(t('aoNoOrdersSelected'));
       return;
     }
 
@@ -387,7 +387,7 @@ export default function StaffActiveOrders() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`Instruction file created for ${selectedOrderIds.length} orders`);
+      toast.success(`${t('aoInstructionFileCreatedFor')} ${selectedOrderIds.length} ${t('ordersLabel')}`);
       setSelectedIds(new Set());
       queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
     } catch (error) {
@@ -398,13 +398,13 @@ export default function StaffActiveOrders() {
   const handleMarkAsExecuted = () => {
     const selectedOrders = filteredOrders.filter((o) => selectedIds.has(o.orderId));
     if (selectedOrders.length === 0) {
-      toast.error('No orders selected');
+      toast.error(t('aoNoOrdersSelected'));
       return;
     }
     selectedOrders.forEach((order) => {
       updateMutation.mutate({ id: order.orderId, data: { status: 'released', executed: true } });
     });
-    toast.success(`${selectedOrders.length} orders marked as executed`);
+    toast.success(`${selectedOrders.length} ${t('ordersLabel')}`);
     setSelectedIds(new Set());
   };
 
@@ -420,7 +420,7 @@ export default function StaffActiveOrders() {
 
   const handleDrawerSave = async (data) => {
     await apiClient.updateOrder(selectedOrder.orderId, data);
-    toast.success('Order updated');
+    toast.success(t('aoOrderUpdatedToast'));
     setDrawerOpen(false);
     queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
   };
