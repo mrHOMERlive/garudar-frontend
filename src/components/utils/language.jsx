@@ -978,6 +978,7 @@ export const translations = {
     clClientStatusUpdatedToast: 'Client status updated',
     clFailedSaveClientToast: 'Failed to save client',
     clFailedDeleteClientToast: 'Failed to delete client',
+    clUsernamePasswordRequired: 'Username and password are required for new clients',
     // StaffActiveOrders
     aoOrdersDeletedToast: 'Orders deleted',
     aoStatusChangedToText: 'Status changed to',
@@ -2308,6 +2309,7 @@ export const translations = {
     clClientStatusUpdatedToast: 'Status klien diperbarui',
     clFailedSaveClientToast: 'Gagal menyimpan klien',
     clFailedDeleteClientToast: 'Gagal menghapus klien',
+    clUsernamePasswordRequired: 'Nama pengguna dan kata sandi wajib diisi untuk klien baru',
     // StaffActiveOrders
     aoOrdersDeletedToast: 'Pesanan dihapus',
     aoStatusChangedToText: 'Status diubah menjadi',

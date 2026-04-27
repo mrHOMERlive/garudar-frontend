@@ -260,7 +260,7 @@ export default function StaffClients() {
       return;
     }
     if (!editingClient && (!formData.login || !formData.password)) {
-      toast.error(t('payeerFillRequired'));
+      toast.error(t('clUsernamePasswordRequired'));
       return;
     }
     saveMutation.mutate(formData);
