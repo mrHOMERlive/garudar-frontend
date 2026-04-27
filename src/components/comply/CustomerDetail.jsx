@@ -27,6 +27,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { t } from '@/components/utils/language';
 
 // Human-readable labels for known CA audit event types.
 // Unknown types are rendered as raw `type` + `detail` in a collapsible block.
@@ -209,7 +210,7 @@ export default function CustomerDetail({ customer, onBack }) {
           description: 'Please try again in a minute — CA generates the PDF asynchronously.',
         });
       } else {
-        toast.error('Unexpected response from server');
+        toast.error(t('complyUnexpectedResponse'));
       }
       // Обновим список screenings, чтобы подтянуть report_s3_key.
       const fresh = await apiClient.getCustomerScreenings(data.id).catch(() => null);
@@ -253,7 +254,7 @@ export default function CustomerDetail({ customer, onBack }) {
     setLoad('rescreen', true);
     try {
       await apiClient.rescreenCustomer(customer.id);
-      toast.success('Re-screen triggered');
+      toast.success(t('complyRescreenTriggered'));
       loadAll();
     } catch (err) {
       toast.error(err.message || 'Failed');
@@ -277,13 +278,13 @@ export default function CustomerDetail({ customer, onBack }) {
 
   const handleRiskOverride = async () => {
     if (!riskOverride.level) {
-      toast.error('Select a risk level');
+      toast.error(t('complySelectRiskLevel'));
       return;
     }
     setLoad('riskOverride', true);
     try {
       await apiClient.overrideRisk(customer.id, { risk_level: riskOverride.level, reason: riskOverride.reason });
-      toast.success('Risk level updated');
+      toast.success(t('complyRiskLevelUpdated'));
       setData((p) => ({ ...p, risk_level: riskOverride.level }));
       loadAll();
     } catch (err) {
@@ -312,7 +313,7 @@ export default function CustomerDetail({ customer, onBack }) {
     setLoad('comment', true);
     try {
       await apiClient.addCaseComment(caseId, { comment: caseComment });
-      toast.success('Comment added');
+      toast.success(t('complyCommentAdded'));
       setCaseComment('');
       setSelectedCaseId(null);
     } catch (err) {
@@ -326,7 +327,7 @@ export default function CustomerDetail({ customer, onBack }) {
     setLoad(`case_${caseId}`, true);
     try {
       await apiClient.updateAmlCase(caseId, { status });
-      toast.success('Case updated');
+      toast.success(t('complyCaseUpdated'));
       loadAll();
     } catch (err) {
       toast.error(err.message || 'Failed');
@@ -558,7 +559,7 @@ export default function CustomerDetail({ customer, onBack }) {
                   {selectedCaseId === c.id && (
                     <div className="mt-3 space-y-2">
                       <Textarea
-                        placeholder="Add a comment..."
+                        placeholder={t('complyAddCommentPlaceholder')}
                         value={caseComment}
                         onChange={(e) => setCaseComment(e.target.value)}
                         rows={2}
@@ -796,7 +797,7 @@ export default function CustomerDetail({ customer, onBack }) {
                     onValueChange={(v) => setRiskOverride((p) => ({ ...p, level: v }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select level" />
+                      <SelectValue placeholder={t('complySelectLevelPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="low">Low</SelectItem>
@@ -809,7 +810,7 @@ export default function CustomerDetail({ customer, onBack }) {
                   <label className="text-xs text-slate-500 mb-1 block">Reason</label>
                   <input
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                    placeholder="Reason for override..."
+                    placeholder={t('complyReasonForOverridePlaceholder')}
                     value={riskOverride.reason}
                     onChange={(e) => setRiskOverride((p) => ({ ...p, reason: e.target.value }))}
                   />

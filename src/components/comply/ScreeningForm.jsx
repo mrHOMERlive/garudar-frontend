@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Shield, Loader2, CheckCircle, FileSearch } from 'lucide-react';
 import { toast } from 'sonner';
 import HitDetailsDrawer from './HitDetailsDrawer';
+import { t } from '@/components/utils/language';
 
 export default function ScreeningForm({ type, onResult }) {
   const [loading, setLoading] = useState(false);
@@ -27,14 +28,14 @@ export default function ScreeningForm({ type, onResult }) {
 
   const handleScreen = async () => {
     if (!form.name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('complyNameRequired'));
       return;
     }
     setLoading(true);
     setLatestAlertId(null);
     try {
       const data = type === 'person' ? await apiClient.screenPerson(form) : await apiClient.screenCompany(form);
-      toast.success('Screening submitted successfully');
+      toast.success(t('complyScreeningSubmitted'));
       setResult(data);
       onResult && onResult(data);
 

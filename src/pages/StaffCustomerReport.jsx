@@ -64,7 +64,7 @@ export default function StaffCustomerReport() {
     mutationFn: (id) => apiClient.deleteCustomerReport(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['customer-reports']);
-      toast.success('Record deleted');
+      toast.success(t('recordDeletedToast'));
     },
   });
 
@@ -156,7 +156,7 @@ export default function StaffCustomerReport() {
                   a.click();
                   window.URL.revokeObjectURL(url);
                 } catch (e) {
-                  toast.error('Failed to export: ' + e.message);
+                  toast.error(t('failedExportToast') + e.message);
                 }
               }}
               variant="outline"

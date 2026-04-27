@@ -997,6 +997,31 @@ export const translations = {
     drSelectExecutingBank: 'Select executing bank...',
     drSelectType: 'Select type...',
     drAdditionalNotesPlaceholder: 'Additional notes...',
+    // Reports
+    recordDeletedToast: 'Record deleted',
+    recordUpdatedToast: 'Record updated',
+    recordCreatedToast: 'Record created',
+    failedExportToast: 'Failed to export: ',
+    // Comply (AML)
+    complyUnexpectedResponse: 'Unexpected response from server',
+    complyRescreenTriggered: 'Re-screen triggered',
+    complySelectRiskLevel: 'Select a risk level',
+    complyRiskLevelUpdated: 'Risk level updated',
+    complyCommentAdded: 'Comment added',
+    complyCaseUpdated: 'Case updated',
+    complyMonitoringDisabled: 'Monitoring disabled',
+    complyNameRequired: 'Name is required',
+    complyScreeningSubmitted: 'Screening submitted successfully',
+    complyAddCommentPlaceholder: 'Add a comment...',
+    complySelectLevelPlaceholder: 'Select level',
+    complyReasonForOverridePlaceholder: 'Reason for override...',
+    complyFilterByNamePlaceholder: 'Filter by name or ID...',
+    // StaffActiveOrders
+    aoFailedCreateInstructionFile: 'Failed to create instruction file: ',
+    // ObligationsModal
+    obligCouldNotOpenDoc: 'Could not open document',
+    obligFailedLoadDoc: 'Failed to load document',
+    obligFailedSaveAgreement: 'Failed to save agreement. Please try again.',
   },
 
   id: {
@@ -1998,6 +2023,31 @@ export const translations = {
     drSelectExecutingBank: 'Pilih bank pelaksana...',
     drSelectType: 'Pilih jenis...',
     drAdditionalNotesPlaceholder: 'Catatan tambahan...',
+    // Reports
+    recordDeletedToast: 'Rekod dihapus',
+    recordUpdatedToast: 'Rekod diperbarui',
+    recordCreatedToast: 'Rekod dibuat',
+    failedExportToast: 'Gagal mengekspor: ',
+    // Comply (AML)
+    complyUnexpectedResponse: 'Respons tak terduga dari server',
+    complyRescreenTriggered: 'Pemindaian ulang dipicu',
+    complySelectRiskLevel: 'Pilih tingkat risiko',
+    complyRiskLevelUpdated: 'Tingkat risiko diperbarui',
+    complyCommentAdded: 'Komentar ditambahkan',
+    complyCaseUpdated: 'Kasus diperbarui',
+    complyMonitoringDisabled: 'Pemantauan dinonaktifkan',
+    complyNameRequired: 'Nama wajib diisi',
+    complyScreeningSubmitted: 'Pemindaian berhasil dikirim',
+    complyAddCommentPlaceholder: 'Tambahkan komentar...',
+    complySelectLevelPlaceholder: 'Pilih tingkat',
+    complyReasonForOverridePlaceholder: 'Alasan penggantian...',
+    complyFilterByNamePlaceholder: 'Filter berdasarkan nama atau ID...',
+    // StaffActiveOrders
+    aoFailedCreateInstructionFile: 'Gagal membuat berkas instruksi: ',
+    // ObligationsModal
+    obligCouldNotOpenDoc: 'Tidak dapat membuka dokumen',
+    obligFailedLoadDoc: 'Gagal memuat dokumen',
+    obligFailedSaveAgreement: 'Gagal menyimpan perjanjian. Silakan coba lagi.',
   },
 };
 

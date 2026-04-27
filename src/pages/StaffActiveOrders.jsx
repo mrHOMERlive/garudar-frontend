@@ -391,7 +391,7 @@ export default function StaffActiveOrders() {
       setSelectedIds(new Set());
       queryClient.invalidateQueries({ queryKey: ['staff-active-orders'] });
     } catch (error) {
-      toast.error('Failed to create instruction file: ' + (error.message || 'Unknown error'));
+      toast.error(t('aoFailedCreateInstructionFile') + (error.message || ''));
     }
   };
 

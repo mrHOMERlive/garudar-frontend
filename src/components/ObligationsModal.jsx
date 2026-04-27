@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import apiClient from '@/api/apiClient';
+import { t } from '@/components/utils/language';
 
 export default function ObligationsModal({ open, onAgreed }) {
   const [agreed, setAgreed] = useState(false);
@@ -16,10 +17,10 @@ export default function ObligationsModal({ open, onAgreed }) {
       if (res?.url) {
         window.open(res.url, '_blank', 'noopener,noreferrer');
       } else {
-        toast.error('Could not open document');
+        toast.error(t('obligCouldNotOpenDoc'));
       }
     } catch {
-      toast.error('Failed to load document');
+      toast.error(t('obligFailedLoadDoc'));
     }
   };
 
@@ -30,7 +31,7 @@ export default function ObligationsModal({ open, onAgreed }) {
       await apiClient.acceptTerms();
       onAgreed();
     } catch {
-      toast.error('Failed to save agreement. Please try again.');
+      toast.error(t('obligFailedSaveAgreement'));
     } finally {
       setLoading(false);
     }
@@ -52,12 +53,12 @@ export default function ObligationsModal({ open, onAgreed }) {
 
         <div className="space-y-4 py-2">
           <p className="text-sm text-slate-600">
-            Before accessing the platform, please review and accept the Password and User ID
-            Obligations document issued by PT Garuda Arma Nusa.
+            Before accessing the platform, please review and accept the Password and User ID Obligations document issued
+            by PT Garuda Arma Nusa.
           </p>
           <p className="text-sm text-slate-600">
-            Sebelum mengakses platform, harap tinjau dan terima dokumen Kewajiban Password dan
-            User ID yang diterbitkan oleh PT Garuda Arma Nusa.
+            Sebelum mengakses platform, harap tinjau dan terima dokumen Kewajiban Password dan User ID yang diterbitkan
+            oleh PT Garuda Arma Nusa.
           </p>
 
           <div className="text-center">
@@ -67,19 +68,12 @@ export default function ObligationsModal({ open, onAgreed }) {
               className="inline-flex items-center gap-2 text-[#1e3a5f] hover:text-[#f5a623] transition-colors"
             >
               <FileText className="w-5 h-5" />
-              <span className="font-medium underline">
-                Open Full Document (PDF) / Buka Dokumen Lengkap (PDF)
-              </span>
+              <span className="font-medium underline">Open Full Document (PDF) / Buka Dokumen Lengkap (PDF)</span>
             </button>
           </div>
 
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-start gap-3">
-            <Checkbox
-              id="obligations-agree"
-              checked={agreed}
-              onCheckedChange={setAgreed}
-              className="mt-0.5"
-            />
+            <Checkbox id="obligations-agree" checked={agreed} onCheckedChange={setAgreed} className="mt-0.5" />
             <label htmlFor="obligations-agree" className="text-sm text-slate-700 cursor-pointer leading-relaxed">
               I have read and agree to the <strong>Obligations Management Password and User ID</strong> document.
               <br />

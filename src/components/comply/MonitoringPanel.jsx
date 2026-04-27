@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import RiskBadge from './RiskBadge';
 import { Eye, User, Building2, Loader2, EyeOff, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { t } from '@/components/utils/language';
 
 export default function MonitoringPanel({ onSelectCustomer }) {
   const [data, setData] = useState(null);
@@ -39,7 +40,7 @@ export default function MonitoringPanel({ onSelectCustomer }) {
     setDisabling((p) => ({ ...p, [customerId]: true }));
     try {
       await apiClient.toggleMonitoring(customerId, { enabled: false });
-      toast.success('Monitoring disabled');
+      toast.success(t('complyMonitoringDisabled'));
       load();
     } catch (err) {
       toast.error(err.message || 'Failed');
@@ -58,7 +59,7 @@ export default function MonitoringPanel({ onSelectCustomer }) {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Filter by name or ID..."
+            placeholder={t('complyFilterByNamePlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
