@@ -551,7 +551,10 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Document upload failed: ${response.status}`);
+      const msg = errorData.detail || errorData.error || `Document upload failed: ${response.status}`;
+      const err = new Error(msg);
+      err.status = response.status;
+      throw err;
     }
 
     return response.json();
@@ -586,6 +589,12 @@ class ApiClient {
   async listKycDocuments(clientId, docType = null) {
     const query = docType ? `?doc_type=${encodeURIComponent(docType)}` : '';
     return this.request(`/clients/${clientId}/documents${query}`);
+  }
+
+  async deleteKycDocument(clientId, docId) {
+    return this.request(`/clients/${clientId}/documents/${docId}`, {
+      method: 'DELETE',
+    });
   }
 
   // KYC Admin/Staff

@@ -11,6 +11,33 @@ import { CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { t } from '@/components/utils/language';
 
+// Map of KYC doc_type → translation key for display in the staff drawer.
+// Keep in sync with KYCDocuments.jsx and the backend KYCDocumentType enum.
+const DOC_TYPE_LABEL_MAP = {
+  cert_incorporation: 'kycDocCertOfIncorporation',
+  register_of_commerce: 'kycDocTradeLicense',
+  company_committee_list: 'kycDocCommitteeList',
+  memorandum_articles: 'kycDocMemorandum',
+  shareholders_list: 'kycDocShareholdersList',
+  authorized_signatories_list: 'kycDocAuthSignatories',
+  passport_signatories: 'kycDocPassportSignatories',
+  ubo_passport: 'kycDocUboPassport',
+  ubo_proof_of_address: 'kycDocUboProofAddress',
+  signed_kyc_document: 'kycDocSignedKyc',
+  bank_statement: 'kycDocBankStatement',
+  financial_statements: 'kycDocFinancialStatements',
+  power_of_attorney: 'kycDocPowerOfAttorney',
+  other: 'kycDocOther',
+};
+
+function groupDocumentsByType(documents) {
+  return documents.reduce((acc, doc) => {
+    const key = doc.doc_type || 'other';
+    (acc[key] ||= []).push(doc);
+    return acc;
+  }, {});
+}
+
 export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos = [], isLoading }) {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
@@ -76,7 +103,7 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error(`Failed to download document: ${error.message}`);
+      toast.error(`${t('kycDownloadFailed')}: ${error.message}`);
     }
   };
 
@@ -218,27 +245,34 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-[#1e3a5f]">Uploaded Documents</h4>
+            <h4 className="font-semibold mb-2 text-[#1e3a5f]">{t('kycUploadedDocsHeader')}</h4>
             <CardBox>
               {documents.length === 0 ? (
-                <div className="text-sm text-slate-500 italic">No documents uploaded.</div>
+                <div className="text-sm text-slate-500 italic">{t('kycNoDocumentsUploaded')}</div>
               ) : (
-                <div className="space-y-2">
-                  {documents.map((doc) => (
-                    <div
-                      key={doc.doc_id}
-                      className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded border border-slate-100"
-                    >
-                      <span className="font-medium capitalize text-slate-700">{doc.doc_type.replace(/_/g, ' ')}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownload(doc)}
-                        className="h-8 text-blue-600 hover:text-blue-800"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        {doc.file_name}
-                      </Button>
+                <div className="space-y-3">
+                  {Object.entries(groupDocumentsByType(documents)).map(([type, files]) => (
+                    <div key={type} className="bg-slate-50 rounded border border-slate-100 p-2">
+                      <div className="font-semibold text-slate-700 mb-1 text-sm">
+                        {t(DOC_TYPE_LABEL_MAP[type]) || type.replace(/_/g, ' ')}{' '}
+                        <span className="text-slate-500 font-normal">({files.length})</span>
+                      </div>
+                      <div className="space-y-1">
+                        {files.map((doc) => (
+                          <Button
+                            key={doc.doc_id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownload(doc)}
+                            className="h-8 text-blue-600 hover:text-blue-800 w-full justify-start"
+                          >
+                            <Download className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className="truncate" title={doc.file_name}>
+                              {doc.file_name}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
