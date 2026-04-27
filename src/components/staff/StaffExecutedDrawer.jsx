@@ -177,8 +177,8 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
       >
         <SheetHeader>
           <SheetTitle className="text-slate-900 flex items-center gap-3">
-            Order #{order.order_number}
-            <Badge className="bg-emerald-600 text-white">Released</Badge>
+            {t('order')} #{order.order_number}
+            <Badge className="bg-emerald-600 text-white">{t('sedReleasedBadge')}</Badge>
           </SheetTitle>
         </SheetHeader>
 
@@ -186,15 +186,15 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
           {/* Order Info (Read-only) */}
           <div className="bg-slate-50 rounded-lg p-4 space-y-2 border border-slate-200">
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-slate-500">Client:</div>
+              <div className="text-slate-500">{t('sedClientColon')}</div>
               <div className="text-slate-900">{order.client_name || '-'}</div>
-              <div className="text-slate-500">Amount:</div>
+              <div className="text-slate-500">{t('sedAmountColon')}</div>
               <div className="font-medium text-emerald-700">
                 {order.amount?.toLocaleString()} {order.currency}
               </div>
-              <div className="text-slate-500">Beneficiary:</div>
+              <div className="text-slate-500">{t('sedBeneficiaryColon')}</div>
               <div className="text-slate-900">{order.beneficiary_name}</div>
-              <div className="text-slate-500">Bank:</div>
+              <div className="text-slate-500">{t('sedBankColon')}</div>
               <div className="text-slate-900">
                 {order.bank_name} ({order.bic})
               </div>
@@ -205,10 +205,10 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
           {/* Transaction Status Section */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Transaction Status</h3>
+            <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sedTransactionStatusHeader')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-slate-600">Number</Label>
+                <Label className="text-xs text-slate-600">{t('sedNumber')}</Label>
                 <Input
                   value={formData.transaction_status_number || ''}
                   onChange={(e) => setFormData({ ...formData, transaction_status_number: e.target.value })}
@@ -216,7 +216,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 />
               </div>
               <div>
-                <Label className="text-xs text-slate-600">Date</Label>
+                <Label className="text-xs text-slate-600">{t('sedDate')}</Label>
                 <Input
                   type="date"
                   value={formData.transaction_status_date || ''}
@@ -226,7 +226,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </div>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Status</Label>
+              <Label className="text-xs text-slate-600">{t('sedStatus')}</Label>
               <Select
                 value={formData.transaction_status_received ? 'Y' : 'N'}
                 onValueChange={(val) => setFormData({ ...formData, transaction_status_received: val === 'Y' })}
@@ -235,8 +235,8 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Y">Yes</SelectItem>
-                  <SelectItem value="N">No</SelectItem>
+                  <SelectItem value="Y">{t('sedYes')}</SelectItem>
+                  <SelectItem value="N">{t('sedNo')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -257,7 +257,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   disabled={uploading.attachment_transaction_status}
                 >
                   <Upload className="w-3 h-3 mr-2" />
-                  {uploading.attachment_transaction_status ? 'Uploading...' : 'Upload Document'}
+                  {uploading.attachment_transaction_status ? t('sedUploadingDots') : t('sedUploadDocument')}
                 </Button>
               </label>
               {txStatusDoc && (
@@ -280,7 +280,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
             <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">MT103</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-slate-600">Number</Label>
+                <Label className="text-xs text-slate-600">{t('sedNumber')}</Label>
                 <Input
                   value={formData.mt103_number || ''}
                   onChange={(e) => setFormData({ ...formData, mt103_number: e.target.value })}
@@ -288,7 +288,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 />
               </div>
               <div>
-                <Label className="text-xs text-slate-600">Date</Label>
+                <Label className="text-xs text-slate-600">{t('sedDate')}</Label>
                 <Input
                   type="date"
                   value={formData.mt103_date || ''}
@@ -298,7 +298,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </div>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Status</Label>
+              <Label className="text-xs text-slate-600">{t('sedStatus')}</Label>
               <Select
                 value={formData.mt103_received ? 'Y' : 'N'}
                 onValueChange={(val) => setFormData({ ...formData, mt103_received: val === 'Y' })}
@@ -307,8 +307,8 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Y">Yes</SelectItem>
-                  <SelectItem value="N">No</SelectItem>
+                  <SelectItem value="Y">{t('sedYes')}</SelectItem>
+                  <SelectItem value="N">{t('sedNo')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -329,7 +329,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   disabled={uploading.attachment_mt103}
                 >
                   <Upload className="w-3 h-3 mr-2" />
-                  {uploading.attachment_mt103 ? 'Uploading...' : 'Upload Document'}
+                  {uploading.attachment_mt103 ? t('sedUploadingDots') : t('sedUploadDocument')}
                 </Button>
               </label>
               {mt103Doc && (
@@ -349,10 +349,10 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
           {/* Act Report Section */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Act Report</h3>
+            <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sedActReportHeader')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-slate-600">Number</Label>
+                <Label className="text-xs text-slate-600">{t('sedNumber')}</Label>
                 <Input
                   value={formData.act_report_number || ''}
                   onChange={(e) => setFormData({ ...formData, act_report_number: e.target.value })}
@@ -360,7 +360,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 />
               </div>
               <div>
-                <Label className="text-xs text-slate-600">Date</Label>
+                <Label className="text-xs text-slate-600">{t('sedDate')}</Label>
                 <Input
                   type="date"
                   value={formData.act_report_date || ''}
@@ -370,7 +370,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </div>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Status</Label>
+              <Label className="text-xs text-slate-600">{t('sedStatus')}</Label>
               <Select
                 value={formData.act_report_status || 'not_made'}
                 onValueChange={(val) => setFormData({ ...formData, act_report_status: val })}
@@ -379,14 +379,14 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="not_made">Not Made</SelectItem>
-                  <SelectItem value="on_sign">On Sign</SelectItem>
-                  <SelectItem value="signed">Signed</SelectItem>
+                  <SelectItem value="not_made">{t('sedNotMade')}</SelectItem>
+                  <SelectItem value="on_sign">{t('sedOnSign')}</SelectItem>
+                  <SelectItem value="signed">{t('sedSigned')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-slate-600">Create Act Report</Label>
+              <Label className="text-xs text-slate-600">{t('sedCreateActReport')}</Label>
               <Button
                 type="button"
                 size="sm"
@@ -396,12 +396,12 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                 disabled={uploading.create_act_report}
               >
                 <FileText className="w-3 h-3 mr-2" />
-                {uploading.create_act_report ? 'Generating...' : 'Create Act Report'}
+                {uploading.create_act_report ? t('sedGeneratingDots') : t('sedCreateActReport')}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-slate-600">Unsigned Act Report</Label>
+              <Label className="text-xs text-slate-600">{t('sedUnsignedActReport')}</Label>
               <div className="flex items-center gap-2">
                 <label className="flex-1">
                   <input
@@ -419,7 +419,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     disabled={uploading.attachment_act_report}
                   >
                     <Upload className="w-3 h-3 mr-2" />
-                    {uploading.attachment_act_report ? 'Uploading...' : 'Upload Unsigned'}
+                    {uploading.attachment_act_report ? t('sedUploadingDots') : t('sedUploadUnsigned')}
                   </Button>
                 </label>
                 {actReportDoc && (
@@ -435,7 +435,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-slate-600">Signed by Client Act Report</Label>
+              <Label className="text-xs text-slate-600">{t('sedSignedByClientActReport')}</Label>
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
@@ -452,12 +452,12 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                   }}
                 >
                   <Download className="w-3 h-3 mr-2" />
-                  Download Signed
+                  {t('sedDownloadSigned')}
                 </Button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-slate-600">Signed Act Report</Label>
+              <Label className="text-xs text-slate-600">{t('sedSignedActReport')}</Label>
               <div className="flex items-center gap-2">
                 <label className="flex-1">
                   <input
@@ -475,7 +475,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
                     disabled={uploading.attachment_act_report_signed}
                   >
                     <Upload className="w-3 h-3 mr-2" />
-                    {uploading.attachment_act_report_signed ? 'Uploading...' : 'Upload Signed'}
+                    {uploading.attachment_act_report_signed ? t('sedUploadingDots') : t('sedUploadSigned')}
                   </Button>
                 </label>
                 {actReportSignedDoc && (
@@ -496,7 +496,7 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label className="text-xs text-slate-600">Staff Notes</Label>
+            <Label className="text-xs text-slate-600">{t('sedStaffNotes')}</Label>
             <Textarea
               value={formData.staff_description || ''}
               onChange={(e) => setFormData({ ...formData, staff_description: e.target.value })}
@@ -507,10 +507,10 @@ export default function StaffExecutedDrawer({ order, open, onClose, onUpdate }) 
 
           <div className="flex gap-3 pt-4">
             <Button variant="outline" onClick={onClose} className="flex-1 border-slate-300">
-              Cancel
+              {t('sedCancelBtn')}
             </Button>
             <Button onClick={handleSave} className="flex-1 bg-emerald-600 hover:bg-emerald-700">
-              Save Changes
+              {t('sedSaveChangesBtn')}
             </Button>
           </div>
         </div>

@@ -174,15 +174,15 @@ export default function StaffServiceAgreement() {
             className="inline-flex items-center text-white hover:text-slate-200 mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            {t('saBackToDashboardBtn')}
           </Link>
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-3 shadow-lg">
               <FileText className="w-8 h-8 text-[#1e3a5f]" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Service Agreement Management</h1>
-              <p className="text-slate-300 text-sm">Manage master documents and client submissions</p>
+              <h1 className="text-2xl font-bold text-white">{t('saManagementTitle')}</h1>
+              <p className="text-slate-300 text-sm">{t('saManagementSubtitle')}</p>
             </div>
           </div>
         </div>
@@ -194,25 +194,25 @@ export default function StaffServiceAgreement() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-[#1e3a5f]">{stats.total}</div>
-              <div className="text-sm text-slate-600">Total Badges</div>
+              <div className="text-sm text-slate-600">{t('saStatTotal')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-amber-600">{stats.pending}</div>
-              <div className="text-sm text-slate-600">Pending</div>
+              <div className="text-sm text-slate-600">{t('saStatPending')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-blue-600">{stats.submitted}</div>
-              <div className="text-sm text-slate-600">Submitted</div>
+              <div className="text-sm text-slate-600">{t('saStatSubmitted')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-emerald-600">{stats.completed}</div>
-              <div className="text-sm text-slate-600">Completed</div>
+              <div className="text-sm text-slate-600">{t('saStatCompleted')}</div>
             </CardContent>
           </Card>
         </div>
@@ -220,7 +220,7 @@ export default function StaffServiceAgreement() {
         {/* Master Document Upload */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Master Document</CardTitle>
+            <CardTitle>{t('saMasterDocumentTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -230,7 +230,7 @@ export default function StaffServiceAgreement() {
                 ) : (
                   <Download className="w-4 h-4 mr-2" />
                 )}
-                {isGenerating ? 'Generating...' : 'Download Current Template'}
+                {isGenerating ? t('saGeneratingDots') : t('saDownloadCurrentTemplate')}
               </Button>
             </div>
           </CardContent>
@@ -239,17 +239,17 @@ export default function StaffServiceAgreement() {
         {/* Client Badges List */}
         <Card>
           <CardHeader>
-            <CardTitle>Client Service Agreements</CardTitle>
+            <CardTitle>{t('saClientAgreementsTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {clientsLoading || badgesLoading ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-slate-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1e3a5f]"></div>
-                  Loading agreements...
+                  {t('saLoadingAgreements')}
                 </div>
               ) : clients.length === 0 ? (
-                <div className="text-center text-slate-500 py-8">No clients found</div>
+                <div className="text-center text-slate-500 py-8">{t('saNoClientsFound')}</div>
               ) : null}
               {!(clientsLoading || badgesLoading) &&
                 clients.map((client) => {
@@ -279,7 +279,7 @@ export default function StaffServiceAgreement() {
                             disabled={createBadgeMutation.isPending}
                           >
                             <FileText className="w-3 h-3 mr-1" />
-                            Create Agreement
+                            {t('saCreateAgreementBtn')}
                           </Button>
                         </div>
                       )}
@@ -288,7 +288,7 @@ export default function StaffServiceAgreement() {
                         <div className="space-y-3 pt-3 border-t border-slate-200">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label className="text-xs text-slate-600">Status</Label>
+                              <Label className="text-xs text-slate-600">{t('saStatusLabelInline')}</Label>
                               <Select
                                 value={badge.status}
                                 onValueChange={(value) => handleStatusChange(badge.id, value)}
@@ -297,22 +297,22 @@ export default function StaffServiceAgreement() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="not_required">Not Required</SelectItem>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="need_signing">Need Signing</SelectItem>
-                                  <SelectItem value="submitted">Submitted</SelectItem>
-                                  <SelectItem value="completed">Completed</SelectItem>
+                                  <SelectItem value="not_required">{t('saStatusOptionNotRequired')}</SelectItem>
+                                  <SelectItem value="pending">{t('saStatusOptionPending')}</SelectItem>
+                                  <SelectItem value="need_signing">{t('saStatusOptionNeedSigning')}</SelectItem>
+                                  <SelectItem value="submitted">{t('saStatusOptionSubmitted')}</SelectItem>
+                                  <SelectItem value="completed">{t('saStatusOptionCompleted')}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div>
-                              <Label className="text-xs text-slate-600">Documents</Label>
+                              <Label className="text-xs text-slate-600">{t('saDocumentsLabelInline')}</Label>
                               <div className="flex gap-2 mt-1">
                                 {badge.submitted_document_url && (
                                   <a href={badge.submitted_document_url} target="_blank" rel="noopener noreferrer">
                                     <Button size="sm" variant="outline">
                                       <Download className="w-3 h-3 mr-1" />
-                                      Signed
+                                      {t('saSignedBtn')}
                                     </Button>
                                   </a>
                                 )}
@@ -321,7 +321,7 @@ export default function StaffServiceAgreement() {
                           </div>
 
                           <div>
-                            <Label className="text-xs text-slate-600">Staff Comment</Label>
+                            <Label className="text-xs text-slate-600">{t('saStaffCommentLabel')}</Label>
                             <div className="flex gap-2 mt-1">
                               <Textarea
                                 value={selectedClient === badge.id ? editingComment : badge.staff_comment || ''}
@@ -336,7 +336,7 @@ export default function StaffServiceAgreement() {
                               />
                               {selectedClient === badge.id && (
                                 <Button size="sm" onClick={() => handleSaveComment(badge.id)}>
-                                  Save
+                                  {t('saSaveBtn')}
                                 </Button>
                               )}
                             </div>

@@ -98,9 +98,9 @@ function CustomerSearchPanel({ onSelectCustomer, reloadSignal = 0 }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="person">Person</SelectItem>
-            <SelectItem value="company">Company</SelectItem>
+            <SelectItem value="all">{t('caAllTypes')}</SelectItem>
+            <SelectItem value="person">{t('caPerson')}</SelectItem>
+            <SelectItem value="company">{t('caCompany')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={riskFilter} onValueChange={setRiskFilter}>
@@ -108,29 +108,32 @@ function CustomerSearchPanel({ onSelectCustomer, reloadSignal = 0 }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Risk</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="all">{t('caAllRisk')}</SelectItem>
+            <SelectItem value="low">{t('caRiskLow')}</SelectItem>
+            <SelectItem value="medium">{t('caRiskMedium')}</SelectItem>
+            <SelectItem value="high">{t('caRiskHigh')}</SelectItem>
           </SelectContent>
         </Select>
         <Button onClick={handleSearch} disabled={loading} className="bg-[#1e3a5f] hover:bg-[#152a45]">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-1" />} Search
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-1" />}{' '}
+          {t('caSearchBtn')}
         </Button>
       </div>
 
       {loading && results === null && (
         <div className="flex items-center gap-2 text-slate-500 py-6">
-          <Loader2 className="w-4 h-4 animate-spin" /> Loading customers...
+          <Loader2 className="w-4 h-4 animate-spin" /> {t('caLoadingCustomers')}
         </div>
       )}
 
       {results && (
         <div className="space-y-2">
-          <p className="text-sm text-slate-500">{results.length ?? 0} results</p>
+          <p className="text-sm text-slate-500">
+            {results.length ?? 0} {t('caResultsSuffix')}
+          </p>
           {results.length === 0 ? (
             <div className="text-center py-10 text-slate-400 bg-white border border-slate-200 rounded-lg">
-              No customers found
+              {t('caNoCustomersFound')}
             </div>
           ) : (
             results.map((customer) => (
@@ -166,7 +169,7 @@ function CustomerSearchPanel({ onSelectCustomer, reloadSignal = 0 }) {
                       {customer.monitored && (
                         <Badge className="bg-blue-100 text-blue-700 border border-blue-200 text-xs">
                           <Eye className="w-3 h-3 mr-1" />
-                          Mon.
+                          {t('caMonShort')}
                         </Badge>
                       )}
                     </div>
@@ -218,28 +221,28 @@ export default function StaffComplyAdvantage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white border border-slate-200 flex-wrap h-auto gap-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
-              <BarChart2 className="w-4 h-4 mr-1.5" /> Overview
+              <BarChart2 className="w-4 h-4 mr-1.5" /> {t('caTabOverview')}
             </TabsTrigger>
             <TabsTrigger value="search" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
-              <Search className="w-4 h-4 mr-1.5" /> Customers
+              <Search className="w-4 h-4 mr-1.5" /> {t('caTabCustomers')}
             </TabsTrigger>
             <TabsTrigger
               value="screen_person"
               className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white"
             >
-              <User className="w-4 h-4 mr-1.5" /> Screen Person
+              <User className="w-4 h-4 mr-1.5" /> {t('caTabScreenPerson')}
             </TabsTrigger>
             <TabsTrigger
               value="screen_company"
               className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white"
             >
-              <Building2 className="w-4 h-4 mr-1.5" /> Screen Company
+              <Building2 className="w-4 h-4 mr-1.5" /> {t('caTabScreenCompany')}
             </TabsTrigger>
             <TabsTrigger value="monitoring" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
-              <Eye className="w-4 h-4 mr-1.5" /> Monitoring
+              <Eye className="w-4 h-4 mr-1.5" /> {t('caTabMonitoring')}
             </TabsTrigger>
             <TabsTrigger value="alerts" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
-              <Bell className="w-4 h-4 mr-1.5" /> Alerts
+              <Bell className="w-4 h-4 mr-1.5" /> {t('caTabAlerts')}
             </TabsTrigger>
           </TabsList>
 
@@ -253,8 +256,8 @@ export default function StaffComplyAdvantage() {
                   <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
                     <User className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div className="font-semibold text-slate-800 text-sm">Screen Individual</div>
-                  <div className="text-xs text-slate-500 mt-1">Sanctions, PEP & adverse media check for a person</div>
+                  <div className="font-semibold text-slate-800 text-sm">{t('caScreenIndividualTitle')}</div>
+                  <div className="text-xs text-slate-500 mt-1">{t('caScreenIndividualDesc')}</div>
                 </button>
                 <button
                   onClick={() => setActiveTab('screen_company')}
@@ -263,10 +266,8 @@ export default function StaffComplyAdvantage() {
                   <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center mb-3 group-hover:bg-amber-100 transition-colors">
                     <Building2 className="w-5 h-5 text-amber-600" />
                   </div>
-                  <div className="font-semibold text-slate-800 text-sm">Screen Company</div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    Sanctions & adverse media check for a corporate entity
-                  </div>
+                  <div className="font-semibold text-slate-800 text-sm">{t('caScreenCompanyTitle')}</div>
+                  <div className="text-xs text-slate-500 mt-1">{t('caScreenCompanyDesc')}</div>
                 </button>
                 <button
                   onClick={() => setActiveTab('monitoring')}
@@ -275,8 +276,8 @@ export default function StaffComplyAdvantage() {
                   <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
                     <Eye className="w-5 h-5 text-indigo-600" />
                   </div>
-                  <div className="font-semibold text-slate-800 text-sm">Ongoing Monitoring</div>
-                  <div className="text-xs text-slate-500 mt-1">View customers under continuous surveillance</div>
+                  <div className="font-semibold text-slate-800 text-sm">{t('caOngoingMonitoringTitle')}</div>
+                  <div className="text-xs text-slate-500 mt-1">{t('caOngoingMonitoringDesc')}</div>
                 </button>
                 <button
                   onClick={() => setActiveTab('alerts')}
@@ -285,26 +286,26 @@ export default function StaffComplyAdvantage() {
                   <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center mb-3 group-hover:bg-red-100 transition-colors">
                     <Bell className="w-5 h-5 text-red-600" />
                   </div>
-                  <div className="font-semibold text-slate-800 text-sm">Review Alerts</div>
-                  <div className="text-xs text-slate-500 mt-1">Confirm or dismiss pending compliance alerts</div>
+                  <div className="font-semibold text-slate-800 text-sm">{t('caReviewAlertsTitle')}</div>
+                  <div className="text-xs text-slate-500 mt-1">{t('caReviewAlertsDesc')}</div>
                 </button>
               </div>
 
               <Card className="border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-[#1e3a5f] text-base flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5" /> About This Module
+                    <AlertTriangle className="w-5 h-5" /> {t('caAboutModule')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2">
                     {[
-                      'Screen individuals & companies against global sanctions lists',
-                      'PEP (Politically Exposed Persons) database checks',
-                      'Adverse media monitoring',
-                      'Continuous monitoring with real-time alerts',
-                      'Risk scoring with manual override capability',
-                      'Case management for compliance workflows',
+                      t('caFeature1'),
+                      t('caFeature2'),
+                      t('caFeature3'),
+                      t('caFeature4'),
+                      t('caFeature5'),
+                      t('caFeature6'),
                     ].map((item, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] mt-2 flex-shrink-0" />
@@ -320,7 +321,7 @@ export default function StaffComplyAdvantage() {
           <TabsContent value="search">
             <Card className="border-slate-200">
               <CardHeader>
-                <CardTitle className="text-[#1e3a5f] text-lg">Customer Search</CardTitle>
+                <CardTitle className="text-[#1e3a5f] text-lg">{t('caCustomerSearchTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CustomerSearchPanel onSelectCustomer={handleSelectCustomer} reloadSignal={customersReload} />
@@ -331,8 +332,8 @@ export default function StaffComplyAdvantage() {
           <TabsContent value="screen_person">
             <Card className="border-slate-200">
               <CardHeader>
-                <CardTitle className="text-[#1e3a5f] text-lg">Screen an Individual</CardTitle>
-                <p className="text-sm text-slate-500">Sanctions, PEP registers, and adverse media checks.</p>
+                <CardTitle className="text-[#1e3a5f] text-lg">{t('caScreenAnIndividual')}</CardTitle>
+                <p className="text-sm text-slate-500">{t('caScreenAnIndividualDesc')}</p>
               </CardHeader>
               <CardContent>
                 <ScreeningForm type="person" onResult={handleScreeningSuccess} />
@@ -343,8 +344,8 @@ export default function StaffComplyAdvantage() {
           <TabsContent value="screen_company">
             <Card className="border-slate-200">
               <CardHeader>
-                <CardTitle className="text-[#1e3a5f] text-lg">Screen a Company</CardTitle>
-                <p className="text-sm text-slate-500">Sanctions and adverse media checks for corporate entities.</p>
+                <CardTitle className="text-[#1e3a5f] text-lg">{t('caScreenACompany')}</CardTitle>
+                <p className="text-sm text-slate-500">{t('caScreenACompanyDesc')}</p>
               </CardHeader>
               <CardContent>
                 <ScreeningForm type="company" onResult={handleScreeningSuccess} />
@@ -356,7 +357,7 @@ export default function StaffComplyAdvantage() {
             <Card className="border-slate-200">
               <CardHeader>
                 <CardTitle className="text-[#1e3a5f] text-lg flex items-center gap-2">
-                  <Eye className="w-5 h-5" /> Monitored Customers
+                  <Eye className="w-5 h-5" /> {t('caMonitoredCustomers')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -369,7 +370,7 @@ export default function StaffComplyAdvantage() {
             <Card className="border-slate-200">
               <CardHeader>
                 <CardTitle className="text-[#1e3a5f] text-lg flex items-center gap-2">
-                  <Bell className="w-5 h-5" /> Alerts
+                  <Bell className="w-5 h-5" /> {t('caAlerts')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -402,10 +403,12 @@ function PageHeader({ onBack }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white">AML Screening</h1>
-                <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">ComplyAdvantage</span>
+                <h1 className="text-xl font-bold text-white">{t('caHeaderTitle')}</h1>
+                <span className="text-xs bg-[#f5a623] px-2 py-1 rounded text-white font-medium">
+                  {t('caHeaderBadge')}
+                </span>
               </div>
-              <p className="text-slate-300 text-xs">Sanctions · PEP · Adverse Media · Monitoring · Risk Scoring</p>
+              <p className="text-slate-300 text-xs">{t('caHeaderSubtitle')}</p>
             </div>
           </div>
         </div>

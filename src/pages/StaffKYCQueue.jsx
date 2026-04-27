@@ -43,7 +43,7 @@ export default function StaffKYCQueue() {
   });
 
   // Filter logic on the client side (search by company name or client name)
-  const filteredQueue = kycQueue.filter(item => {
+  const filteredQueue = kycQueue.filter((item) => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -68,7 +68,7 @@ export default function StaffKYCQueue() {
     in_progress: 'bg-blue-100 text-blue-800',
     approved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
-    needs_fix: 'bg-orange-100 text-orange-800'
+    needs_fix: 'bg-orange-100 text-orange-800',
   };
 
   const formatStatus = (status) => {
@@ -117,9 +117,7 @@ export default function StaffKYCQueue() {
             </div>
           ) : filteredQueue.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-slate-500">
-                {t('noKYCPending')}
-              </CardContent>
+              <CardContent className="py-12 text-center text-slate-500">{t('noKYCPending')}</CardContent>
             </Card>
           ) : (
             filteredQueue.map((item) => (
@@ -127,14 +125,19 @@ export default function StaffKYCQueue() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">
-                        {item.company_name || t('companyNameNotProvided')}
-                      </CardTitle>
+                      <CardTitle className="text-lg mb-2">{item.company_name || t('companyNameNotProvided')}</CardTitle>
                       <div className="text-sm text-slate-600 space-y-1">
-                        <div className="font-medium text-slate-800">{t('clientLabel')}: {item.client_name || t('unknownLabel')}</div>
-                        <div>Email: {item.client_email || 'N/A'}</div>
+                        <div className="font-medium text-slate-800">
+                          {t('clientLabel')}: {item.client_name || t('unknownLabel')}
+                        </div>
+                        <div>
+                          {t('emailColon')} {item.client_email || t('na')}
+                        </div>
                         {item.submitted_at && (
-                          <div>{t('submittedAtLabel')} {new Date(item.submitted_at).toLocaleDateString()} {new Date(item.submitted_at).toLocaleTimeString()}</div>
+                          <div>
+                            {t('submittedAtLabel')} {new Date(item.submitted_at).toLocaleDateString()}{' '}
+                            {new Date(item.submitted_at).toLocaleTimeString()}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -142,10 +145,7 @@ export default function StaffKYCQueue() {
                       <Badge className={statusColors[item.status] || 'bg-gray-100 text-gray-800'}>
                         {formatStatus(item.status)}
                       </Badge>
-                      <Button
-                        onClick={() => handleViewKYC(item)}
-                        className="bg-[#1e3a5f] hover:bg-[#152a45]"
-                      >
+                      <Button onClick={() => handleViewKYC(item)} className="bg-[#1e3a5f] hover:bg-[#152a45]">
                         <Eye className="w-4 h-4 mr-2" />
                         {t('reviewButton')}
                       </Button>
@@ -164,9 +164,9 @@ export default function StaffKYCQueue() {
           open={drawerOpen}
           onClose={handleDrawerClose}
           // Pass the FULL data fetched in this component.
-          // If loading, you might want to show a loader or pass null/loading state, 
+          // If loading, you might want to show a loader or pass null/loading state,
           // but usually it's better to wait or let the drawer handle partials.
-          // Since we can't edit the drawer, we hope it handles updates gracefully 
+          // Since we can't edit the drawer, we hope it handles updates gracefully
           // or we can block rendering until data is ready locally if we want strictly specific behavior.
           // However, react-query caches, so subsequent opens are fast.
           kycProfile={fullKycProfile}

@@ -439,7 +439,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             #{order.orderId}
             <OrderStatusBadge status={status} />
           </SheetTitle>
-          <SheetDescription className="hidden">Manage order details, documents, and status.</SheetDescription>
+          <SheetDescription className="hidden">{t('sodSheetDescription')}</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-1 pb-6">
@@ -449,7 +449,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               <div className="flex items-start gap-3 bg-red-50 border-2 border-red-300 rounded-lg p-3">
                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-red-800">Regulatory Threshold Reached</p>
+                  <p className="text-xs font-bold text-red-800">{t('sodRegulatoryThresholdReached')}</p>
                   <p className="text-xs text-red-700 mt-0.5">
                     {order.currency} {parseFloat(order.amount).toLocaleString('en-US')} exceeds the{' '}
                     {formatThreshold(order.currency)} threshold. Enhanced due diligence & supporting documents required.
@@ -461,9 +461,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* STATUS MANAGEMENT Section */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Status Management</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodStatusManagementHeader')}</h3>
               <div>
-                <Label className="text-xs text-slate-600">Order Status</Label>
+                <Label className="text-xs text-slate-600">{t('sodOrderStatus')}</Label>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger className="mt-1 bg-white border-slate-300">
                     <SelectValue />
@@ -483,11 +483,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* SECTION 1: CLIENT PAYMENT INSTRUCTIONS */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Client Payment Instructions</h3>
-              <p className="text-xs text-slate-500 italic">Select the account where client should send payment</p>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodClientPaymentInstructions')}</h3>
+              <p className="text-xs text-slate-500 italic">{t('sodSelectAccountWhereSendPayment')}</p>
 
               <div>
-                <Label className="text-xs text-slate-600 font-bold">Select Payment Account *</Label>
+                <Label className="text-xs text-slate-600 font-bold">{t('sodSelectPaymentAccount')}</Label>
                 <Select
                   value={clientPaymentAccountId}
                   onValueChange={(val) => {
@@ -517,11 +517,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   <SelectContent>
                     {payeerLoading ? (
                       <SelectItem value="__loading" disabled>
-                        Loading accounts...
+                        {t('sodLoadingAccounts')}
                       </SelectItem>
                     ) : activePayeerAccounts.length === 0 ? (
                       <SelectItem value="__empty" disabled>
-                        No active accounts
+                        {t('sodNoActiveAccounts')}
                       </SelectItem>
                     ) : (
                       activePayeerAccounts.map((acc) => (
@@ -537,25 +537,25 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {clientPaymentAccountId && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                  <p className="text-xs font-semibold text-slate-700">Selected Account Details:</p>
+                  <p className="text-xs font-semibold text-slate-700">{t('sodSelectedAccountDetails')}</p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Account Name:</span>
+                      <span className="text-slate-600">{t('sodAccountNameColon')}</span>
                       <span className="font-medium text-slate-900">{clientPaymentAccountName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Account Number:</span>
+                      <span className="text-slate-600">{t('sodAccountNumberColon')}</span>
                       <span className="font-mono font-medium text-slate-900">{clientPaymentAccountNumber}</span>
                     </div>
                     {clientPaymentBankName && (
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Bank Name:</span>
+                        <span className="text-slate-600">{t('sodBankNameColon')}</span>
                         <span className="font-medium text-slate-900">{clientPaymentBankName}</span>
                       </div>
                     )}
                     {clientPaymentBankAddress && (
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Bank Address:</span>
+                        <span className="text-slate-600">{t('sodBankAddressColon')}</span>
                         <span className="font-medium text-slate-900 text-right">{clientPaymentBankAddress}</span>
                       </div>
                     )}
@@ -580,11 +580,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* SECTION 3: FX & CONVERSION Section */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Transfer Amounts & FX</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodTransferAmountsFx')}</h3>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs text-slate-600">Source Currency</Label>
+                  <Label className="text-xs text-slate-600">{t('sodSourceCurrency')}</Label>
                   <Select value={clientPaymentCurrency} onValueChange={setClientPaymentCurrency}>
                     <SelectTrigger className="mt-1 bg-white border-slate-300">
                       <SelectValue placeholder="USD" />
@@ -592,7 +592,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectContent>
                       {currenciesLoading ? (
                         <SelectItem value="__loading" disabled>
-                          Loading currencies...
+                          {t('sodLoadingCurrencies')}
                         </SelectItem>
                       ) : (
                         currencies
@@ -608,7 +608,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-600">Payment Currency</Label>
+                  <Label className="text-xs text-slate-600">{t('sodPaymentCurrency')}</Label>
                   <div className="mt-1 bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-700">
                     {order.currency}
                   </div>
@@ -616,9 +616,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               </div>
 
               <div>
-                <Label className="text-xs text-slate-600">Conversion Method</Label>
+                <Label className="text-xs text-slate-600">{t('sodConversionMethod')}</Label>
                 <div className="mt-1 bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-700">
-                  {conversionMethod === 'no_conversion' ? 'No Conversion' : 'Executing Bank Rate'}
+                  {conversionMethod === 'no_conversion' ? t('sodNoConversion') : t('sodExecutingBankRate')}
                 </div>
               </div>
 
@@ -626,7 +626,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <Label
                   className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}
                 >
-                  {conversionMethod === 'central_bank' ? 'Central Bank Rate Applied *' : 'Exchange Rate *'}
+                  {conversionMethod === 'central_bank' ? t('sodCentralBankRateApplied') : t('sodExchangeRateLabel')}
                 </Label>
                 <Input
                   type="number"
@@ -646,7 +646,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 <Label
                   className={`text-xs ${conversionMethod === 'no_conversion' ? 'text-slate-400' : 'text-slate-600'}`}
                 >
-                  Data Fixing
+                  {t('sodDataFixing')}
                 </Label>
                 <Input
                   type="date"
@@ -662,10 +662,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* REMUNERATION & FEES Section */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Transfer Fee / Remuneration</h3>
+              <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodTransferFeeRemuneration')}</h3>
 
               <div>
-                <Label className="text-xs text-slate-600">Remuneration Type</Label>
+                <Label className="text-xs text-slate-600">{t('sodRemunerationType')}</Label>
                 <Select value={remunerationType} onValueChange={setRemunerationType}>
                   <SelectTrigger className="mt-1 bg-white border-slate-300">
                     <SelectValue />
@@ -679,7 +679,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {remunerationType === 'PERCENT' ? (
                 <div>
-                  <Label className="text-xs text-slate-600">Remuneration Percentage (%) *</Label>
+                  <Label className="text-xs text-slate-600">{t('sodRemunerationPercentage')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -693,7 +693,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
               ) : (
                 <div>
-                  <Label className="text-xs text-slate-600">Remuneration Fixed Amount *</Label>
+                  <Label className="text-xs text-slate-600">{t('sodRemunerationFixedAmount')}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -708,7 +708,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
               )}
 
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                <div className="text-xs text-slate-600 mb-1">Total Originator Pays</div>
+                <div className="text-xs text-slate-600 mb-1">{t('sodTotalOriginatorPays')}</div>
                 <div className="text-lg font-bold text-indigo-900">
                   {Number(amountToBePaid || calculateAmountRemuneration() + (Number(order.amount) || 0)).toLocaleString(
                     'en-US',
@@ -720,7 +720,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                  <div className="text-xs text-slate-600 mb-1">Transfer Fee ({order.currency})</div>
+                  <div className="text-xs text-slate-600 mb-1">
+                    {t('sodTransferFeeColon')} ({order.currency})
+                  </div>
                   <div className="text-sm font-bold text-[#1e3a5f]">
                     {calculateAmountRemuneration().toLocaleString('en-US', {
                       minimumFractionDigits: 2,
@@ -729,7 +731,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </div>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <div className="text-xs text-slate-600 mb-1">Net to Beneficiary ({order.currency})</div>
+                  <div className="text-xs text-slate-600 mb-1">
+                    {t('sodNetToBeneficiary')} ({order.currency})
+                  </div>
                   <div className="text-sm font-bold text-emerald-700">
                     {Number(order.amount || 0).toLocaleString('en-US', {
                       minimumFractionDigits: 2,
@@ -743,9 +747,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* Invoice Section */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Invoice</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodInvoice')}</h4>
                 <div className="flex items-center gap-3">
-                  <Label className="text-xs text-slate-600">Invoice Received</Label>
+                  <Label className="text-xs text-slate-600">{t('sodInvoiceReceived')}</Label>
                   <Select value={invoiceReceived ? 'Y' : 'N'} onValueChange={(val) => setInvoiceReceived(val === 'Y')}>
                     <SelectTrigger className="w-20 bg-white border-slate-300">
                       <SelectValue />
@@ -763,7 +767,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     className="inline-flex items-center gap-2 text-xs text-[#1e3a5f] hover:underline"
                   >
                     <Download className="w-3 h-3" />
-                    Download Invoice CSV
+                    {t('sodDownloadInvoiceCSV')}
                   </a>
                 )}
               </div>
@@ -772,9 +776,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* Payment Proof Section */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Payment Proof</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodPaymentProof')}</h4>
                 <div className="flex items-center gap-3">
-                  <Label className="text-xs text-slate-600">Payment Proof Received</Label>
+                  <Label className="text-xs text-slate-600">{t('sodPaymentProofReceived')}</Label>
                   <Select value={paymentProof ? 'Y' : 'N'} onValueChange={(val) => setPaymentProof(val === 'Y')}>
                     <SelectTrigger className="w-20 bg-white border-slate-300">
                       <SelectValue />
@@ -787,7 +791,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-600">Payment Proof Date</Label>
+                  <Label className="text-xs text-slate-600">{t('sodPaymentProofDate')}</Label>
                   <Input
                     type="date"
                     value={paymentProofDate}
@@ -797,7 +801,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs text-slate-600">Upload Payment Proof</Label>
+                  <Label className="text-xs text-slate-600">{t('sodUploadPaymentProof')}</Label>
                   <div className="flex items-center gap-2">
                     <label className="flex-1">
                       <input
@@ -814,7 +818,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         disabled={uploadingProof}
                       >
                         <Upload className="w-4 h-4 mr-2" />
-                        {uploadingProof ? 'Uploading...' : 'Upload Document'}
+                        {uploadingProof ? t('sodUploadingDots') : t('sodUploadDocumentBtn')}
                       </Button>
                     </label>
                   </div>
@@ -826,7 +830,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       className="inline-flex items-center gap-2 text-xs text-[#1e3a5f] hover:underline p-0 h-auto"
                     >
                       <Download className="w-3 h-3" />
-                      Download Uploaded Proof
+                      {t('sodDownloadUploadedProof')}
                     </Button>
                   )}
                 </div>
@@ -836,10 +840,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* SECTION 4: EXECUTION Section */}
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">GAN&apos;s Execution & Payment</h3>
+                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodGanExecutionPayment')}</h3>
 
                 <div>
-                  <Label className="text-xs text-slate-600">Date of Execution</Label>
+                  <Label className="text-xs text-slate-600">{t('sodDateOfExecution')}</Label>
                   <Input
                     type="date"
                     value={dateReport}
@@ -849,7 +853,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-600">Executing Bank</Label>
+                  <Label className="text-xs text-slate-600">{t('sodExecutingBank')}</Label>
                   <Select value={executingBank} onValueChange={setExecutingBank}>
                     <SelectTrigger className="mt-1 bg-white border-slate-300">
                       <SelectValue placeholder={t('drSelectExecutingBank')} />
@@ -857,11 +861,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     <SelectContent>
                       {payeerLoading ? (
                         <SelectItem value="__loading" disabled>
-                          Loading banks...
+                          {t('sodLoadingBanks')}
                         </SelectItem>
                       ) : activePayeerAccounts.length === 0 ? (
                         <SelectItem value="__empty" disabled>
-                          No active accounts
+                          {t('sodNoActiveAccounts')}
                         </SelectItem>
                       ) : (
                         activePayeerAccounts.map((acc) => (
@@ -880,11 +884,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* Documents Section */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Documents</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodDocuments')}</h4>
 
                 {/* Sales Contract */}
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Sales Contract</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('sodSalesContract')}</Label>
                   <div className="flex items-center gap-2">
                     <label className="flex-1">
                       <input
@@ -902,7 +906,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         disabled={uploadingSalesContract}
                       >
                         <Upload className="w-3 h-3 mr-2" />
-                        {uploadingSalesContract ? 'Uploading...' : 'Upload'}
+                        {uploadingSalesContract ? t('sodUploadingDots') : t('sodUploadBtn')}
                       </Button>
                     </label>
                     {getDoc('sales_contract') && (
@@ -920,7 +924,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 {/* Invoice */}
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Invoice</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('sodInvoice')}</Label>
                   <div className="flex items-center gap-2">
                     <label className="flex-1">
                       <input
@@ -938,7 +942,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         disabled={uploadingInvoice}
                       >
                         <Upload className="w-3 h-3 mr-2" />
-                        {uploadingInvoice ? 'Uploading...' : 'Upload'}
+                        {uploadingInvoice ? t('sodUploadingDots') : t('sodUploadBtn')}
                       </Button>
                     </label>
                     {getDoc('invoice') && (
@@ -956,7 +960,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 {/* Other Documents */}
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Other Documents</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('sodOtherDocuments')}</Label>
                   <div className="flex items-center gap-2">
                     <label className="flex-1">
                       <input
@@ -974,7 +978,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                         disabled={uploadingOther}
                       >
                         <Upload className="w-3 h-3 mr-2" />
-                        {uploadingOther ? 'Uploading...' : 'Upload'}
+                        {uploadingOther ? t('sodUploadingDots') : t('sodUploadBtn')}
                       </Button>
                     </label>
                     {getDoc('other') && (
@@ -992,7 +996,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 {/* WORD Order */}
                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                  <Label className="text-xs text-slate-600 mb-2 block">Order</Label>
+                  <Label className="text-xs text-slate-600 mb-2 block">{t('sodOrder')}</Label>
                   <div className="flex flex-col gap-2">
                     <Button
                       type="button"
@@ -1002,7 +1006,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                       onClick={handleDownloadExcel}
                     >
                       <FileText className="w-3 h-3 mr-2" />
-                      Download Unsigned Order
+                      {t('sodDownloadUnsignedOrder')}
                     </Button>
                     <div className="flex items-center gap-2">
                       <label className="flex-1">
@@ -1021,7 +1025,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                           disabled={uploadingWordOrder}
                         >
                           <Upload className="w-3 h-3 mr-2" />
-                          {uploadingWordOrder ? 'Uploading...' : 'Upload Unsigned by Client'}
+                          {uploadingWordOrder ? t('sodUploadingDots') : t('sodUploadUnsignedByClient')}
                         </Button>
                       </label>
                       {unsignedOrderDoc && (
@@ -1052,7 +1056,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                           disabled={uploadingWordOrder}
                         >
                           <Upload className="w-3 h-3 mr-2" />
-                          {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Client'}
+                          {uploadingWordOrder ? t('sodUploadingDots') : t('sodUploadSignedByClient')}
                         </Button>
                       </label>
                       {signedOrderDoc && (
@@ -1083,7 +1087,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                           disabled={uploadingWordOrder}
                         >
                           <Upload className="w-3 h-3 mr-2" />
-                          {uploadingWordOrder ? 'Uploading...' : 'Upload Signed by Staff'}
+                          {uploadingWordOrder ? t('sodUploadingDots') : t('sodUploadSignedByStaff')}
                         </Button>
                       </label>
                       {signedOrderStaffDoc && (
@@ -1105,11 +1109,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* Order Information */}
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">Order Information</h3>
+                <h3 className="text-sm font-bold text-[#1e3a5f] uppercase">{t('sodOrderInformation')}</h3>
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">Amount</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('sodAmount')}</div>
                     <div className="font-semibold text-slate-900">
                       {order.currency}{' '}
                       {order.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -1117,62 +1121,62 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">Remittance Currency</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('sodRemittanceCurrency')}</div>
                     <div className="font-semibold text-slate-900">{order.currency}</div>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">Debit Account</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('sodDebitAccount')}</div>
                     <div className="font-semibold text-slate-900">{terms?.GANBankAccount || '-'}</div>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">Transaction Reference</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('sodTransactionReference')}</div>
                     <div className="font-semibold text-slate-900 text-xs break-all">{order.orderId || '-'}</div>
                   </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Beneficiary Name</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodBeneficiaryName')}</div>
                   <div className="font-semibold text-slate-900">{order.beneficiaryName}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Beneficiary Address</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodBeneficiaryAddress')}</div>
                   <div className="font-semibold text-slate-900 text-sm">
                     {order.beneficiaryAddress || order.beneficiaryAdress}
                   </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Destination Account</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodDestinationAccount')}</div>
                   <div className="font-semibold text-slate-900">{order.destinationAccount}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">Bank Country</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('sodBankCountry')}</div>
                     <div className="font-semibold text-slate-900">{order.bankCountry}</div>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 mb-1">BIC/SWIFT</div>
+                    <div className="text-xs text-slate-500 mb-1">{t('bicSwiftLabel')}</div>
                     <div className="font-semibold text-slate-900">{order.bankBic}</div>
                   </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Bank Name</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodBankName')}</div>
                   <div className="font-semibold text-slate-900">{order.bankName}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Bank Address</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodBankAddress')}</div>
                   <div className="font-semibold text-slate-900 text-sm">{order.bankAddress || '-'}</div>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                  <div className="text-xs text-slate-500 mb-1">Transaction Remark</div>
+                  <div className="text-xs text-slate-500 mb-1">{t('sodTransactionRemark')}</div>
                   <div className="font-semibold text-slate-900 text-sm whitespace-pre-wrap">{order.remark}</div>
                 </div>
               </div>
@@ -1181,22 +1185,22 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* BANK STATEMENTS Section */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Bank Statements</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodBankStatements')}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-slate-600">Statement IN Type</Label>
+                    <Label className="text-xs text-slate-600">{t('sodStatementInType')}</Label>
                     <Select value={bankStatementInType} onValueChange={setBankStatementInType}>
                       <SelectTrigger className="mt-1 bg-white border-slate-300">
                         <SelectValue placeholder={t('drSelectType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="mandiri_statement">Mandiri Statement</SelectItem>
-                        <SelectItem value="other_bank_statements">Other Bank Statements</SelectItem>
+                        <SelectItem value="mandiri_statement">{t('sodMandiriStatement')}</SelectItem>
+                        <SelectItem value="other_bank_statements">{t('sodOtherBankStatements')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-600">Statement IN ID</Label>
+                    <Label className="text-xs text-slate-600">{t('sodStatementInId')}</Label>
                     <Input
                       value={bankStatementInId}
                       onChange={(e) => setBankStatementInId(e.target.value)}
@@ -1208,19 +1212,19 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-slate-600">Statement OUT Type</Label>
+                    <Label className="text-xs text-slate-600">{t('sodStatementOutType')}</Label>
                     <Select value={bankStatementOutType} onValueChange={setBankStatementOutType}>
                       <SelectTrigger className="mt-1 bg-white border-slate-300">
                         <SelectValue placeholder={t('drSelectType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="mandiri_statement">Mandiri Statement</SelectItem>
-                        <SelectItem value="other_bank_statements">Other Bank Statements</SelectItem>
+                        <SelectItem value="mandiri_statement">{t('sodMandiriStatement')}</SelectItem>
+                        <SelectItem value="other_bank_statements">{t('sodOtherBankStatements')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-600">Statement OUT ID</Label>
+                    <Label className="text-xs text-slate-600">{t('sodStatementOutId')}</Label>
                     <Input
                       value={bankStatementOutId}
                       onChange={(e) => setBankStatementOutId(e.target.value)}
@@ -1235,10 +1239,10 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* PAYMENT AMOUNTS Section */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Payment Amounts</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodPaymentAmounts')}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-slate-600">Amount to be Paid (Target Cur)</Label>
+                    <Label className="text-xs text-slate-600">{t('sodAmountToBePaidTarget')}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -1248,7 +1252,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-600">Amount Paid (Target Cur)</Label>
+                    <Label className="text-xs text-slate-600">{t('sodAmountPaidTarget')}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -1261,7 +1265,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-slate-600">Doc Paid No</Label>
+                    <Label className="text-xs text-slate-600">{t('sodDocPaidNo')}</Label>
                     <Input
                       value={docPaidNo}
                       onChange={(e) => setDocPaidNo(e.target.value)}
@@ -1269,7 +1273,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-600">Doc Paid Date</Label>
+                    <Label className="text-xs text-slate-600">{t('sodDocPaidDate')}</Label>
                     <Input
                       type="date"
                       value={docPaidDate}
@@ -1281,7 +1285,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs text-slate-600">Payment Proof No</Label>
+                    <Label className="text-xs text-slate-600">{t('sodPaymentProofNo')}</Label>
                     <Input
                       value={paymentProofNo}
                       onChange={(e) => setPaymentProofNo(e.target.value)}
@@ -1289,7 +1293,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-600">Payment Proof Date</Label>
+                    <Label className="text-xs text-slate-600">{t('sodPaymentProofDate')}</Label>
                     <Input
                       type="date"
                       value={paymentProofDate}
@@ -1304,9 +1308,9 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
               {/* Non-Mandiri Execution */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Execution</h4>
+                <h4 className="text-xs font-bold text-slate-700 uppercase">{t('sodExecution')}</h4>
                 <div className="flex items-center gap-3">
-                  <Label className="text-xs text-slate-600">Non-Mandiri Execution</Label>
+                  <Label className="text-xs text-slate-600">{t('sodNonMandiriExecution')}</Label>
                   <Select
                     value={nonMandiriExecution ? 'Y' : 'N'}
                     onValueChange={(val) => setNonMandiriExecution(val === 'Y')}
@@ -1327,11 +1331,11 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* Last Export Info */}
             <div>
-              <Label className="text-xs text-slate-600">Last Instruction Export</Label>
+              <Label className="text-xs text-slate-600">{t('sodLastInstructionExport')}</Label>
               <div className="mt-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded p-2">
                 {lastInstructionExport?.last_export_date
                   ? format(new Date(lastInstructionExport.last_export_date), 'dd/MM/yyyy HH:mm')
-                  : 'Not exported yet'}
+                  : t('sodNotExportedYet')}
               </div>
             </div>
 
@@ -1339,7 +1343,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
 
             {/* Invoice Number */}
             <div>
-              <Label className="text-xs text-slate-600">Invoice Number</Label>
+              <Label className="text-xs text-slate-600">{t('sodInvoiceNumber')}</Label>
               <Input
                 value={invoiceNumber}
                 onChange={(e) => setInvoiceNumber(e.target.value)}
@@ -1348,7 +1352,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             </div>
 
             <div>
-              <Label className="text-xs text-slate-600">Description</Label>
+              <Label className="text-xs text-slate-600">{t('sodDescription')}</Label>
               <Textarea
                 value={staffDescription}
                 onChange={(e) => setStaffDescription(e.target.value)}
@@ -1362,7 +1366,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
         {/* Footer */}
         <div className="flex-shrink-0 p-4 bg-white border-t border-slate-200 flex gap-3">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-slate-300">
-            Cancel
+            {t('sodCancelBtn')}
           </Button>
           <Button
             type="button"
@@ -1370,7 +1374,7 @@ export default function StaffOrderDrawer({ order, open, onClose, onSave }) {
             disabled={saving}
             className="flex-1 bg-[#1e3a5f] hover:bg-[#152a45]"
           >
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? t('sodSavingDots') : t('sodSaveBtn')}
           </Button>
         </div>
       </SheetContent>

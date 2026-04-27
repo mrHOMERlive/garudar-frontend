@@ -199,8 +199,8 @@ export default function StaffCustomerReport() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('allCustomerTypes')}</SelectItem>
-                <SelectItem value="client">Client</SelectItem>
-                <SelectItem value="counterparty">Counterparty</SelectItem>
+                <SelectItem value="client">{t('custReportClient')}</SelectItem>
+                <SelectItem value="counterparty">{t('custReportCounterparty')}</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -216,9 +216,9 @@ export default function StaffCustomerReport() {
               <SelectContent>
                 <SelectItem value="all">{t('allCodes')}</SelectItem>
                 <SelectItem value="MC">MC</SelectItem>
-                <SelectItem value="Bank">Bank</SelectItem>
-                <SelectItem value="Individual">Individual</SelectItem>
-                <SelectItem value="Corporate">Corporate</SelectItem>
+                <SelectItem value="Bank">{t('custReportBank')}</SelectItem>
+                <SelectItem value="Individual">{t('custReportIndividual')}</SelectItem>
+                <SelectItem value="Corporate">{t('custReportCorporate')}</SelectItem>
               </SelectContent>
             </Select>
             <Select

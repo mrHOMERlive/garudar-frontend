@@ -28,8 +28,8 @@ import {
 import { t } from '@/components/utils/language';
 
 const BADGE_TYPES = [
-  { value: 'kyc', label: 'KYC Verification', icon: FileCheck },
-  { value: 'service_agreement', label: 'Service Agreement', icon: FileSignature },
+  { value: 'kyc', labelKey: 'crBadgeKycLabel', icon: FileCheck },
+  { value: 'service_agreement', labelKey: 'crBadgeServiceAgreementLabel', icon: FileSignature },
 ];
 
 export default function StaffClientRequests() {
@@ -70,17 +70,19 @@ export default function StaffClientRequests() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
+                  <h1 className="text-xl font-bold text-white">{t('payeerGTransStaff')}</h1>
                   <span className="text-white/60">•</span>
-                  <span className="text-white">Client Requests Management</span>
+                  <span className="text-white">{t('crManagementHeader')}</span>
                 </div>
-                <Badge className="bg-[#f5a623] text-white">{clients.length} clients</Badge>
+                <Badge className="bg-[#f5a623] text-white">
+                  {clients.length} {t('crClientsCountSuffix')}
+                </Badge>
               </div>
             </div>
             <Link to={createPageUrl('GTrans')}>
               <Button className="bg-white text-[#1e3a5f] hover:bg-slate-100">
                 <Globe className="w-4 h-4 mr-1" />
-                Public Site
+                {t('publicSite')}
               </Button>
             </Link>
           </div>
@@ -104,11 +106,11 @@ export default function StaffClientRequests() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold max-w-[200px]">Client</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold max-w-[220px]">Email</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-28">Active Badges</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-32">Account Status</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold text-right w-36">Actions</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold max-w-[200px]">{t('crColClient')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold max-w-[220px]">{t('crColEmail')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-28">{t('crColActiveBadges')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-32">{t('crColAccountStatus')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold text-right w-36">{t('crColActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -117,14 +119,14 @@ export default function StaffClientRequests() {
                   <TableCell colSpan={5} className="text-center text-slate-500 py-8">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1e3a5f]"></div>
-                      Loading clients...
+                      {t('crLoadingClients')}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : filteredClients.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-slate-500 py-8">
-                    No clients found
+                    {t('crNoClientsFound')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -142,19 +144,19 @@ export default function StaffClientRequests() {
                       <TableCell className="text-slate-700 max-w-[220px] truncate">{client.client_mail}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="border-[#1e3a5f] text-[#1e3a5f]">
-                          {client.active_badges_count || 0} active
+                          {client.active_badges_count || 0} {t('crActiveSuffix')}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {isOnHold ? (
                           <Badge className="bg-red-100 text-red-800 border border-red-300">
                             <AlertCircle className="w-3 h-3 mr-1" />
-                            On Hold
+                            {t('crStatusOnHold')}
                           </Badge>
                         ) : (
                           <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300">
                             <CheckCircle className="w-3 h-3 mr-1" />
-                            Active
+                            {t('crStatusActive')}
                           </Badge>
                         )}
                       </TableCell>
@@ -164,7 +166,7 @@ export default function StaffClientRequests() {
                           onClick={() => openDrawer(client)}
                           className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
                         >
-                          Manage Badges
+                          {t('crManageBadgesBtn')}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -288,7 +290,9 @@ function ClientBadgeDrawer({ client, open, onClose }) {
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-white">
         <SheetHeader className="border-b border-slate-200 pb-4">
-          <SheetTitle className="text-[#1e3a5f]">Manage Badges for {client.client_name}</SheetTitle>
+          <SheetTitle className="text-[#1e3a5f]">
+            {t('crManageBadgesFor')} {client.client_name}
+          </SheetTitle>
           <p className="text-sm text-slate-500">{client.client_id}</p>
         </SheetHeader>
 
@@ -296,7 +300,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
           {/* Account Status Section */}
           <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900">Account Status</h3>
+              <h3 className="font-semibold text-slate-900">{t('crAccountStatusHeader')}</h3>
               <Badge
                 variant="outline"
                 className={
@@ -305,7 +309,7 @@ function ClientBadgeDrawer({ client, open, onClose }) {
                     : 'border-emerald-300 bg-emerald-50 text-emerald-700'
                 }
               >
-                {accountStatus === 'hold' ? 'On Hold' : 'Active'}
+                {accountStatus === 'hold' ? t('crStatusOnHold') : t('crStatusActive')}
               </Badge>
             </div>
 
@@ -315,8 +319,8 @@ function ClientBadgeDrawer({ client, open, onClose }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active - Can create orders</SelectItem>
-                  <SelectItem value="hold">Hold - Cannot create orders</SelectItem>
+                  <SelectItem value="active">{t('crStatusActiveOption')}</SelectItem>
+                  <SelectItem value="hold">{t('crStatusHoldOption')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -351,9 +355,9 @@ function ClientBadgeDrawer({ client, open, onClose }) {
                       <Icon className={`w-5 h-5 ${badgeData.is_active ? 'text-white' : 'text-slate-400'}`} />
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900">{badgeType.label}</div>
+                      <div className="font-medium text-slate-900">{t(badgeType.labelKey)}</div>
                       <div className="text-sm text-slate-500">
-                        {badgeData.is_active ? 'Visible to client' : 'Hidden from client'}
+                        {badgeData.is_active ? t('crVisibleToClient') : t('crHiddenFromClient')}
                       </div>
                     </div>
                   </div>
@@ -369,10 +373,10 @@ function ClientBadgeDrawer({ client, open, onClose }) {
 
         <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
           <Button variant="outline" onClick={onClose} className="border-slate-300">
-            Cancel
+            {t('crCancelBtn')}
           </Button>
           <Button onClick={handleSaveAll} className="bg-[#1e3a5f] hover:bg-[#152a45]">
-            Save All Changes
+            {t('crSaveAllChangesBtn')}
           </Button>
         </div>
       </SheetContent>
