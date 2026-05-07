@@ -300,6 +300,32 @@ export default function CreateOrder() {
     );
   }
 
+  // ТЗ Sec 10.4: KYC-гейт. Клиент с неподтверждённым KYC (и без admin-override)
+  // не может создавать заявки даже если пришёл напрямую по URL.
+  if (client && client.kyc_status !== 'approved' && client.kyc_override !== true) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-slate-200">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-amber-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">{t('kycRequiredTitle')}</h1>
+          <p className="text-slate-600 mb-6">{t('kycRequiredMessage')}</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link to={createPageUrl('ClientKYC')} className="flex-1">
+              <Button className="w-full bg-[#1e3a5f] hover:bg-[#152a45]">{t('completeKyc')}</Button>
+            </Link>
+            <Link to={createPageUrl('UserDashboard')} className="flex-1">
+              <Button variant="outline" className="w-full">
+                {t('returnToDashboard')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader

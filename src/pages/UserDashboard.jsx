@@ -67,8 +67,11 @@ export default function UserDashboard() {
   });
 
   const kycApproved = client?.kyc_status === 'approved';
+  const kycOverride = client?.kyc_override === true;
   const accountActive = client?.account_status !== 'hold';
-  const canCreateOrders = accountActive;
+  // ТЗ Sec 10.4: создание заявок разрешено только при approved KYC
+  // (либо при ручном admin-override).
+  const canCreateOrders = accountActive && (kycApproved || kycOverride);
 
   const stats = {
     total: orders.length,
@@ -95,7 +98,11 @@ export default function UserDashboard() {
   const modules = [
     {
       title: t('createOrder'),
-      description: !accountActive ? t('accountOnHold') : t('initiateFundTransfer'),
+      description: !accountActive
+        ? t('accountOnHold')
+        : !canCreateOrders
+          ? t('kycRequiredForOrders')
+          : t('initiateFundTransfer'),
       icon: PlusCircle,
       page: 'CreateOrder',
       color: 'bg-[#1e3a5f]',

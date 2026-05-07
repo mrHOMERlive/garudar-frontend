@@ -166,6 +166,10 @@ export const translations = {
     // KYC
     kycVerification: 'KYC Verification',
     kycStatus: 'Status',
+    kycRequiredForOrders: 'Complete KYC to start creating orders',
+    kycRequiredTitle: 'KYC verification required',
+    kycRequiredMessage: 'You must complete and submit your KYC for approval before you can create payment orders.',
+    completeKyc: 'Go to KYC',
 
     // Other Badges
     serviceAgreement: 'Service Agreement',
@@ -1504,6 +1508,10 @@ export const translations = {
     // KYC
     kycVerification: 'Verifikasi KYC',
     kycStatus: 'Status',
+    kycRequiredForOrders: 'Selesaikan KYC untuk mulai membuat pesanan',
+    kycRequiredTitle: 'Verifikasi KYC diperlukan',
+    kycRequiredMessage: 'Anda harus menyelesaikan dan mengirim KYC untuk disetujui sebelum membuat pesanan pembayaran.',
+    completeKyc: 'Buka KYC',
 
     // Other Badges
     serviceAgreement: 'Perjanjian Layanan',
