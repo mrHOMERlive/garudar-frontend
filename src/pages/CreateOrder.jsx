@@ -153,6 +153,9 @@ export default function CreateOrder() {
         bank_bic: orderData.bic,
         bank_name: orderData.bank_name,
         bank_address: orderData.bank_address,
+        // ТЗ Sec 5.2.2: бэк сам подставит bank_name/bank_address из
+        // org_directory если override=false, иначе пишет audit_log.
+        bank_manual_override: orderData.bank_manual_override === true,
         remark: orderData.transaction_remark,
         invocie_required: isAboveThreshold(orderData.amount, orderData.currency),
         invocie_received: false,
