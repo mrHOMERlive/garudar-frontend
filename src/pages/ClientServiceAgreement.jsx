@@ -9,9 +9,6 @@ import { Download, Upload, CheckCircle, AlertCircle, FileText, ArrowLeft, Loader
 import { toast } from 'sonner';
 import { t } from '@/components/utils/language';
 
-const SERVICE_AGREEMENT_URL =
-  'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/3d1a5e4fc_ServiceAgreement-GAN02022026.docx';
-
 export default function ClientServiceAgreement() {
   const [uploading, setUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -223,7 +220,7 @@ export default function ClientServiceAgreement() {
                 {isGenerating ? t('generatingDots') : t('download')}
               </Button>
             </div>
-            {badge?.document_url && badge.document_url !== SERVICE_AGREEMENT_URL && (
+            {badge?.document_url && (
               <div className="mt-4">
                 <p className="text-sm text-slate-600 mb-2">{t('alternativeStaffDoc')}</p>
                 <a href={badge.document_url} download>

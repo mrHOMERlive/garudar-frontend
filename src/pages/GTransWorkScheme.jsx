@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight, ArrowDown, Building2, Globe, RefreshCw,
-  CheckCircle, Workflow, Users
-} from 'lucide-react';
+import { ArrowRight, ArrowDown, Building2, Globe, RefreshCw, CheckCircle, Workflow, Users } from 'lucide-react';
 
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
@@ -23,61 +20,67 @@ export default function GTransWorkScheme() {
       step: 1,
       icon: Building2,
       title: language === 'en' ? 'Originator' : 'Pengirim',
-      description: language === 'en'
-        ? 'Corporate client initiates transfer order through GTrans platform'
-        : 'Klien korporat memulai pesanan transfer melalui platform GTrans',
-      color: 'bg-[#1e3a5f]'
+      description:
+        language === 'en'
+          ? 'Corporate client initiates transfer order through GTrans platform'
+          : 'Klien korporat memulai pesanan transfer melalui platform GTrans',
+      color: 'bg-[#1e3a5f]',
     },
     {
       step: 2,
       icon: Workflow,
       title: 'GTrans (GAN)',
-      description: language === 'en'
-        ? 'GAN as Executing Sender processes the order with full compliance'
-        : 'GAN sebagai Pengirim Pelaksana memproses pesanan dengan kepatuhan penuh',
-      color: 'bg-[#f5a623]'
+      description:
+        language === 'en'
+          ? 'GAN as Executing Sender processes the order with full compliance'
+          : 'GAN sebagai Pengirim Pelaksana memproses pesanan dengan kepatuhan penuh',
+      color: 'bg-[#f5a623]',
     },
     {
       step: 3,
       icon: Globe,
       title: language === 'en' ? 'Banking Network' : 'Jaringan Perbankan',
-      description: language === 'en'
-        ? 'Transfer routed through partner banks and correspondent networks'
-        : 'Transfer dialirkan melalui bank mitra dan jaringan koresponden',
-      color: 'bg-emerald-600'
+      description:
+        language === 'en'
+          ? 'Transfer routed through partner banks and correspondent networks'
+          : 'Transfer dialirkan melalui bank mitra dan jaringan koresponden',
+      color: 'bg-emerald-600',
     },
     {
       step: 4,
       icon: Users,
       title: language === 'en' ? 'Beneficiary' : 'Penerima',
-      description: language === 'en'
-        ? 'Funds delivered to beneficiary account in destination country'
-        : 'Dana dikirim ke rekening penerima di negara tujuan',
-      color: 'bg-cyan-600'
-    }
+      description:
+        language === 'en'
+          ? 'Funds delivered to beneficiary account in destination country'
+          : 'Dana dikirim ke rekening penerima di negara tujuan',
+      color: 'bg-cyan-600',
+    },
   ];
 
   const flowTypes = [
     {
       title: language === 'en' ? 'Outbound from Indonesia' : 'Keluar dari Indonesia',
-      description: language === 'en'
-        ? 'Transfer funds from Indonesian entities to beneficiaries worldwide. Supports both same-currency and FX conversion.'
-        : 'Transfer dana dari entitas Indonesia ke penerima di seluruh dunia. Mendukung mata uang yang sama dan konversi FX.',
+      description:
+        language === 'en'
+          ? 'Transfer funds from Indonesian entities to beneficiaries worldwide. Supports both same-currency and FX conversion.'
+          : 'Transfer dana dari entitas Indonesia ke penerima di seluruh dunia. Mendukung mata uang yang sama dan konversi FX.',
       flows: [
         { from: 'IDR', to: 'USD/EUR/CNY', type: language === 'en' ? 'With FX' : 'Dengan FX' },
-        { from: 'USD', to: 'USD', type: language === 'en' ? 'Same Currency' : 'Mata Uang Sama' }
-      ]
+        { from: 'USD', to: 'USD', type: language === 'en' ? 'Same Currency' : 'Mata Uang Sama' },
+      ],
     },
     {
       title: language === 'en' ? 'Outbound from Other Countries' : 'Keluar dari Negara Lain',
-      description: language === 'en'
-        ? 'Process transfers originating from entities outside Indonesia to various destinations.'
-        : 'Proses transfer yang berasal dari entitas di luar Indonesia ke berbagai tujuan.',
+      description:
+        language === 'en'
+          ? 'Process transfers originating from entities outside Indonesia to various destinations.'
+          : 'Proses transfer yang berasal dari entitas di luar Indonesia ke berbagai tujuan.',
       flows: [
         { from: 'USD/EUR', to: 'IDR', type: language === 'en' ? 'To Indonesia' : 'Ke Indonesia' },
-        { from: 'CNY', to: 'USD', type: language === 'en' ? 'Cross-currency' : 'Lintas Mata Uang' }
-      ]
-    }
+        { from: 'CNY', to: 'USD', type: language === 'en' ? 'Cross-currency' : 'Lintas Mata Uang' },
+      ],
+    },
   ];
 
   return (
@@ -97,8 +100,7 @@ export default function GTransWorkScheme() {
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               {language === 'en'
                 ? 'Understanding the complete process from order creation to execution.'
-                : 'Memahami proses lengkap dari pembuatan pesanan hingga eksekusi.'
-              }
+                : 'Memahami proses lengkap dari pembuatan pesanan hingga eksekusi.'}
             </p>
           </div>
 
@@ -119,7 +121,11 @@ export default function GTransWorkScheme() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Invoice and relevant docs submitted' : 'Invoice dan dokumen terkait dikirim'}</span>
+                    <span>
+                      {language === 'en'
+                        ? 'Invoice and relevant docs submitted'
+                        : 'Invoice dan dokumen terkait dikirim'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -144,11 +150,15 @@ export default function GTransWorkScheme() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-[#f5a623] flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Order signed and approved' : 'Pesanan ditandatangani dan disetujui'}</span>
+                    <span>
+                      {language === 'en' ? 'Order signed and approved' : 'Pesanan ditandatangani dan disetujui'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-[#f5a623] flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Client sends proof of payment' : 'Klien mengirim bukti pembayaran'}</span>
+                    <span>
+                      {language === 'en' ? 'Client sends proof of payment' : 'Klien mengirim bukti pembayaran'}
+                    </span>
                   </li>
                 </ul>
               </CardContent>
@@ -165,26 +175,35 @@ export default function GTransWorkScheme() {
                 <ul className="space-y-3 text-slate-600">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Processing: T to T+1 business days' : 'Pemrosesan: T hingga T+1 hari kerja'}</span>
+                    <span>
+                      {language === 'en' ? 'Processing: T to T+1 business days' : 'Pemrosesan: T hingga T+1 hari kerja'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Bank Mandiri as strategic partner' : 'Bank Mandiri sebagai mitra strategis'}</span>
+                    <span>
+                      {language === 'en' ? 'Bank Mandiri as strategic partner' : 'Bank Mandiri sebagai mitra strategis'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span>{language === 'en' ? 'Signing Report of Execution' : 'Penandatanganan Laporan Eksekusi'}</span>
+                    <span>
+                      {language === 'en' ? 'Signing Report of Execution' : 'Penandatanganan Laporan Eksekusi'}
+                    </span>
                   </li>
                 </ul>
                 <div className="mt-6 pt-6 border-t border-emerald-200">
                   <div className="bg-white rounded-lg p-4 border border-emerald-200">
-                    <a href="https://koprabymandiri.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                      <img
-                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/827953f97_logo512.png"
-                        alt="Kopra by Mandiri"
-                        className="h-8 w-auto object-contain"
-                      />
-                      <span className="text-sm font-medium text-slate-600">{language === 'en' ? 'Strategic Execution Partner' : 'Mitra Eksekusi Strategis'}</span>
+                    <a
+                      href="https://koprabymandiri.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
+                      <img src="/kopra-by-mandiri.png" alt="Kopra by Mandiri" className="h-8 w-auto object-contain" />
+                      <span className="text-sm font-medium text-slate-600">
+                        {language === 'en' ? 'Strategic Execution Partner' : 'Mitra Eksekusi Strategis'}
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -198,7 +217,9 @@ export default function GTransWorkScheme() {
                 {language === 'en' ? 'Core Funds-Flow Structure' : 'Struktur Aliran Dana Inti'}
               </h2>
               <p className="text-slate-600 text-center mb-8">
-                {language === 'en' ? 'The technical flow of funds through the system' : 'Aliran teknis dana melalui sistem'}
+                {language === 'en'
+                  ? 'The technical flow of funds through the system'
+                  : 'Aliran teknis dana melalui sistem'}
               </p>
 
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-2">
@@ -211,7 +232,9 @@ export default function GTransWorkScheme() {
                       transition={{ delay: idx * 0.1 }}
                       className="flex flex-col items-center text-center flex-1"
                     >
-                      <div className={`w-20 h-20 rounded-2xl ${item.color} flex items-center justify-center mb-4 shadow-lg`}>
+                      <div
+                        className={`w-20 h-20 rounded-2xl ${item.color} flex items-center justify-center mb-4 shadow-lg`}
+                      >
                         <item.icon className="w-10 h-10 text-white" />
                       </div>
                       <div className="text-xs font-medium text-slate-400 mb-1">
@@ -244,16 +267,11 @@ export default function GTransWorkScheme() {
             <p className="text-slate-600 text-center mb-12 max-w-3xl mx-auto">
               {language === 'en'
                 ? 'GTrans supports both Inbound and Outbound transfers. Indonesian companies transfer funds to foreign entities through GAN which acts as the Successor Organizer in the agreed currency. For Inbound transfers, GAN acts as the Successor Operator for Companies in Indonesia that accept payments from overseas partners and send funds to the Customer in the agreed currency (e.g., USD, EUR, CNY).'
-                : 'GTrans mendukung transfer Masuk dan Keluar. Perusahaan Indonesia mentransfer dana ke entitas asing melalui GAN yang bertindak sebagai Penyelenggara Penerus dalam mata uang yang disepakati. Untuk transfer Masuk, GAN bertindak sebagai Operator Penerus untuk Perusahaan di Indonesia yang menerima pembayaran dari mitra luar negeri dan mengirim dana ke Pelanggan dalam mata uang yang disepakati (misalnya, USD, EUR, CNY).'
-              }
+                : 'GTrans mendukung transfer Masuk dan Keluar. Perusahaan Indonesia mentransfer dana ke entitas asing melalui GAN yang bertindak sebagai Penyelenggara Penerus dalam mata uang yang disepakati. Untuk transfer Masuk, GAN bertindak sebagai Operator Penerus untuk Perusahaan di Indonesia yang menerima pembayaran dari mitra luar negeri dan mengirim dana ke Pelanggan dalam mata uang yang disepakati (misalnya, USD, EUR, CNY).'}
             </p>
 
             <div className="grid md:grid-cols-2 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                 <h3 className="text-xl font-bold text-[#1e3a5f] mb-6">
                   {language === 'en' ? 'Inbound Transfer' : 'Transfer Masuk'}
                 </h3>
@@ -274,8 +292,6 @@ export default function GTransWorkScheme() {
             </div>
           </div>
 
-
-
           <Card className="border-[#1e3a5f]/30 bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8f] text-white mb-16">
             <CardContent className="p-8">
               <h3 className="text-xl font-bold mb-4">
@@ -284,18 +300,23 @@ export default function GTransWorkScheme() {
               <p className="text-blue-100 mb-6 leading-relaxed">
                 {language === 'en'
                   ? 'GAN operates as Executing Sender under the Customer Service Agreement, limited to transfer and settlement of funds per client instructions. GAN bears no liability for the underlying commercial transaction between parties.'
-                  : 'GAN beroperasi sebagai Pengirim Pelaksana berdasarkan Perjanjian Layanan Pelanggan, terbatas pada transfer dan penyelesaian dana sesuai instruksi klien. GAN tidak bertanggung jawab atas transaksi komersial yang mendasari antara para pihak.'
-                }
+                  : 'GAN beroperasi sebagai Pengirim Pelaksana berdasarkan Perjanjian Layanan Pelanggan, terbatas pada transfer dan penyelesaian dana sesuai instruksi klien. GAN tidak bertanggung jawab atas transaksi komersial yang mendasari antara para pihak.'}
               </p>
               <div className="flex flex-wrap gap-3">
                 <div className="px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <span className="text-sm font-medium">{language === 'en' ? 'BI PSP Licensed' : 'Berlisensi PSP BI'}</span>
+                  <span className="text-sm font-medium">
+                    {language === 'en' ? 'BI PSP Licensed' : 'Berlisensi PSP BI'}
+                  </span>
                 </div>
                 <div className="px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <span className="text-sm font-medium">{language === 'en' ? 'T to T+1 Settlement' : 'Penyelesaian T hingga T+1'}</span>
+                  <span className="text-sm font-medium">
+                    {language === 'en' ? 'T to T+1 Settlement' : 'Penyelesaian T hingga T+1'}
+                  </span>
                 </div>
                 <div className="px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <span className="text-sm font-medium">{language === 'en' ? 'Fully Compliant' : 'Sepenuhnya Patuh'}</span>
+                  <span className="text-sm font-medium">
+                    {language === 'en' ? 'Fully Compliant' : 'Sepenuhnya Patuh'}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -308,8 +329,7 @@ export default function GTransWorkScheme() {
             <p className="text-slate-600 mb-6">
               {language === 'en'
                 ? 'Contact our team to learn more about integrating with GTrans.'
-                : 'Hubungi tim kami untuk mempelajari lebih lanjut tentang integrasi dengan GTrans.'
-              }
+                : 'Hubungi tim kami untuk mempelajari lebih lanjut tentang integrasi dengan GTrans.'}
             </p>
             <Link to={createPageUrl('GTransContactSales')}>
               <Button className="bg-[#1e3a5f] hover:bg-[#152a45]">

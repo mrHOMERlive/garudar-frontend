@@ -14,9 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { t } from '@/components/utils/language';
 
-const DEFAULT_MASTER_URL =
-  'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69233f5a9a123941f81322f5/3d1a5e4fc_ServiceAgreement-GAN02022026.docx';
-
 export default function StaffServiceAgreement() {
   const [uploadingMaster, setUploadingMaster] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -131,7 +128,6 @@ export default function StaffServiceAgreement() {
       badge_type: 'service_agreement',
       status: 'pending',
       is_active: true,
-      document_url: DEFAULT_MASTER_URL,
     });
   };
 
