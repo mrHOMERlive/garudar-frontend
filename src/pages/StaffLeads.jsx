@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Inbox, MessageSquare, UserPlus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Globe, ChevronLeft, ChevronRight, Search, UserPlus, Loader2 } from 'lucide-react';
 
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
@@ -40,11 +40,23 @@ const statusLabelKey = (s) => {
   }
 };
 
-const formatDate = (iso) => {
+const formatShortDate = (iso) => {
   if (!iso) return '';
   try {
-    const d = new Date(iso);
-    return d.toLocaleString();
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const formatFullDate = (iso) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleString();
   } catch {
     return iso;
   }
@@ -54,27 +66,50 @@ export default function StaffLeads() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('all');
-  const [messageDialog, setMessageDialog] = useState({ open: false, lead: null });
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [detailsLead, setDetailsLead] = useState(null);
 
-  // Full list (no server-side filter — let the page handle filtering for
-  // simpler stats and quick switching between tabs). Pagination is bounded
-  // server-side at 500.
   const { data: leadList, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: () => apiClient.getLeads({ limit: 500 }),
   });
 
-  const leads = leadList?.items || [];
+  // Stable reference so dependent useMemos don't invalidate every render
+  // when leadList?.items is undefined.
+  const leads = useMemo(() => leadList?.items ?? [], [leadList]);
 
-  const stats = {
-    total: leads.length,
-    new: leads.filter((l) => l.status === 'new').length,
-    in_progress: leads.filter((l) => l.status === 'in_progress').length,
-    converted: leads.filter((l) => l.status === 'converted').length,
-    rejected: leads.filter((l) => l.status === 'rejected').length,
-  };
+  const stats = useMemo(
+    () => ({
+      total: leads.length,
+      new: leads.filter((l) => l.status === 'new').length,
+      in_progress: leads.filter((l) => l.status === 'in_progress').length,
+      converted: leads.filter((l) => l.status === 'converted').length,
+      rejected: leads.filter((l) => l.status === 'rejected').length,
+    }),
+    [leads]
+  );
 
-  const filteredLeads = statusFilter === 'all' ? leads : leads.filter((l) => l.status === statusFilter);
+  const filteredLeads = useMemo(() => {
+    let rows = statusFilter === 'all' ? leads : leads.filter((l) => l.status === statusFilter);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter(
+        (l) =>
+          l.company_name?.toLowerCase().includes(q) ||
+          l.business_email?.toLowerCase().includes(q) ||
+          l.contact_person?.toLowerCase().includes(q) ||
+          l.country?.toLowerCase().includes(q)
+      );
+    }
+    return rows;
+  }, [leads, statusFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * itemsPerPage;
+  const paginatedLeads = filteredLeads.slice(startIndex, startIndex + itemsPerPage);
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }) => apiClient.updateLead(id, { status }),
@@ -93,14 +128,8 @@ export default function StaffLeads() {
   };
 
   const handleConvert = (lead) => {
-    // Navigate to StaffClients with a query param. StaffClients reads it,
-    // prefills the Add-Client dialog and (on submit success) PATCHes the
-    // lead status back to 'converted'.
     navigate(`${createPageUrl('StaffClients')}?prefill_from_lead=${lead.id}`);
   };
-
-  const openMessage = (lead) => setMessageDialog({ open: true, lead });
-  const closeMessage = () => setMessageDialog({ open: false, lead: null });
 
   const STAT_BUTTONS = [
     { key: 'all', label: t('leadsFilterAll'), count: stats.total },
@@ -112,42 +141,55 @@ export default function StaffLeads() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-[#1e3a5f] shadow-lg border-b border-[#1e3a5f]/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-[#1e3a5f] border-b border-[#1e3a5f]/20 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                to={createPageUrl('StaffDashboard')}
-                className="inline-flex items-center text-white/80 hover:text-white text-sm"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('leadsBackToDashboard')}
+              <Link to={createPageUrl('StaffDashboard')}>
+                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
               </Link>
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
+                <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-white">GTrans Staff</h1>
+                  <span className="text-white/60">•</span>
+                  <span className="text-white">{t('leadsPageTitle')}</span>
+                </div>
+                <Badge className="bg-[#f5a623] text-white">
+                  {stats.total} {t('leadsPageTitle')}
+                </Badge>
+              </div>
             </div>
-            <LanguageSwitcher />
-          </div>
-          <div className="flex items-center gap-4 mt-4">
-            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <Inbox className="w-7 h-7 text-[#1e3a5f]" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">{t('leadsPageTitle')}</h1>
-              <p className="text-slate-300 text-sm">{t('leadsPageSubtitle')}</p>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <Link to={createPageUrl('GTrans')}>
+                <Button variant="outline" size="sm" className="bg-white text-[#1e3a5f] hover:bg-slate-100">
+                  <Globe className="w-4 h-4 mr-1" />
+                  {t('publicSite')}
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Filter chips with embedded counts */}
-        <div className="flex flex-wrap gap-2">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Filter chips */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
           {STAT_BUTTONS.map((btn) => {
             const isActive = statusFilter === btn.key;
             return (
               <button
                 key={btn.key}
                 type="button"
-                onClick={() => setStatusFilter(btn.key)}
+                onClick={() => {
+                  setStatusFilter(btn.key);
+                  setCurrentPage(1);
+                }}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   isActive
                     ? 'bg-[#1e3a5f] text-white border-[#1e3a5f]'
@@ -167,125 +209,252 @@ export default function StaffLeads() {
           })}
         </div>
 
-        <Card className="border-slate-200">
-          <CardContent className="p-0">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16 text-slate-500">
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                {t('loading')}
-              </div>
-            ) : filteredLeads.length === 0 ? (
-              <div className="py-16 text-center text-slate-500">{t('leadsNoneFound')}</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t('leadsTableDate')}</TableHead>
-                      <TableHead>{t('leadsTableCompany')}</TableHead>
-                      <TableHead>{t('leadsTableCountry')}</TableHead>
-                      <TableHead>{t('leadsTableContact')}</TableHead>
-                      <TableHead>{t('leadsTableEmail')}</TableHead>
-                      <TableHead>{t('leadsTablePhone')}</TableHead>
-                      <TableHead>{t('leadsTableProducts')}</TableHead>
-                      <TableHead>{t('leadsTableVolume')}</TableHead>
-                      <TableHead>{t('leadsTableStatus')}</TableHead>
-                      <TableHead className="text-right">{t('leadsTableActions')}</TableHead>
+        {/* Search */}
+        <div className="mb-4">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+            <Input
+              placeholder={t('leadsSearchPlaceholder')}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-9 bg-white border-slate-300 text-slate-800 placeholder:text-slate-400"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+          <Table className="table-fixed w-full">
+            <TableHeader>
+              <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
+                <TableHead className="text-[#1e3a5f] font-semibold w-28">{t('leadsTableDate')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold">{t('leadsTableCompany')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-32">{t('leadsTableCountry')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-56">{t('leadsTableEmail')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-44">{t('leadsTableStatus')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-36 text-right">{t('leadsTableActions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">
+                    <span className="inline-flex items-center">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t('loading')}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ) : paginatedLeads.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-slate-500 py-8">
+                    {t('leadsNoneFound')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedLeads.map((lead) => {
+                  const isTerminal = lead.status === 'converted' || lead.status === 'rejected';
+                  const stop = (e) => e.stopPropagation();
+                  return (
+                    <TableRow
+                      key={lead.id}
+                      className="border-slate-200 hover:bg-slate-100 cursor-pointer"
+                      onClick={() => setDetailsLead(lead)}
+                    >
+                      <TableCell className="text-slate-600 text-xs whitespace-nowrap">
+                        {formatShortDate(lead.created_at)}
+                      </TableCell>
+                      <TableCell className="text-[#1e3a5f] font-medium overflow-hidden">
+                        <div className="truncate" title={lead.company_name}>
+                          {lead.company_name}
+                        </div>
+                        {lead.contact_person && (
+                          <div className="text-slate-500 text-xs truncate" title={lead.contact_person}>
+                            {lead.contact_person}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-slate-700 text-sm truncate" title={lead.country || ''}>
+                        {lead.country || '—'}
+                      </TableCell>
+                      <TableCell className="text-slate-700 text-sm overflow-hidden">
+                        <a
+                          href={`mailto:${lead.business_email}`}
+                          className="text-blue-600 hover:underline truncate block"
+                          title={lead.business_email}
+                          onClick={stop}
+                        >
+                          {lead.business_email}
+                        </a>
+                      </TableCell>
+                      <TableCell onClick={stop}>
+                        <Select value={lead.status} onValueChange={(v) => handleStatusChange(lead, v)}>
+                          <SelectTrigger className={`h-8 w-full border ${STATUS_BADGE_STYLE[lead.status] || ''}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STATUSES.map((s) => (
+                              <SelectItem key={s} value={s}>
+                                {t(statusLabelKey(s))}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {lead.converted_client_id && (
+                          <Link
+                            to={createPageUrl('StaffClients')}
+                            onClick={stop}
+                            className="text-emerald-700 hover:underline text-[11px] mt-1 block truncate"
+                            title={`${t('leadsConvertedLinkLabel')} ${lead.converted_client_id}`}
+                          >
+                            {t('leadsConvertedLinkLabel')} {lead.converted_client_id}
+                          </Link>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right" onClick={stop}>
+                        {isTerminal ? (
+                          <span className="text-slate-400 text-sm">—</span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="bg-[#1e3a5f] hover:bg-[#152a45] text-white h-8"
+                            onClick={() => handleConvert(lead)}
+                          >
+                            <UserPlus className="w-3.5 h-3.5 mr-1" />
+                            {t('leadsConvertBtn')}
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredLeads.map((lead) => {
-                      const isTerminal = lead.status === 'converted' || lead.status === 'rejected';
-                      return (
-                        <TableRow key={lead.id}>
-                          <TableCell className="whitespace-nowrap text-xs text-slate-600">
-                            {formatDate(lead.created_at)}
-                          </TableCell>
-                          <TableCell className="font-medium text-[#1e3a5f]">{lead.company_name}</TableCell>
-                          <TableCell>{lead.country || '—'}</TableCell>
-                          <TableCell>{lead.contact_person}</TableCell>
-                          <TableCell className="text-xs">
-                            <a href={`mailto:${lead.business_email}`} className="text-blue-600 hover:underline">
-                              {lead.business_email}
-                            </a>
-                          </TableCell>
-                          <TableCell className="text-xs">{lead.phone || '—'}</TableCell>
-                          <TableCell className="text-xs">
-                            {Array.isArray(lead.products_interested) && lead.products_interested.length > 0
-                              ? lead.products_interested.join(', ')
-                              : '—'}
-                          </TableCell>
-                          <TableCell className="text-xs">{lead.monthly_volume}</TableCell>
-                          <TableCell>
-                            <Select value={lead.status} onValueChange={(v) => handleStatusChange(lead, v)}>
-                              <SelectTrigger
-                                className={`h-8 w-[140px] border ${STATUS_BADGE_STYLE[lead.status] || ''}`}
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {STATUSES.map((s) => (
-                                  <SelectItem key={s} value={s}>
-                                    {t(statusLabelKey(s))}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            {lead.converted_client_id && (
-                              <div className="mt-1 text-[11px]">
-                                <Link to={createPageUrl('StaffClients')} className="text-emerald-700 hover:underline">
-                                  {t('leadsConvertedLinkLabel')} {lead.converted_client_id}
-                                </Link>
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="inline-flex gap-2">
-                              {lead.message && (
-                                <Button variant="outline" size="sm" onClick={() => openMessage(lead)}>
-                                  <MessageSquare className="w-3.5 h-3.5 mr-1" />
-                                  {t('leadsViewMessageBtn')}
-                                </Button>
-                              )}
-                              {!isTerminal && (
-                                <Button
-                                  size="sm"
-                                  className="bg-[#1e3a5f] hover:bg-[#152a45] text-white"
-                                  onClick={() => handleConvert(lead)}
-                                >
-                                  <UserPlus className="w-3.5 h-3.5 mr-1" />
-                                  {t('leadsConvertBtn')}
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">{t('showLabel')}</span>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-20 bg-white border-slate-300 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-slate-600">
+              {filteredLeads.length === 0
+                ? '0 of 0'
+                : `${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredLeads.length)} of ${filteredLeads.length}`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
+              disabled={safePage <= 1}
+              className="border-slate-300"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-slate-600">
+              {t('pageLabel')} {safePage} {t('ofLabel')} {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
+              disabled={safePage >= totalPages}
+              className="border-slate-300"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </main>
 
-      <Dialog open={messageDialog.open} onOpenChange={(open) => !open && closeMessage()}>
-        <DialogContent className="max-w-2xl">
+      {/* Details Dialog — opens on row click */}
+      <Dialog open={!!detailsLead} onOpenChange={(open) => !open && setDetailsLead(null)}>
+        <DialogContent className="bg-white border-slate-200 text-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('leadsViewMessageTitle')}</DialogTitle>
+            <DialogTitle className="text-[#1e3a5f]">{t('leadsDetailsTitle')}</DialogTitle>
           </DialogHeader>
-          <div className="text-sm text-slate-700 whitespace-pre-wrap py-2">{messageDialog.lead?.message || '—'}</div>
-          <div className="text-xs text-slate-500 border-t pt-2">
-            {messageDialog.lead?.company_name} · {messageDialog.lead?.business_email}
-          </div>
+          {detailsLead && (
+            <div className="space-y-4 py-2 text-sm">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                <Field label={t('leadsTableDate')} value={formatFullDate(detailsLead.created_at)} />
+                <Field label={t('leadsTableStatus')} value={t(statusLabelKey(detailsLead.status))} />
+                <Field label={t('leadsTableCompany')} value={detailsLead.company_name} />
+                <Field label={t('leadsTableContact')} value={detailsLead.contact_person} />
+                <Field label={t('leadsTableEmail')} value={detailsLead.business_email} />
+                <Field label={t('leadsTablePhone')} value={detailsLead.phone || '—'} />
+                <Field label={t('leadsTableCountry')} value={detailsLead.country || '—'} />
+                <Field label={t('leadsTableVolume')} value={detailsLead.monthly_volume} />
+                <Field
+                  label={t('leadsTableProducts')}
+                  value={
+                    Array.isArray(detailsLead.products_interested) && detailsLead.products_interested.length > 0
+                      ? detailsLead.products_interested.join(', ')
+                      : '—'
+                  }
+                  full
+                />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                  {t('leadsViewMessageTitle')}
+                </div>
+                <div className="text-slate-700 whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-md p-3 max-h-48 overflow-y-auto">
+                  {detailsLead.message || '—'}
+                </div>
+              </div>
+              {detailsLead.converted_client_id && (
+                <div className="border-t border-slate-200 pt-3 text-sm">
+                  <span className="text-slate-500">{t('leadsConvertedLinkLabel')} </span>
+                  <Link
+                    to={createPageUrl('StaffClients')}
+                    onClick={() => setDetailsLead(null)}
+                    className="text-emerald-700 hover:underline font-medium"
+                  >
+                    {detailsLead.converted_client_id}
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={closeMessage}>
+            <Button variant="outline" onClick={() => setDetailsLead(null)}>
               {t('close')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+/** Small two-row label/value pair used inside the details dialog grid. */
+function Field({ label, value, full }) {
+  return (
+    <div className={full ? 'col-span-2' : ''}>
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</div>
+      <div className="text-slate-800 break-words">{value || '—'}</div>
     </div>
   );
 }

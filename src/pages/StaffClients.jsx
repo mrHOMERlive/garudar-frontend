@@ -187,6 +187,10 @@ export default function StaffClients() {
 
   useEffect(() => {
     if (!prefillLead || dialogOpen || convertingLeadId) return;
+    // Wait for the country dictionary to load before opening the dialog so
+    // resolveCountryName can canonicalise the lead country (otherwise the
+    // CountrySelector renders the placeholder until countries arrive).
+    if (countries.length === 0) return;
     setEditingClient(null);
     setFormData({
       client_id: '',
@@ -214,7 +218,7 @@ export default function StaffClients() {
     setConvertingLeadId(prefillLead.id);
     setDialogOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefillLead]);
+  }, [prefillLead, countries]);
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
