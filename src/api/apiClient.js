@@ -618,6 +618,26 @@ class ApiClient {
     });
   }
 
+  async getLeads(params = {}) {
+    const qp = new URLSearchParams();
+    if (params.status) qp.append('status', params.status);
+    if (params.limit !== undefined) qp.append('limit', params.limit);
+    if (params.offset !== undefined) qp.append('offset', params.offset);
+    const qs = qp.toString();
+    return this.request(`/leads${qs ? `?${qs}` : ''}`);
+  }
+
+  async getLead(leadId) {
+    return this.request(`/leads/${leadId}`);
+  }
+
+  async updateLead(leadId, data) {
+    return this.request(`/leads/${leadId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
   // NDA
   async getNdaRequests(params = {}) {
     const queryParams = new URLSearchParams();

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,12 @@ export default function StaffClients() {
   const [clientToDelete, setClientToDelete] = useState(null);
   const [editingClient, setEditingClient] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  // When opened from a Lead's "Convert to Client" action, the lead id is in
+  // ?prefill_from_lead=... — we keep it in state so onSuccess of saveMutation
+  // can mark the lead as converted and link it to the new client.
+  const [convertingLeadId, setConvertingLeadId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const prefillLeadIdParam = searchParams.get('prefill_from_lead');
   const [sortOrder, setSortOrder] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -127,6 +133,45 @@ export default function StaffClients() {
 
   const clients = rawClients;
 
+  // Fetch the source lead when arriving with ?prefill_from_lead=... so the
+  // Add-Client dialog can be opened with pre-populated fields.
+  const { data: prefillLead } = useQuery({
+    queryKey: ['lead-for-prefill', prefillLeadIdParam],
+    queryFn: () => apiClient.getLead(prefillLeadIdParam),
+    enabled: !!prefillLeadIdParam && !convertingLeadId,
+  });
+
+  useEffect(() => {
+    if (!prefillLead || dialogOpen || convertingLeadId) return;
+    setEditingClient(null);
+    setFormData({
+      client_id: '',
+      name: prefillLead.company_name || '',
+      client_alias_1: '',
+      client_alias_2: '',
+      client_alias_3: '',
+      client_reg_number: '',
+      client_tax_number: '',
+      client_reg_country: prefillLead.country || '',
+      doc_id: '',
+      status_sign: 'not_sent',
+      date_signing: '',
+      group_id: '',
+      group_name: '',
+      client_director: prefillLead.contact_person || '',
+      last_id: '',
+      description: prefillLead.message || '',
+      email: prefillLead.business_email || '',
+      login: prefillLead.business_email || '',
+      password: '',
+      active: true,
+    });
+    setShowPassword(false);
+    setConvertingLeadId(prefillLead.id);
+    setDialogOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillLead]);
+
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       const apiData = {
@@ -161,9 +206,28 @@ export default function StaffClients() {
         return apiClient.createClient(createData);
       }
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success(editingClient ? t('clClientUpdatedToast') : t('clClientCreatedToast'));
+
+      if (convertingLeadId && response?.client_id) {
+        // Mark the source lead as converted and link to the new client.
+        try {
+          await apiClient.updateLead(convertingLeadId, {
+            status: 'converted',
+            converted_client_id: response.client_id,
+          });
+          queryClient.invalidateQueries({ queryKey: ['leads'] });
+          toast.success(t('leadConvertedToClientToast'));
+        } catch (err) {
+          // Client was created successfully; only the lead-status patch
+          // failed. Surface a non-fatal warning so the staffer knows.
+          toast.error(err?.message || t('leadStatusUpdateFailedToast'));
+        }
+        setConvertingLeadId(null);
+        setSearchParams({});
+      } else {
+        toast.success(editingClient ? t('clClientUpdatedToast') : t('clClientCreatedToast'));
+      }
       closeDialog();
     },
     onError: (error) => {
@@ -252,6 +316,13 @@ export default function StaffClients() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingClient(null);
+    if (convertingLeadId) {
+      // User cancelled the convert flow (or onSuccess already handled cleanup
+      // and this is a no-op). Either way, drop the prefill query param so a
+      // page refresh doesn't reopen the dialog unexpectedly.
+      setConvertingLeadId(null);
+      setSearchParams({});
+    }
   };
 
   const handleSubmit = () => {
