@@ -232,10 +232,10 @@ export default function StaffLeads() {
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
                 <TableHead className="text-[#1e3a5f] font-semibold w-28">{t('leadsTableDate')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">{t('leadsTableCompany')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-32">{t('leadsTableCountry')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-56">{t('leadsTableEmail')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-44">{t('leadsTableStatus')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-36 text-right">{t('leadsTableActions')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">{t('leadsTableCountry')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-48">{t('leadsTableEmail')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-40">{t('leadsTableStatus')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-40 text-right">{t('leadsTableActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
