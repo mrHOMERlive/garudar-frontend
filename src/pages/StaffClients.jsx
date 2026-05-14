@@ -44,6 +44,50 @@ import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 import CountrySelector from '../components/kyc/CountrySelector';
 
+/**
+ * Resolve a free-text country string (from a lead) to a canonical country
+ * name present in the loaded `countries` list. Case-insensitive name match,
+ * ISO-code match, and an unambiguous "startsWith" fallback. If nothing
+ * matches we keep the raw string so staff can see what was typed.
+ */
+function resolveCountryName(rawCountry, countries) {
+  if (!rawCountry || !Array.isArray(countries) || countries.length === 0) {
+    return rawCountry || '';
+  }
+  const needle = String(rawCountry).trim().toLowerCase();
+  if (!needle) return '';
+  const byName = countries.find((c) => c.name?.toLowerCase() === needle);
+  if (byName) return byName.name;
+  const byCode = countries.find((c) => c.code?.toLowerCase() === needle);
+  if (byCode) return byCode.name;
+  const starts = countries.filter((c) => c.name?.toLowerCase().startsWith(needle));
+  if (starts.length === 1) return starts[0].name;
+  return rawCountry;
+}
+
+/**
+ * Compose the Client `description` textarea content from a lead so that
+ * fields with no first-class slot on the Client model (phone, products,
+ * monthly volume) are visible to staff after Convert. Empty fields are
+ * skipped so the textarea doesn't get noisy bullet stubs.
+ */
+function buildDescriptionFromLead(lead) {
+  const parts = [];
+  if (lead.message) parts.push(lead.message.trim());
+  const facts = [];
+  if (lead.phone) facts.push(`Phone: ${lead.phone}`);
+  if (Array.isArray(lead.products_interested) && lead.products_interested.length > 0) {
+    facts.push(`Products interested: ${lead.products_interested.join(', ')}`);
+  }
+  if (lead.monthly_volume) facts.push(`Expected monthly volume: ${lead.monthly_volume}`);
+  if (facts.length > 0) {
+    if (parts.length > 0) parts.push('---');
+    parts.push('Initial lead data:');
+    facts.forEach((line) => parts.push(`• ${line}`));
+  }
+  return parts.join('\n');
+}
+
 export default function StaffClients() {
   const [search, setSearch] = useState('');
   const [countries, setCountries] = useState([]);
@@ -152,7 +196,7 @@ export default function StaffClients() {
       client_alias_3: '',
       client_reg_number: '',
       client_tax_number: '',
-      client_reg_country: prefillLead.country || '',
+      client_reg_country: resolveCountryName(prefillLead.country, countries),
       doc_id: '',
       status_sign: 'not_sent',
       date_signing: '',
@@ -160,7 +204,7 @@ export default function StaffClients() {
       group_name: '',
       client_director: prefillLead.contact_person || '',
       last_id: '',
-      description: prefillLead.message || '',
+      description: buildDescriptionFromLead(prefillLead),
       email: prefillLead.business_email || '',
       login: prefillLead.business_email || '',
       password: '',
