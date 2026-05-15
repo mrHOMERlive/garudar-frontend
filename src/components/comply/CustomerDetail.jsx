@@ -263,6 +263,30 @@ export default function CustomerDetail({ customer, onBack }) {
     }
   };
 
+  // Перепроверка по локальным PPATK-спискам (DTTOT/DPPSPM/UN-AQ).
+  // Идёт по client_id, не по AmlCustomer.id — потому что endpoint
+  // прогоняет ВСЕ AmlCustomer'ы клиента (компания + директор + UBO).
+  // Если customer.client_id не задан (например, ручной screening через
+  // /aml/screen/company без клиента) — кнопку рендерим disabled.
+  const handleRescreenPpatk = async () => {
+    if (!data.client_id) {
+      toast.error(t('amlPpatkNoClientLinked'));
+      return;
+    }
+    setLoad('rescreen_ppatk', true);
+    try {
+      const r = await apiClient.rescreenClientPpatk(data.client_id);
+      const total = r.matches_total ?? 0;
+      const newOnes = r.new_alerts ?? 0;
+      toast.success(`PPATK: ${total} matches, ${newOnes} new alerts (account: ${r.account_status || 'active'})`);
+      loadAll();
+    } catch (err) {
+      toast.error(err.message || 'PPATK rescreen failed');
+    } finally {
+      setLoad('rescreen_ppatk', false);
+    }
+  };
+
   const handleToggleMonitor = async () => {
     setLoad('monitor', true);
     try {
@@ -397,6 +421,21 @@ export default function CustomerDetail({ customer, onBack }) {
                   <RefreshCw className="w-4 h-4 mr-1" />
                 )}{' '}
                 Re-screen
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRescreenPpatk}
+                disabled={loading.rescreen_ppatk || !data.client_id}
+                title={data.client_id ? t('amlPpatkRescreenTooltip') : t('amlPpatkNoClientLinked')}
+                data-testid="ppatk-rescreen-button"
+              >
+                {loading.rescreen_ppatk ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                ) : (
+                  <Shield className="w-4 h-4 mr-1" />
+                )}
+                {t('amlPpatkRescreen')}
               </Button>
               <Button size="sm" variant="outline" onClick={handleToggleMonitor} disabled={loading.monitor}>
                 {loading.monitor ? (
@@ -594,103 +633,128 @@ export default function CustomerDetail({ customer, onBack }) {
               <CheckCircle className="w-5 h-5" /> No alerts found.
             </div>
           ) : (
-            alerts.map((a) => (
-              <Card
-                key={a.id}
-                className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${a.status === 'pending' ? 'border-l-red-500' : a.status === 'confirmed' ? 'border-l-amber-500' : 'border-l-slate-300'}`}
-                onClick={() => setSelectedAlertId(a.id)}
-                data-testid={`alert-card-${a.id}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-                        {a.title || a.match_type || `Alert ${a.id}`}
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </div>
-                      {a.description && <div className="text-sm text-slate-500 mt-0.5">{a.description}</div>}
-                      {a.match_details?.aml_types?.length > 0 && (
-                        <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                          {a.match_details.aml_types.map((t) => (
+            alerts.map((a) => {
+              const isPpatk = a.match_type === 'ppatk_local';
+              // Source list: либо из match_details (новые алерты), либо из
+              // title "PPATK match: <SRC>" (fallback на случай старых записей).
+              const ppatkSource =
+                a.match_details?.source_list || (a.title?.startsWith('PPATK match: ') ? a.title.slice(13) : null);
+              return (
+                <Card
+                  key={a.id}
+                  className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
+                    isPpatk
+                      ? 'border-l-red-700 bg-red-50/40'
+                      : a.status === 'pending'
+                        ? 'border-l-red-500'
+                        : a.status === 'confirmed'
+                          ? 'border-l-amber-500'
+                          : 'border-l-slate-300'
+                  }`}
+                  onClick={() => setSelectedAlertId(a.id)}
+                  data-testid={`alert-card-${a.id}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 font-semibold text-slate-800 flex-wrap">
+                          {isPpatk && (
                             <Badge
-                              key={t}
-                              className={`text-xs ${
-                                t === 'SANCTION'
-                                  ? 'bg-red-600 text-white'
-                                  : t === 'SANCTION_RELATED'
-                                    ? 'bg-red-400 text-white'
-                                    : t.startsWith('PEP')
-                                      ? 'bg-orange-500 text-white'
-                                      : t.startsWith('ADVERSE_MEDIA')
-                                        ? 'bg-yellow-600 text-white'
-                                        : 'bg-slate-500 text-white'
-                              }`}
+                              className="bg-red-700 text-white text-xs font-mono"
+                              data-testid={`ppatk-badge-${a.id}`}
                             >
-                              {t}
+                              PPATK{ppatkSource ? ` • ${ppatkSource}` : ''}
                             </Badge>
-                          ))}
+                          )}
+                          {a.title || a.match_type || `Alert ${a.id}`}
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
                         </div>
-                      )}
-                      {a.match_details?.entities?.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {a.match_details.entities.map((e, i) => (
-                            <div key={i} className="text-xs bg-red-50 border border-red-100 rounded px-2 py-1.5">
-                              {e.name && <span className="font-medium text-slate-800">{e.name}</span>}
-                              {e.sources?.length > 0 && (
-                                <span className="text-slate-500 ml-1.5">— {e.sources.join(', ')}</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="flex gap-2 mt-1.5 flex-wrap">
-                        <Badge
-                          className={
-                            a.status === 'pending'
-                              ? 'bg-red-500 text-white text-xs'
-                              : a.status === 'confirmed'
-                                ? 'bg-amber-500 text-white text-xs'
-                                : 'bg-slate-400 text-white text-xs'
-                          }
-                        >
-                          {a.status}
-                        </Badge>
-                        {a.created_at && (
-                          <span className="text-xs text-slate-400">{new Date(a.created_at).toLocaleDateString()}</span>
+                        {a.description && <div className="text-sm text-slate-500 mt-0.5">{a.description}</div>}
+                        {a.match_details?.aml_types?.length > 0 && (
+                          <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                            {a.match_details.aml_types.map((t) => (
+                              <Badge
+                                key={t}
+                                className={`text-xs ${
+                                  t === 'SANCTION'
+                                    ? 'bg-red-600 text-white'
+                                    : t === 'SANCTION_RELATED'
+                                      ? 'bg-red-400 text-white'
+                                      : t.startsWith('PEP')
+                                        ? 'bg-orange-500 text-white'
+                                        : t.startsWith('ADVERSE_MEDIA')
+                                          ? 'bg-yellow-600 text-white'
+                                          : 'bg-slate-500 text-white'
+                                }`}
+                              >
+                                {t}
+                              </Badge>
+                            ))}
+                          </div>
                         )}
+                        {a.match_details?.entities?.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {a.match_details.entities.map((e, i) => (
+                              <div key={i} className="text-xs bg-red-50 border border-red-100 rounded px-2 py-1.5">
+                                {e.name && <span className="font-medium text-slate-800">{e.name}</span>}
+                                {e.sources?.length > 0 && (
+                                  <span className="text-slate-500 ml-1.5">— {e.sources.join(', ')}</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2 mt-1.5 flex-wrap">
+                          <Badge
+                            className={
+                              a.status === 'pending'
+                                ? 'bg-red-500 text-white text-xs'
+                                : a.status === 'confirmed'
+                                  ? 'bg-amber-500 text-white text-xs'
+                                  : 'bg-slate-400 text-white text-xs'
+                            }
+                          >
+                            {a.status}
+                          </Badge>
+                          {a.created_at && (
+                            <span className="text-xs text-slate-400">
+                              {new Date(a.created_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {a.status === 'pending' && (
+                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAlertAction(a.id, 'confirm');
+                            }}
+                            disabled={loading[`alert_${a.id}`]}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAlertAction(a.id, 'dismiss');
+                            }}
+                            disabled={loading[`alert_${a.id}`]}
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    {a.status === 'pending' && (
-                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAlertAction(a.id, 'confirm');
-                          }}
-                          disabled={loading[`alert_${a.id}`]}
-                        >
-                          Confirm
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAlertAction(a.id, 'dismiss');
-                          }}
-                          disabled={loading[`alert_${a.id}`]}
-                        >
-                          Dismiss
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       )}

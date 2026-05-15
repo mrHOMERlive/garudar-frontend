@@ -172,6 +172,7 @@ export default function StaffClients() {
         kyc_status: client.kyc_status || '',
         created_date: client.kyc_submitted_at || new Date().toISOString(),
         aml_risk_level: client.aml_risk_level || null,
+        ppatk_pending_alerts_count: client.ppatk_pending_alerts_count ?? 0,
       })),
   });
 
@@ -540,23 +541,34 @@ export default function StaffClients() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {client.aml_risk_level ? (
-                        <Badge
-                          className={
-                            client.aml_risk_level === 'high'
-                              ? 'bg-red-600 text-white'
-                              : client.aml_risk_level === 'medium'
-                                ? 'bg-amber-500 text-white'
-                                : client.aml_risk_level === 'low'
-                                  ? 'bg-emerald-600 text-white'
-                                  : 'bg-slate-400 text-white'
-                          }
-                        >
-                          {client.aml_risk_level.charAt(0).toUpperCase() + client.aml_risk_level.slice(1)}
-                        </Badge>
-                      ) : (
-                        <span className="text-slate-400 text-sm">—</span>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1">
+                        {client.aml_risk_level ? (
+                          <Badge
+                            className={
+                              client.aml_risk_level === 'high'
+                                ? 'bg-red-600 text-white'
+                                : client.aml_risk_level === 'medium'
+                                  ? 'bg-amber-500 text-white'
+                                  : client.aml_risk_level === 'low'
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'bg-slate-400 text-white'
+                            }
+                          >
+                            {client.aml_risk_level.charAt(0).toUpperCase() + client.aml_risk_level.slice(1)}
+                          </Badge>
+                        ) : (
+                          <span className="text-slate-400 text-sm">—</span>
+                        )}
+                        {client.ppatk_pending_alerts_count > 0 && (
+                          <Badge
+                            className="bg-red-700 text-white text-[10px] font-mono"
+                            title={t('amlPpatkAlertsCount')}
+                            data-testid={`ppatk-chip-${client.client_id}`}
+                          >
+                            ⚠ PPATK {client.ppatk_pending_alerts_count}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

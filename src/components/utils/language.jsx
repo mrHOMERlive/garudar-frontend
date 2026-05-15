@@ -1063,6 +1063,12 @@ export const translations = {
     complyUnexpectedResponse: 'Unexpected response from server',
     complyRescreenTriggered: 'Re-screen triggered',
     complySelectRiskLevel: 'Select a risk level',
+    // PPATK / local sanctions screening (DTTOT, DPPSPM, UN-AQ).
+    amlPpatkRescreen: 'Re-screen PPATK',
+    amlPpatkRescreenTooltip: 'Re-check this client against the latest DTTOT / DPPSPM / UN-AQ lists',
+    amlPpatkNoClientLinked: 'No client linked — PPATK rescreen is only available for KYC-approved clients',
+    amlPpatkMatchFound: 'PPATK match',
+    amlPpatkAlertsCount: 'PPATK alerts',
     complyRiskLevelUpdated: 'Risk level updated',
     complyCommentAdded: 'Comment added',
     complyCaseUpdated: 'Case updated',
@@ -2450,6 +2456,13 @@ export const translations = {
     complyUnexpectedResponse: 'Respons tak terduga dari server',
     complyRescreenTriggered: 'Pemindaian ulang dipicu',
     complySelectRiskLevel: 'Pilih tingkat risiko',
+    // PPATK / penyaringan sanksi lokal (DTTOT, DPPSPM, UN-AQ).
+    amlPpatkRescreen: 'Periksa ulang PPATK',
+    amlPpatkRescreenTooltip: 'Periksa ulang klien ini terhadap daftar DTTOT / DPPSPM / UN-AQ terbaru',
+    amlPpatkNoClientLinked:
+      'Tidak ada klien terkait — periksa ulang PPATK hanya tersedia untuk klien dengan KYC disetujui',
+    amlPpatkMatchFound: 'Cocokan PPATK',
+    amlPpatkAlertsCount: 'Alert PPATK',
     complyRiskLevelUpdated: 'Tingkat risiko diperbarui',
     complyCommentAdded: 'Komentar ditambahkan',
     complyCaseUpdated: 'Kasus diperbarui',

@@ -909,6 +909,26 @@ class ApiClient {
   async getClientAmlStatus(clientId) {
     return this.request(`/aml/client/${clientId}/status`);
   }
+
+  /**
+   * Перепроверить клиента только по локальным PPATK-спискам (DTTOT/
+   * DPPSPM/UN-AQ). Без вызова ComplyAdvantage. Идемпотентна — повторный
+   * вызов не создаст дубль AmlAlert.
+   *
+   * @param {string} clientId
+   * @returns {Promise<{
+   *   client_id: string,
+   *   matches_total: number,
+   *   matches_by_source: Record<string, number>,
+   *   new_alerts: number,
+   *   account_status: string,
+   * }>}
+   */
+  async rescreenClientPpatk(clientId) {
+    return this.request(`/aml/client/${clientId}/rescreen-ppatk`, {
+      method: 'POST',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
