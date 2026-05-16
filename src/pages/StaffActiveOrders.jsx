@@ -404,7 +404,7 @@ export default function StaffActiveOrders() {
     selectedOrders.forEach((order) => {
       updateMutation.mutate({ id: order.orderId, data: { status: 'released', executed: true } });
     });
-    toast.success(`${selectedOrders.length} ${t('ordersLabel')}`);
+    toast.success(`${selectedOrders.length} ${t('ordersLabel')} ${t('aoMarkedAsExecutedSuffix')}`);
     setSelectedIds(new Set());
   };
 
