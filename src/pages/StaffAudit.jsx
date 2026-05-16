@@ -186,7 +186,7 @@ export default function StaffAudit() {
                   <span className="text-white">{t('auditPageTitle')}</span>
                 </div>
                 <Badge className="bg-[#f5a623] text-white">
-                  {total} {t('auditEventsLabel')}
+                  {total} {total === 1 ? t('auditEventLabel') : t('auditEventsLabel')}
                 </Badge>
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function StaffAudit() {
                 <TableHead className="text-[#1e3a5f] font-semibold w-44">{t('auditTableEntity')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">{t('auditTableEntityId')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold w-48">{t('auditTableAction')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-20 text-right">{t('auditTableHas')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-24">{t('auditTableChange')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -398,16 +398,46 @@ export default function StaffAudit() {
                         <span className="text-slate-400 text-sm">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-xs text-slate-400">
-                        {row.has_old_value && row.has_new_value
-                          ? '↹'
-                          : row.has_new_value
-                            ? '＋'
-                            : row.has_old_value
-                              ? '−'
-                              : ''}
-                      </span>
+                    <TableCell>
+                      {(() => {
+                        // Тип изменения: видно по has_old/has_new флагам.
+                        // Bg-цвета подобраны как у Action-badge'ей UPDATE/CREATE/DELETE
+                        // — чтобы аудитор узнал паттерн "что произошло с данными".
+                        if (row.has_old_value && row.has_new_value) {
+                          return (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] bg-blue-50 text-blue-700 border-blue-200"
+                              title={t('auditChangeUpdatedTooltip')}
+                            >
+                              {t('auditChangeUpdated')}
+                            </Badge>
+                          );
+                        }
+                        if (row.has_new_value) {
+                          return (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200"
+                              title={t('auditChangeCreatedTooltip')}
+                            >
+                              {t('auditChangeCreated')}
+                            </Badge>
+                          );
+                        }
+                        if (row.has_old_value) {
+                          return (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] bg-red-50 text-red-700 border-red-200"
+                              title={t('auditChangeDeletedTooltip')}
+                            >
+                              {t('auditChangeDeleted')}
+                            </Badge>
+                          );
+                        }
+                        return <span className="text-slate-400 text-xs">—</span>;
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))
