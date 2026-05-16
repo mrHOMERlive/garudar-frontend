@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { apiClient } from '@/api/apiClient';
+import { useAuth } from '@/hooks/useAuth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -27,6 +28,11 @@ const INVOICE_EMAIL = 'info@garudar.id';
 
 export default function CreateOrder() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  // Admin/Staff просматривают client-pages для отладки/демо. KYC-гейт
+  // (ниже) активен только для роли USER — симметрично бэку, где
+  // orders.py:218 различает role перед KYC-проверкой.
+  const isStaffOrAdmin = user?.role === 'ADMIN' || user?.role === 'STAFF';
   const [formData, setFormData] = useState({
     amount: 0,
     currency: 'USD',
@@ -305,7 +311,9 @@ export default function CreateOrder() {
 
   // ТЗ Sec 10.4: KYC-гейт. Клиент с неподтверждённым KYC (и без admin-override)
   // не может создавать заявки даже если пришёл напрямую по URL.
-  if (client && client.kyc_status !== 'approved' && client.kyc_override !== true) {
+  // Admin/Staff пропускаются (как в бэке orders.py:218) — они могут открывать
+  // client-страницы для отладки/демо без своего client-профиля.
+  if (!isStaffOrAdmin && client && client.kyc_status !== 'approved' && client.kyc_override !== true) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-slate-200">

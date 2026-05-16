@@ -69,9 +69,12 @@ export default function UserDashboard() {
   const kycApproved = client?.kyc_status === 'approved';
   const kycOverride = client?.kyc_override === true;
   const accountActive = client?.account_status !== 'hold';
+  // Admin/Staff заходят на client-pages для отладки/демо — гейт обходят
+  // (симметрично бэку orders.py:218 где роль USER проверяется отдельно).
+  const isStaffOrAdmin = user?.role === 'ADMIN' || user?.role === 'STAFF';
   // ТЗ Sec 10.4: создание заявок разрешено только при approved KYC
-  // (либо при ручном admin-override).
-  const canCreateOrders = accountActive && (kycApproved || kycOverride);
+  // (либо при ручном admin-override). Staff/Admin не блокируются.
+  const canCreateOrders = isStaffOrAdmin || (accountActive && (kycApproved || kycOverride));
 
   const stats = {
     total: orders.length,
