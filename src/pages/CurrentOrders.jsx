@@ -215,6 +215,7 @@ export default function CurrentOrders() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
       <ClientPageHeader
         sticky
+        title={t('currentOrders')}
         subtitle={t('trackTransferStatus')}
         badgeLabel={`${currentOrders.length} ${t('activeLabel')}`}
         actions={

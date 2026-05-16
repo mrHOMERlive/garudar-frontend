@@ -110,7 +110,7 @@ export const translations = {
     noOrdersFound: 'No orders found',
     rowsPerPage: 'Rows per page:',
     orders: 'orders',
-    order: 'order',
+    order: 'Order',
 
     // Order Actions
     viewTerms: 'View Terms',

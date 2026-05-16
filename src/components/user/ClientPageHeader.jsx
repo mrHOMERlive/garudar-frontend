@@ -17,6 +17,9 @@ import { t } from '@/components/utils/language';
  * inline header with hamburger Sheet.
  *
  * Props:
+ *  - title: optional secondary heading shown next to "GTrans" (e.g. page name).
+ *           Used by tests for `getByText('Current Orders')`-style assertions and
+ *           helps users see which page they're on.
  *  - subtitle: string shown under "GTrans"
  *  - badgeLabel: optional small right-of-title badge (e.g. "CLIENT", "3 ACTIVE")
  *  - badgeClassName: tailwind colors for badge (default emerald)
@@ -25,6 +28,7 @@ import { t } from '@/components/utils/language';
  *  - backTo: createPageUrl key for back button (default 'UserDashboard')
  */
 export default function ClientPageHeader({
+  title,
   subtitle,
   badgeLabel,
   badgeClassName = 'bg-emerald-500',
@@ -53,6 +57,12 @@ export default function ClientPageHeader({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">GTrans</h1>
+                {title && (
+                  <>
+                    <span className="text-white/60">•</span>
+                    <span className="text-white text-base sm:text-lg md:text-xl font-medium">{title}</span>
+                  </>
+                )}
                 {badgeLabel && (
                   <span
                     className={`text-[10px] sm:text-xs ${badgeClassName} px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-white font-medium whitespace-nowrap`}

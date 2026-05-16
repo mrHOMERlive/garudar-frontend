@@ -134,7 +134,8 @@ export default function ExecutedOrders() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader
-        subtitle={t('executedOrders')}
+        title={t('executedOrders')}
+        subtitle={t('viewCompletedOrders')}
         badgeLabel={t('clientDashboard')}
         actions={
           <Link to={createPageUrl('GTrans')}>

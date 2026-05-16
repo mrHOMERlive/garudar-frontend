@@ -340,6 +340,7 @@ export default function CreateOrder() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader
+        title={t('createOrder')}
         subtitle={t('createPaymentOrder')}
         badgeLabel="CLIENT"
         actions={

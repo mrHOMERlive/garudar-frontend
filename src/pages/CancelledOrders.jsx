@@ -85,7 +85,8 @@ export default function CancelledOrders() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ClientPageHeader
-        subtitle={t('cancelledOrders')}
+        title={t('cancelledOrders')}
+        subtitle={t('clientDashboard')}
         badgeLabel={t('clientDashboard')}
         actions={
           <Link to={createPageUrl('GTrans')}>
