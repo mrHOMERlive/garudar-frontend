@@ -17,6 +17,7 @@ import {
   FileSignature,
   BarChart2,
   Inbox,
+  ScrollText,
 } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
@@ -225,6 +226,18 @@ export default function StaffDashboard() {
                   </div>
                   <CardTitle className="text-[#1e3a5f]">{t('mod_customerData_title')}</CardTitle>
                   <CardDescription className="text-slate-500">{t('mod_customerData_desc')}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('StaffAudit')} data-testid="dashboard-audit-link">
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center mb-3">
+                    <ScrollText className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">{t('auditNavLabel')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('auditNavDescription')}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

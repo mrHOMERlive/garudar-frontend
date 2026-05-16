@@ -19,6 +19,7 @@ const StaffKYCQueue = lazy(() => import('./StaffKYCQueue'));
 const StaffClients = lazy(() => import('./StaffClients'));
 const StaffClientRequests = lazy(() => import('./StaffClientRequests'));
 const StaffLeads = lazy(() => import('./StaffLeads'));
+const StaffAudit = lazy(() => import('./StaffAudit'));
 const StaffActiveOrders = lazy(() => import('./StaffActiveOrders'));
 const StaffExecutedOrders = lazy(() => import('./StaffExecutedOrders'));
 const StaffPayeerAccounts = lazy(() => import('./StaffPayeerAccounts'));
@@ -71,6 +72,7 @@ const PAGES = {
   StaffClientRequests: StaffClientRequests,
 
   StaffLeads: StaffLeads,
+  StaffAudit: StaffAudit,
 
   StaffActiveOrders: StaffActiveOrders,
 
@@ -387,6 +389,14 @@ function PagesContent() {
               element={
                 <RequireAdmin>
                   <StaffComplyAdvantage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/staffaudit"
+              element={
+                <RequireAdmin>
+                  <StaffAudit />
                 </RequireAdmin>
               }
             />

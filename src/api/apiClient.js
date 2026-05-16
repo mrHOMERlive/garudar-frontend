@@ -929,6 +929,57 @@ class ApiClient {
       method: 'POST',
     });
   }
+
+  // ── Audit log viewer (ТЗ §4.12) ──────────────────────────────────
+
+  /**
+   * Список audit-событий с фильтрами + пагинацией.
+   * @param {object} params - entity, entity_id, action, created_by, since,
+   *                          until, q (free-text), limit, offset.
+   */
+  async getAuditLog(params = {}) {
+    const qp = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== '') qp.append(k, v);
+    }
+    const qs = qp.toString();
+    return this.request(`/audit${qs ? `?${qs}` : ''}`);
+  }
+
+  async getAuditLogDetail(auditId) {
+    return this.request(`/audit/${auditId}`);
+  }
+
+  async getAuditDistinctValues() {
+    return this.request('/audit/distinct-values');
+  }
+
+  /**
+   * Скачивает CSV-экспорт audit-лога. Auth — через HTTP-only куки
+   * (`credentials: 'include'`), как и остальные API-запросы. Файл
+   * получаем как Blob и сохраняем через временный <a download>.
+   */
+  async downloadAuditCsv(params = {}) {
+    const qp = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== '') qp.append(k, v);
+    }
+    const qs = qp.toString();
+    const url = `${this.baseUrl}/audit/export/csv${qs ? `?${qs}` : ''}`;
+    const resp = await fetch(url, { credentials: 'include' });
+    if (!resp.ok) throw new Error(`Export failed: ${resp.status}`);
+    const blob = await resp.blob();
+    const filename =
+      (resp.headers.get('Content-Disposition') || '').match(/filename="?([^"]+)"?/)?.[1] ||
+      `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
 }
 
 export const apiClient = new ApiClient();
