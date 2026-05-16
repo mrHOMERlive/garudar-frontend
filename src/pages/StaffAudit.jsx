@@ -333,12 +333,16 @@ export default function StaffAudit() {
 
         {/* Table */}
         <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-          <Table className="table-fixed w-full">
+          {/* min-w-[820px]: ниже этой ширины колонки начинают overlap'аться.
+              shadcn Table обёрнут в overflow-auto — на узких экранах
+              появится горизонтальный скролл внутри карточки, а не overflow
+              всего layout'а. */}
+          <Table className="table-fixed w-full min-w-[820px]">
             <TableHeader>
               <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                <TableHead className="text-[#1e3a5f] font-semibold w-44">{t('auditTableDate')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('auditTableUser')}</TableHead>
-                <TableHead className="text-[#1e3a5f] font-semibold w-44">{t('auditTableEntity')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-36">{t('auditTableDate')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-28">{t('auditTableUser')}</TableHead>
+                <TableHead className="text-[#1e3a5f] font-semibold w-32">{t('auditTableEntity')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold">{t('auditTableEntityId')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold w-48">{t('auditTableAction')}</TableHead>
                 <TableHead className="text-[#1e3a5f] font-semibold w-24">{t('auditTableChange')}</TableHead>
