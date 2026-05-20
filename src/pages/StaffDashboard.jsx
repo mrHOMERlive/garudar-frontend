@@ -272,6 +272,18 @@ export default function StaffDashboard() {
               </Card>
             </Link>
 
+            <Link to={createPageUrl('StaffNDA')} data-testid="dashboard-nda-link">
+              <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-3">
+                    <FileSignature className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="text-[#1e3a5f]">{t('ndaInboxTitle')}</CardTitle>
+                  <CardDescription className="text-slate-500">{t('ndaInboxSubtitle')}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+
             <Link to={createPageUrl('StaffClientRequests')}>
               <Card className="bg-white border-slate-200 hover:border-[#1e3a5f] hover:shadow-lg transition-all cursor-pointer h-full">
                 <CardHeader>

@@ -1,318 +1,474 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiClient } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Download, Upload, CheckCircle, AlertCircle, FileText, ArrowLeft, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { ArrowLeft, Send, Download, Upload, FileText, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { t } from '@/components/utils/language';
 
-export default function ClientServiceAgreement() {
-  const [uploading, setUploading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const queryClient = useQueryClient();
+/**
+ * ClientServiceAgreement — English-only end-to-end Service Agreement flow.
+ *
+ * Workflow (см. backend `app/routers/service_agreement.py`):
+ *   DRAFT → GENERATED → SIGNED_UPLOADED → SUBMITTED → ACCEPTED / REJECTED
+ *
+ * Реквизиты PT GAN — hardcoded в шаблоне DOCX. В форме клиент заполняет
+ * только данные своей компании, которые подставляются в плейсхолдеры.
+ */
 
-  const { data: client } = useQuery({
-    queryKey: ['currentClient'],
-    queryFn: () => apiClient.getMyClient(),
-  });
+const STATUS_DRAFT = 'draft';
+const STATUS_GENERATED = 'generated';
+const STATUS_SIGNED_UPLOADED = 'signed_uploaded';
+const STATUS_SUBMITTED = 'submitted';
+const STATUS_ACCEPTED = 'accepted';
+const STATUS_REJECTED = 'rejected';
 
-  const { data: badges = [] } = useQuery({
-    queryKey: ['client-badges', client?.client_id],
-    queryFn: async () => {
-      if (!client?.client_id) return [];
-      const allBadges = await apiClient.getClientBadges(client.client_id);
-      return allBadges.filter((b) => b.badge_type === 'service_agreement');
+function StatusBadge({ status }) {
+  const map = {
+    [STATUS_DRAFT]: { cls: 'bg-slate-200 text-slate-800', label: t('saStatusDraft'), icon: FileText },
+    [STATUS_GENERATED]: { cls: 'bg-blue-100 text-blue-800', label: t('saStatusGenerated'), icon: FileText },
+    [STATUS_SIGNED_UPLOADED]: {
+      cls: 'bg-indigo-100 text-indigo-800',
+      label: t('saStatusSignedUploaded'),
+      icon: Upload,
     },
-    enabled: !!client?.client_id,
+    [STATUS_SUBMITTED]: { cls: 'bg-amber-100 text-amber-900', label: t('saStatusSubmitted'), icon: Clock },
+    [STATUS_ACCEPTED]: { cls: 'bg-emerald-100 text-emerald-900', label: t('saStatusAccepted'), icon: CheckCircle2 },
+    [STATUS_REJECTED]: { cls: 'bg-red-100 text-red-800', label: t('saStatusRejected'), icon: XCircle },
+  };
+  const entry = map[status] || { cls: 'bg-slate-200 text-slate-800', label: status || '—', icon: FileText };
+  const Icon = entry.icon;
+  return (
+    <Badge className={`${entry.cls} text-xs font-medium px-2 py-1 inline-flex items-center gap-1`}>
+      <Icon className="w-3.5 h-3.5" />
+      {entry.label}
+    </Badge>
+  );
+}
+
+export default function ClientServiceAgreement() {
+  const queryClient = useQueryClient();
+  const [uploading, setUploading] = useState(false);
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => apiClient.getCurrentUser(),
   });
 
-  const badge = badges[0];
+  const { data: client, isLoading: clientLoading } = useQuery({
+    queryKey: ['currentClient', user?.email],
+    queryFn: async () => apiClient.getMyClient(),
+    enabled: !!user,
+  });
 
-  const uploadMutation = useMutation({
-    mutationFn: async (file) => {
-      const { file_url } = await apiClient.uploadFile(file);
+  const { data: saRequest } = useQuery({
+    queryKey: ['saRequest', client?.client_id],
+    queryFn: async () => {
+      const requests = await apiClient.listServiceAgreementRequests(client.client_id);
+      return requests[0];
+    },
+    enabled: !!client,
+  });
 
-      if (badge) {
-        await apiClient.updateBadge(badge.id, {
-          submitted_document_url: file_url,
-          status: 'submitted',
-        });
+  const { data: history } = useQuery({
+    queryKey: ['saHistory', saRequest?.id],
+    queryFn: async () => apiClient.getServiceAgreementHistory(saRequest.id),
+    enabled: !!saRequest,
+  });
+
+  const [formData, setFormData] = useState({
+    effective_date: '',
+    company_name: '',
+    country: '',
+    address: '',
+    signatory_name: '',
+    signatory_title: '',
+    registration_number: '',
+    tax_id: '',
+    contact_email: '',
+    contact_phone: '',
+    term: '',
+  });
+
+  useEffect(() => {
+    if (saRequest) {
+      setFormData({
+        effective_date: saRequest.effective_date || '',
+        company_name: saRequest.company_name || '',
+        country: saRequest.country || '',
+        address: saRequest.address || '',
+        signatory_name: saRequest.signatory_name || '',
+        signatory_title: saRequest.signatory_title || '',
+        registration_number: saRequest.registration_number || '',
+        tax_id: saRequest.tax_id || '',
+        contact_email: saRequest.contact_email || '',
+        contact_phone: saRequest.contact_phone || '',
+        term: saRequest.term || '',
+      });
+    } else if (client) {
+      // Префилл из карточки клиента, если SA-заявка ещё не создана.
+      // Облегчает первое заполнение — клиент видит свои данные, а не пустые поля.
+      setFormData((prev) => ({
+        ...prev,
+        company_name: prev.company_name || client.client_name || '',
+        country: prev.country || client.client_reg_country || '',
+        registration_number: prev.registration_number || client.client_reg_number || '',
+        signatory_name: prev.signatory_name || client.client_director || '',
+        contact_email: prev.contact_email || client.client_mail || '',
+      }));
+    }
+  }, [saRequest, client]);
+
+  const status = saRequest?.status || STATUS_DRAFT;
+  const isReadOnly = [STATUS_SIGNED_UPLOADED, STATUS_SUBMITTED, STATUS_ACCEPTED].includes(status);
+  const lastRejection = (history || [])
+    .slice()
+    .reverse()
+    .find((h) => h.new_status === STATUS_REJECTED);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (saRequest) {
+        return apiClient.updateServiceAgreementRequest(saRequest.id, formData);
       }
-
-      return file_url;
+      return apiClient.createServiceAgreementRequest(formData, client.client_id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['client-badges'] });
-      toast.success(t('signedSaUploadSuccessToast'));
-    },
-    onError: () => {
-      toast.error(t('failedToUploadDocumentToast'));
+      queryClient.invalidateQueries(['saRequest']);
+      toast.success(t('saInformationSavedToast'));
     },
   });
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      const saved = saRequest
+        ? await apiClient.updateServiceAgreementRequest(saRequest.id, formData)
+        : await apiClient.createServiceAgreementRequest(formData, client.client_id);
+      return apiClient.generateServiceAgreementRequest(saved.id);
+    },
+    onSuccess: (resp) => {
+      queryClient.invalidateQueries(['saRequest']);
+      queryClient.invalidateQueries(['saHistory']);
+      toast.success(t('saGeneratedSuccessToast'));
+      if (resp?.generated_file_url) {
+        window.open(resp.generated_file_url, '_blank', 'noopener,noreferrer');
+      }
+    },
+    onError: (e) => {
+      toast.error(`${t('failedGenerateSaToast')}: ${e?.message || ''}`.trim());
+    },
+  });
 
+  const submitMutation = useMutation({
+    mutationFn: async () => apiClient.submitServiceAgreementRequest(saRequest.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['saRequest']);
+      queryClient.invalidateQueries(['saHistory']);
+      queryClient.invalidateQueries(['currentClient']);
+      toast.success(t('saSubmittedForReviewToast'));
+    },
+  });
+
+  const handleFileUpload = async (file) => {
+    if (!file || !saRequest) return;
     setUploading(true);
     try {
-      await uploadMutation.mutateAsync(file);
+      await apiClient.uploadSignedServiceAgreement(saRequest.id, file);
+      queryClient.invalidateQueries(['saRequest']);
+      queryClient.invalidateQueries(['saHistory']);
+      toast.success(t('signedSaUploadSuccessToast'));
+    } catch (err) {
+      toast.error(`${t('failedToUploadDocumentToast')}: ${err?.message || ''}`);
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDownload = async () => {
-    if (!client) return;
-    setIsGenerating(true);
-    try {
-      const blob = await apiClient.generateServiceAgreement(
-        {
-          fields: {},
-          upload_to_s3: false,
-        },
-        client.client_id
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Service_Agreement_${client.client_name?.replace(/\s+/g, '_') || 'Client'}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-      toast.success(t('saGeneratedSuccessToast'));
-    } catch (error) {
-      console.error('Failed to generate agreement:', error);
-      toast.error(t('failedGenerateSaToast'));
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  if (!client) {
+  if (clientLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-600">{t('loading')}</p>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#1e3a5f] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">{t('loading')}</p>
+        </div>
       </div>
     );
   }
 
-  const isSubmitted = badge?.status === 'submitted';
-  const isCompleted = badge?.status === 'completed';
+  if (!client) return <div>{t('errorLoadingClient')}</div>;
+
+  const canGenerate = !isReadOnly && [STATUS_DRAFT, STATUS_GENERATED, STATUS_REJECTED, undefined].includes(status);
+  const canUploadSigned = status === STATUS_GENERATED;
+  const canSubmit = status === STATUS_SIGNED_UPLOADED;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-[#1e3a5f] shadow-lg border-b border-[#1e3a5f]/20">
-        <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
-          <Link
-            to={createPageUrl('UserDashboard')}
-            className="inline-flex items-center text-white hover:text-slate-200 mb-3 sm:mb-4 text-sm sm:text-base"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('backToDashboard')}
+      <div className="bg-[#1e3a5f] shadow-lg">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+          <Link to={createPageUrl('UserDashboard')}>
+            <Button variant="ghost" className="text-white hover:bg-white/10 -ml-2 sm:ml-0">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('backToDashboard')}
+            </Button>
           </Link>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg sm:rounded-xl flex items-center justify-center p-2 sm:p-3 shadow-lg flex-shrink-0">
-              <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-white">{t('saSubtitle')}</h1>
-              <p className="text-slate-300 text-xs sm:text-sm">{t('saHeaderSubtitle')}</p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
-        {/* Status Banner */}
-        {isCompleted && (
-          <div className="mb-6 bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-6 h-6 text-emerald-600" />
-              <div>
-                <h3 className="font-semibold text-emerald-900">{t('agreementAcceptedTitle')}</h3>
-                <p className="text-sm text-emerald-700">{t('saAcceptedDesc')}</p>
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
+        <div className="mb-6 sm:mb-8 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1 sm:mb-2">{t('saRequestTitle')}</h1>
+            <p className="text-sm sm:text-base text-slate-600">{t('saRequestSubtitle')}</p>
+          </div>
+          {saRequest && <StatusBadge status={status} />}
+        </div>
+
+        {status === STATUS_SUBMITTED && (
+          <div className="mb-4 p-3 sm:p-4 rounded-md bg-amber-50 border border-amber-200 text-amber-900 text-sm">
+            {t('saSubmittedHint')}
+          </div>
+        )}
+        {status === STATUS_ACCEPTED && (
+          <div className="mb-4 p-3 sm:p-4 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
+            {t('saAcceptedHint')}
+          </div>
+        )}
+        {status === STATUS_REJECTED && (
+          <div className="mb-4 p-3 sm:p-4 rounded-md bg-red-50 border border-red-200 text-red-900 text-sm">
+            <div className="font-semibold mb-1">{t('saRejectedHint')}</div>
+            {lastRejection?.comment && (
+              <div className="mt-1">
+                <span className="font-medium">{t('saRejectCommentLabel')}:</span> {lastRejection.comment}
               </div>
-            </div>
+            )}
           </div>
         )}
 
-        {isSubmitted && !isCompleted && (
-          <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-blue-600" />
-              <div>
-                <h3 className="font-semibold text-blue-900">{t('underReviewTitle')}</h3>
-                <p className="text-sm text-blue-700">{t('saUnderReviewDesc')}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Instructions */}
-        <Card className="mb-6 border-slate-200">
-          <CardHeader>
-            <CardTitle className="text-[#1e3a5f]">{t('instructionsTitle')}</CardTitle>
-            <CardDescription>{t('saInstructionsDesc')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold flex-shrink-0">
-                1
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-900">{t('step1Heading')}</h4>
-                <p className="text-sm text-slate-600">{t('step1Desc')}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold flex-shrink-0">
-                2
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-900">{t('step2Heading')}</h4>
-                <p className="text-sm text-slate-600">{t('step2Desc')}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold flex-shrink-0">
-                3
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-900">{t('step3Heading')}</h4>
-                <p className="text-sm text-slate-600">{t('step3Desc')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Download Section */}
-        <Card className="mb-6 border-slate-200">
+        <Card className="mb-6">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">{t('step1DownloadTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-7 h-7 sm:w-8 sm:h-8 text-[#1e3a5f] flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="font-medium text-slate-900 text-sm sm:text-base">{t('saSubtitle')}</div>
-                  <div className="text-xs sm:text-sm text-slate-600">{t('saDocxDocument')}</div>
-                </div>
-              </div>
-              <Button
-                onClick={handleDownload}
-                disabled={isGenerating}
-                className="bg-[#1e3a5f] hover:bg-[#152a45] w-full sm:w-auto"
-              >
-                {isGenerating ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4 mr-2" />
-                )}
-                {isGenerating ? t('generatingDots') : t('download')}
-              </Button>
-            </div>
-            {badge?.document_url && (
-              <div className="mt-4">
-                <p className="text-sm text-slate-600 mb-2">{t('alternativeStaffDoc')}</p>
-                <a href={badge.document_url} download>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-3 h-3 mr-2" />
-                    {t('downloadStaffDocument')}
-                  </Button>
-                </a>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upload Section */}
-        <Card className="border-slate-200">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-[#1e3a5f] text-base sm:text-lg">{t('step2UploadTitle')}</CardTitle>
-            {badge?.staff_comment && (
-              <CardDescription className="text-amber-700 font-medium text-xs sm:text-sm">
-                {t('noteFromGtrans')} {badge.staff_comment}
-              </CardDescription>
-            )}
+            <CardTitle className="text-lg sm:text-xl">{t('saCompanyInformation')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-4 sm:p-6 pt-0 sm:pt-0">
-            {badge?.submitted_document_url ? (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-medium text-emerald-900 text-sm sm:text-base">
-                        {t('signedAgreementUploaded')}
-                      </div>
-                      <div className="text-xs sm:text-sm text-emerald-700">{t('yourSignedDocSubmitted')}</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <a
-                      href={badge.submitted_document_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 sm:flex-initial"
-                    >
-                      <Button size="sm" variant="outline" className="w-full">
-                        <Download className="w-3 h-3 mr-2" />
-                        {t('viewLabelBtn')}
-                      </Button>
-                    </a>
-                    <label className="flex-1 sm:flex-initial">
-                      <input
-                        type="file"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        accept=".pdf,.doc,.docx"
-                        disabled={uploading || isCompleted}
-                      />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={uploading || isCompleted}
-                        onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                        className="w-full"
-                      >
-                        <Upload className="w-3 h-3 mr-2" />
-                        {t('replaceLabelBtn')}
-                      </Button>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <label className="block">
-                <input
-                  type="file"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  accept=".pdf,.doc,.docx"
-                  disabled={uploading}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="effective_date">{t('effectiveDateLabel')} *</Label>
+                <Input
+                  id="effective_date"
+                  type="date"
+                  value={formData.effective_date}
+                  onChange={(e) => handleChange('effective_date', e.target.value)}
+                  disabled={isReadOnly}
                 />
-                <Button
-                  className="w-full bg-[#f5a623] hover:bg-[#e09000] py-6"
-                  disabled={uploading}
-                  onClick={(e) => e.currentTarget.previousElementSibling?.click()}
-                >
-                  <Upload className="w-5 h-5 mr-2" />
-                  {uploading ? t('uploadingDots') : t('uploadSignedAgreementBtn')}
-                </Button>
-              </label>
-            )}
-            <p className="text-xs text-slate-600 text-center">{t('acceptedFormatsHint')}</p>
+              </div>
+              <div>
+                <Label htmlFor="term">{t('saTermLabel')}</Label>
+                <Input
+                  id="term"
+                  value={formData.term}
+                  onChange={(e) => handleChange('term', e.target.value)}
+                  disabled={isReadOnly}
+                  placeholder={t('saTermPlaceholder')}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="company_name">{t('saCompanyNameLabel')} *</Label>
+              <Input
+                id="company_name"
+                value={formData.company_name}
+                onChange={(e) => handleChange('company_name', e.target.value)}
+                disabled={isReadOnly}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="country">{t('saCountryLabel')} *</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => handleChange('country', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div>
+                <Label htmlFor="registration_number">{t('saRegNumberLabel')}</Label>
+                <Input
+                  id="registration_number"
+                  value={formData.registration_number}
+                  onChange={(e) => handleChange('registration_number', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="address">{t('saAddressLabel')} *</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleChange('address', e.target.value)}
+                disabled={isReadOnly}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="signatory_name">{t('saSignatoryNameLabel')} *</Label>
+                <Input
+                  id="signatory_name"
+                  value={formData.signatory_name}
+                  onChange={(e) => handleChange('signatory_name', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div>
+                <Label htmlFor="signatory_title">{t('saSignatoryTitleLabel')}</Label>
+                <Input
+                  id="signatory_title"
+                  value={formData.signatory_title}
+                  onChange={(e) => handleChange('signatory_title', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="tax_id">{t('saTaxIdLabel')}</Label>
+                <Input
+                  id="tax_id"
+                  value={formData.tax_id}
+                  onChange={(e) => handleChange('tax_id', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div>
+                <Label htmlFor="contact_email">{t('contactEmailLabel')}</Label>
+                <Input
+                  id="contact_email"
+                  type="email"
+                  value={formData.contact_email}
+                  onChange={(e) => handleChange('contact_email', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+              <div>
+                <Label htmlFor="contact_phone">{t('contactPhoneLabel')}</Label>
+                <Input
+                  id="contact_phone"
+                  value={formData.contact_phone}
+                  onChange={(e) => handleChange('contact_phone', e.target.value)}
+                  disabled={isReadOnly}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        {saRequest?.generated_file_url && (
+          <Card className="mb-6">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">{t('generatedSaTitle')}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+              <a href={saRequest.generated_file_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Download className="w-4 h-4 mr-2" />
+                  {t('downloadGeneratedSa')}
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+        )}
+
+        {(canUploadSigned || saRequest?.signed_file_url) && (
+          <Card className="mb-6">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">{t('uploadSignedSaTitle')}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+              {canUploadSigned && (
+                <>
+                  <p className="text-xs sm:text-sm text-slate-600 mb-3">{t('saUploadSignedHelp')}</p>
+                  <label>
+                    <input
+                      type="file"
+                      onChange={(e) => handleFileUpload(e.target.files?.[0])}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploading}
+                      onClick={(e) => e.currentTarget.previousElementSibling?.click()}
+                      className="w-full sm:w-auto"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploading ? t('uploading') : t('uploadSignedSaBtnLabel')}
+                    </Button>
+                  </label>
+                </>
+              )}
+              {saRequest?.signed_file_url && (
+                <div className={canUploadSigned ? 'mt-3' : ''}>
+                  <a href={saRequest.signed_file_url} target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                      <Download className="w-4 h-4 mr-2" />
+                      {t('viewUploadedSa')}
+                    </Button>
+                  </a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+          {!isReadOnly && (
+            <Button
+              variant="outline"
+              onClick={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+              className="w-full sm:w-auto"
+            >
+              {t('saveProgressLabel')}
+            </Button>
+          )}
+          {canGenerate && (
+            <Button
+              variant="outline"
+              onClick={() => generateMutation.mutate()}
+              disabled={generateMutation.isPending}
+              className="w-full sm:w-auto"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              {status === STATUS_GENERATED ? t('saRegenerateBtn') : t('saGenerateBtn')}
+            </Button>
+          )}
+          {canSubmit && (
+            <Button
+              onClick={() => submitMutation.mutate()}
+              disabled={submitMutation.isPending}
+              className="w-full sm:w-auto bg-[#1e3a5f] hover:bg-[#152a45]"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {t('saSubmitFinalBtn')}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

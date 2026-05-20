@@ -672,6 +672,42 @@ class ApiClient {
     });
   }
 
+  async generateNda(id) {
+    return this.request(`/nda-requests/${id}/generate`, { method: 'POST' });
+  }
+
+  async uploadSignedNda(id, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    // request() ставит Content-Type application/json по умолчанию;
+    // для multipart нужен fetch напрямую — повторяет паттерн uploadFile().
+    const resp = await fetch(`${this.baseUrl}/nda-requests/${id}/upload-signed`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error(`upload-signed failed: ${resp.status} ${text}`);
+    }
+    return resp.json();
+  }
+
+  async submitNda(id) {
+    return this.request(`/nda-requests/${id}/submit`, { method: 'POST' });
+  }
+
+  async ndaDecision(id, status, comment = null) {
+    return this.request(`/nda-requests/${id}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ status, comment }),
+    });
+  }
+
+  async getNdaHistory(id) {
+    return this.request(`/nda-requests/${id}/history`);
+  }
+
   // Legal
   async getPrivacyPolicy(language = 'en') {
     const query = `?language=${encodeURIComponent(language)}`;
@@ -699,15 +735,78 @@ class ApiClient {
     });
   }
 
-  // Service Agreements (Staff)
+  // Badges helper (used by KYC and legacy SA-badge flow)
   async getBadgesByType(type) {
     return this.request(`/badges?type=${encodeURIComponent(type)}`);
   }
 
-  async createServiceAgreementBadge(clientId, data) {
-    // Uses the upsert endpoint
-    return this.updateClientBadge(clientId, 'service_agreement', data);
+  // ====================================================================
+  // SERVICE AGREEMENT — dedicated workflow (зеркало NDA endpoints)
+  // ====================================================================
+
+  async listServiceAgreementRequests(clientId = null) {
+    const qs = clientId ? `?client_id=${encodeURIComponent(clientId)}` : '';
+    return this.request(`/service-agreement-requests${qs}`);
   }
+
+  async getServiceAgreementRequest(saId) {
+    return this.request(`/service-agreement-requests/${saId}`);
+  }
+
+  async createServiceAgreementRequest(data, clientId) {
+    const qs = clientId ? `?client_id=${encodeURIComponent(clientId)}` : '';
+    return this.request(`/service-agreement-requests${qs}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateServiceAgreementRequest(saId, data) {
+    return this.request(`/service-agreement-requests/${saId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async generateServiceAgreementRequest(saId) {
+    return this.request(`/service-agreement-requests/${saId}/generate`, { method: 'POST' });
+  }
+
+  async uploadSignedServiceAgreement(saId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const resp = await fetch(`${this.baseUrl}/service-agreement-requests/${saId}/upload-signed`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error(`upload-signed failed: ${resp.status} ${text}`);
+    }
+    return resp.json();
+  }
+
+  async submitServiceAgreementRequest(saId) {
+    return this.request(`/service-agreement-requests/${saId}/submit`, { method: 'POST' });
+  }
+
+  async serviceAgreementDecision(saId, status, comment = null) {
+    return this.request(`/service-agreement-requests/${saId}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ status, comment }),
+    });
+  }
+
+  async getServiceAgreementHistory(saId) {
+    return this.request(`/service-agreement-requests/${saId}/history`);
+  }
+
+  // ====================================================================
+  // SERVICE AGREEMENT — legacy free-form generator
+  // (Используется для скачивания master-шаблона на Staff-стороне. Не пишет
+  //  SA-сущность в БД. Будет удалён после полной миграции UI на dedicated flow.)
+  // ====================================================================
 
   async generateServiceAgreement(data, clientId = null) {
     const queryParams = new URLSearchParams();

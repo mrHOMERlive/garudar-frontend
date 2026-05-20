@@ -37,6 +37,7 @@ const GTransFXSolutions = lazy(() => import('./GTransFXSolutions'));
 const GTransECommerceCollectSettle = lazy(() => import('./GTransECommerceCollectSettle'));
 const GTransMerchantPay = lazy(() => import('./GTransMerchantPay'));
 const StaffServiceAgreement = lazy(() => import('./StaffServiceAgreement'));
+const StaffNDA = lazy(() => import('./StaffNDA'));
 const ClientServiceAgreement = lazy(() => import('./ClientServiceAgreement'));
 const StaffCustomerReport = lazy(() => import('./StaffCustomerReport'));
 const StaffTransactionReport = lazy(() => import('./StaffTransactionReport'));
@@ -107,6 +108,7 @@ const PAGES = {
   GTransMerchantPay: GTransMerchantPay,
 
   StaffServiceAgreement: StaffServiceAgreement,
+  StaffNDA: StaffNDA,
 
   ClientServiceAgreement: ClientServiceAgreement,
 
@@ -397,6 +399,14 @@ function PagesContent() {
               element={
                 <RequireAdmin>
                   <StaffAudit />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/staffnda"
+              element={
+                <RequireAdmin>
+                  <StaffNDA />
                 </RequireAdmin>
               }
             />

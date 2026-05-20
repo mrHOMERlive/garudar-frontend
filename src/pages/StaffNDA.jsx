@@ -24,9 +24,14 @@ import { toast } from 'sonner';
 import { t } from '@/components/utils/language';
 
 /**
- * StaffServiceAgreement — Inbox для Service Agreement (Staff/Admin).
- * Зеркало StaffNDA.jsx. Принятие/отклонение SA-заявок с обязательным
- * комментарием для reject.
+ * StaffNDA — Inbox для NDA-заявок (Staff/Admin).
+ *
+ * Видим только заявки в статусах SUBMITTED (требуют решения),
+ * ACCEPTED/REJECTED (history), плюс опционально SIGNED_UPLOADED/GENERATED
+ * для аудита in-flight. Фильтр по умолчанию = submitted (активная очередь).
+ *
+ * Drawer/dialog показывает все поля партнёра + ссылки на скачивание
+ * generated/signed файлов + Accept/Reject. Reject требует comment.
  */
 
 const STATUS_OPTIONS = [
@@ -57,26 +62,28 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function StaffServiceAgreement() {
+export default function StaffNDA() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('submitted');
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(null); // NDARequestDto
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectComment, setRejectComment] = useState('');
 
-  const { data: saList = [], isLoading } = useQuery({
-    queryKey: ['staff-sa-list'],
-    queryFn: async () => apiClient.listServiceAgreementRequests(),
+  const { data: ndaList = [], isLoading } = useQuery({
+    queryKey: ['staff-nda-list'],
+    queryFn: async () => apiClient.getNdaRequests(),
   });
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['staff-sa-clients'],
+    queryKey: ['staff-nda-clients'],
     queryFn: async () => apiClient.getAllClients({ limit: 500 }).catch(() => []),
   });
 
   const clientNameById = useMemo(() => {
     const m = {};
+    // `getAllClients` может вернуть и массив, и `{items: [...]}` —
+    // нормализуем.
     const arr = Array.isArray(clients) ? clients : clients?.items || [];
     for (const c of arr) {
       m[c.client_id] = c.client_name || c.name || c.email || c.client_id;
@@ -86,40 +93,40 @@ export default function StaffServiceAgreement() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return (saList || []).filter((n) => {
+    return (ndaList || []).filter((n) => {
       if (statusFilter && statusFilter !== 'all' && n.status !== statusFilter) return false;
       if (term) {
         const cname = (clientNameById[n.client_id] || n.client_id || '').toLowerCase();
-        const compname = (n.company_name || '').toLowerCase();
-        if (!cname.includes(term) && !compname.includes(term)) return false;
+        const pname = (n.partner_name_en || '').toLowerCase();
+        if (!cname.includes(term) && !pname.includes(term)) return false;
       }
       return true;
     });
-  }, [saList, statusFilter, search, clientNameById]);
+  }, [ndaList, statusFilter, search, clientNameById]);
 
   const { data: history } = useQuery({
-    queryKey: ['sa-history', selected?.id],
-    queryFn: async () => apiClient.getServiceAgreementHistory(selected.id),
+    queryKey: ['nda-history', selected?.id],
+    queryFn: async () => apiClient.getNdaHistory(selected.id),
     enabled: !!selected,
   });
 
   const acceptMutation = useMutation({
-    mutationFn: async () => apiClient.serviceAgreementDecision(selected.id, 'accepted'),
+    mutationFn: async () => apiClient.ndaDecision(selected.id, 'accepted'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff-sa-list'] });
-      queryClient.invalidateQueries({ queryKey: ['sa-history'] });
-      toast.success(t('saAcceptedToast'));
+      queryClient.invalidateQueries({ queryKey: ['staff-nda-list'] });
+      queryClient.invalidateQueries({ queryKey: ['nda-history'] });
+      toast.success(t('ndaAcceptedToast'));
       setSelected(null);
     },
     onError: (e) => toast.error(`${e?.message || 'Accept failed'}`),
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async () => apiClient.serviceAgreementDecision(selected.id, 'rejected', rejectComment.trim()),
+    mutationFn: async () => apiClient.ndaDecision(selected.id, 'rejected', rejectComment.trim()),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff-sa-list'] });
-      queryClient.invalidateQueries({ queryKey: ['sa-history'] });
-      toast.success(t('saRejectedToast'));
+      queryClient.invalidateQueries({ queryKey: ['staff-nda-list'] });
+      queryClient.invalidateQueries({ queryKey: ['nda-history'] });
+      toast.success(t('ndaRejectedToast'));
       setRejectOpen(false);
       setRejectComment('');
       setSelected(null);
@@ -137,20 +144,20 @@ export default function StaffServiceAgreement() {
               {t('backToDashboard')}
             </Button>
           </Link>
-          <div className="text-white text-sm sm:text-base font-medium">{t('saInboxTitle')}</div>
+          <div className="text-white text-sm sm:text-base font-medium">{t('ndaInboxTitle')}</div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 md:py-8">
         <div className="mb-5">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1">{t('saInboxTitle')}</h1>
-          <p className="text-sm text-slate-600">{t('saInboxSubtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e3a5f] mb-1">{t('ndaInboxTitle')}</h1>
+          <p className="text-sm text-slate-600">{t('ndaInboxSubtitle')}</p>
         </div>
 
         <Card className="mb-5">
           <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
             <div>
-              <Label className="text-xs text-slate-600">{t('saInboxFilterStatus')}</Label>
+              <Label className="text-xs text-slate-600">{t('ndaInboxFilterStatus')}</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue />
@@ -166,11 +173,11 @@ export default function StaffServiceAgreement() {
               </Select>
             </div>
             <div className="sm:col-span-2">
-              <Label className="text-xs text-slate-600">{t('saInboxSearchClient')}</Label>
+              <Label className="text-xs text-slate-600">{t('ndaInboxSearchClient')}</Label>
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('saInboxSearchClient')}
+                placeholder={t('ndaInboxSearchClient')}
               />
             </div>
           </CardContent>
@@ -178,25 +185,25 @@ export default function StaffServiceAgreement() {
 
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg">{filtered.length} SA</CardTitle>
+            <CardTitle className="text-lg">{filtered.length} NDA</CardTitle>
           </CardHeader>
           <CardContent className="p-0 sm:p-0">
             {isLoading ? (
               <div className="p-8 text-center text-slate-500">{t('loading')}</div>
             ) : filtered.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">{t('saInboxNoRecords')}</div>
+              <div className="p-8 text-center text-slate-500">{t('ndaInboxNoRecords')}</div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
-                      <TableHead>{t('saInboxColClient')}</TableHead>
-                      <TableHead>{t('saInboxColCompany')}</TableHead>
-                      <TableHead>{t('saInboxColStatus')}</TableHead>
-                      <TableHead>{t('saInboxColEffectiveDate')}</TableHead>
-                      <TableHead>{t('saInboxColSubmittedAt')}</TableHead>
-                      <TableHead>{t('saInboxColActions')}</TableHead>
+                      <TableHead>{t('ndaInboxColClient')}</TableHead>
+                      <TableHead>Partner</TableHead>
+                      <TableHead>{t('ndaInboxColStatus')}</TableHead>
+                      <TableHead>{t('ndaInboxColEffectiveDate')}</TableHead>
+                      <TableHead>{t('ndaInboxColSubmittedAt')}</TableHead>
+                      <TableHead>{t('ndaInboxColActions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -204,8 +211,8 @@ export default function StaffServiceAgreement() {
                       <TableRow key={n.id}>
                         <TableCell className="font-mono text-xs">#{n.id}</TableCell>
                         <TableCell>{clientNameById[n.client_id] || n.client_id}</TableCell>
-                        <TableCell className="max-w-[260px] truncate" title={n.company_name || ''}>
-                          {n.company_name || '—'}
+                        <TableCell className="max-w-[260px] truncate" title={n.partner_name_en || ''}>
+                          {n.partner_name_en || '—'}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={n.status} />
@@ -214,7 +221,7 @@ export default function StaffServiceAgreement() {
                         <TableCell>{n.submitted_at ? new Date(n.submitted_at).toLocaleDateString() : '—'}</TableCell>
                         <TableCell>
                           <Button size="sm" variant="outline" onClick={() => setSelected(n)}>
-                            {t('saInboxReview')}
+                            {t('ndaInboxReview')}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -237,10 +244,10 @@ export default function StaffServiceAgreement() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              SA #{selected?.id} — {clientNameById[selected?.client_id] || selected?.client_id}
+              NDA #{selected?.id} — {clientNameById[selected?.client_id] || selected?.client_id}
             </DialogTitle>
             <DialogDescription className="flex items-center gap-2">
-              <span>{t('saInboxColStatus')}:</span>
+              <span>{t('ndaInboxColStatus')}:</span>
               <StatusBadge status={selected?.status} />
             </DialogDescription>
           </DialogHeader>
@@ -253,45 +260,41 @@ export default function StaffServiceAgreement() {
                   {selected.effective_date || '—'}
                 </div>
                 <div>
-                  <span className="text-slate-500">{t('saTermLabel')}:</span> {selected.term || '—'}
+                  <span className="text-slate-500">{t('partnerRegNumberLabel')}:</span> {selected.partner_inn || '—'}
                 </div>
               </div>
               <div>
-                <span className="text-slate-500">{t('saCompanyNameLabel').replace(' *', '')}:</span>{' '}
-                {selected.company_name || '—'}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <span className="text-slate-500">{t('saCountryLabel').replace(' *', '')}:</span>{' '}
-                  {selected.country || '—'}
-                </div>
-                <div>
-                  <span className="text-slate-500">{t('saRegNumberLabel')}:</span> {selected.registration_number || '—'}
-                </div>
+                <span className="text-slate-500">{t('partnerNameEnLabel')}:</span> {selected.partner_name_en || '—'}
               </div>
               <div>
-                <span className="text-slate-500">{t('saAddressLabel').replace(' *', '')}:</span>{' '}
-                {selected.address || '—'}
+                <span className="text-slate-500">{t('partnerCountryEn')}:</span> {selected.partner_country_en || '—'}
+              </div>
+              <div>
+                <span className="text-slate-500">{t('partnerAddressEnLabel')}:</span>{' '}
+                {selected.partner_address_en || '—'}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-slate-500">{t('saSignatoryNameLabel').replace(' *', '')}:</span>{' '}
-                  {selected.signatory_name || '—'}
+                  <span className="text-slate-500">{t('partnerSignatoryEn')}:</span>{' '}
+                  {selected.partner_signatory_en || '—'}
                 </div>
                 <div>
-                  <span className="text-slate-500">{t('saSignatoryTitleLabel')}:</span>{' '}
-                  {selected.signatory_title || '—'}
+                  <span className="text-slate-500">{t('partnerSignatoryTitleEn')}:</span>{' '}
+                  {selected.partner_signatory_title_en || '—'}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <span className="text-slate-500">{t('saTaxIdLabel')}:</span> {selected.tax_id || '—'}
+                  <span className="text-slate-500">{t('contactNameLabel')}:</span>{' '}
+                  {selected.partner_contact_name || '—'}
                 </div>
                 <div>
-                  <span className="text-slate-500">{t('contactEmailLabel')}:</span> {selected.contact_email || '—'}
+                  <span className="text-slate-500">{t('contactEmailLabel')}:</span>{' '}
+                  {selected.partner_contact_email || '—'}
                 </div>
                 <div>
-                  <span className="text-slate-500">{t('contactPhoneLabel')}:</span> {selected.contact_phone || '—'}
+                  <span className="text-slate-500">{t('contactPhoneLabel')}:</span>{' '}
+                  {selected.partner_contact_phone || '—'}
                 </div>
               </div>
 
@@ -300,7 +303,7 @@ export default function StaffServiceAgreement() {
                   <a href={selected.generated_file_url} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline">
                       <Download className="w-4 h-4 mr-2" />
-                      {t('saDownloadGenerated')}
+                      {t('ndaDownloadGenerated')}
                     </Button>
                   </a>
                 )}
@@ -308,7 +311,7 @@ export default function StaffServiceAgreement() {
                   <a href={selected.signed_file_url} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="outline">
                       <Download className="w-4 h-4 mr-2" />
-                      {t('saDownloadSigned')}
+                      {t('ndaDownloadSigned')}
                     </Button>
                   </a>
                 )}
@@ -342,7 +345,7 @@ export default function StaffServiceAgreement() {
                   disabled={rejectMutation.isPending}
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  {t('saActionReject')}
+                  {t('ndaActionReject')}
                 </Button>
                 <Button
                   className="bg-emerald-600 hover:bg-emerald-700"
@@ -350,7 +353,7 @@ export default function StaffServiceAgreement() {
                   disabled={acceptMutation.isPending}
                 >
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {t('saActionAccept')}
+                  {t('ndaActionAccept')}
                 </Button>
               </>
             ) : (
@@ -366,13 +369,13 @@ export default function StaffServiceAgreement() {
       <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('saRejectDialogTitle')}</DialogTitle>
-            <DialogDescription>{t('saRejectDialogDesc')}</DialogDescription>
+            <DialogTitle>{t('ndaRejectDialogTitle')}</DialogTitle>
+            <DialogDescription>{t('ndaRejectDialogDesc')}</DialogDescription>
           </DialogHeader>
           <Textarea
             value={rejectComment}
             onChange={(e) => setRejectComment(e.target.value)}
-            placeholder={t('saRejectCommentLabel')}
+            placeholder={t('ndaRejectCommentLabel')}
             rows={4}
           />
           <DialogFooter className="gap-2">
@@ -384,7 +387,7 @@ export default function StaffServiceAgreement() {
               onClick={() => rejectMutation.mutate()}
               disabled={!rejectComment.trim() || rejectMutation.isPending}
             >
-              {t('saConfirmReject')}
+              {t('ndaConfirmReject')}
             </Button>
           </DialogFooter>
         </DialogContent>

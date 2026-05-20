@@ -406,10 +406,13 @@ export default function UserDashboard() {
               );
             })()}
 
-            {/* Service Agreement */}
+            {/* Service Agreement — теперь читаем clients.service_agreement_status
+                (зеркало dedicated SA-сущности). Показываем карточку всегда,
+                чтобы у клиента был быстрый доступ к разделу даже когда заявка
+                ещё не создана. */}
             {(() => {
-              const serviceAgreementBadge = clientBadges.find((b) => b.badge_type === 'service_agreement');
-              if (!serviceAgreementBadge?.is_active) return null;
+              const saStatus = client?.service_agreement_status;
+              if (!saStatus) return null;
 
               return (
                 <Link to={createPageUrl('ClientServiceAgreement')}>
@@ -422,11 +425,9 @@ export default function UserDashboard() {
                         <div className="font-semibold text-slate-900 mb-1 text-sm sm:text-base">
                           {t('serviceAgreement')}
                         </div>
-                        {serviceAgreementBadge?.staff_comment && (
-                          <div className="text-xs sm:text-sm text-slate-600 break-words">
-                            {serviceAgreementBadge.staff_comment}
-                          </div>
-                        )}
+                        <div className="text-xs sm:text-sm text-slate-600">
+                          {t('saStatusLabelPrefix') || t('kycStatus')} {saStatus?.replace('_', ' ')}
+                        </div>
                       </div>
                     </div>
                   </div>
