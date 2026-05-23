@@ -486,6 +486,17 @@ class ApiClient {
     return this.request(`/clients/${clientId}/kyc`);
   }
 
+  /**
+   * Локальные PPATK-матчи, найденные на KYC submit (ДО approve).
+   * Staff-only endpoint — клиентам этот endpoint вернёт 403 (tipping-off
+   * prevention по AML-регуляторике).
+   *
+   * Returns: {status, match_count, has_red_flag, screened_at, matches[]}
+   */
+  async getKycPpatkAlerts(clientId) {
+    return this.request(`/aml/client/${clientId}/prescreen-alerts`);
+  }
+
   async updateKycProfile(clientId, profileData) {
     return this.request(`/clients/${clientId}/kyc`, {
       method: 'PUT',

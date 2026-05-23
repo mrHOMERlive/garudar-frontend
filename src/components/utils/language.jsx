@@ -1171,6 +1171,27 @@ export const translations = {
     amlPpatkNoClientLinked: 'No client linked — PPATK rescreen is only available for KYC-approved clients',
     amlPpatkMatchFound: 'PPATK match',
     amlPpatkAlertsCount: 'PPATK alerts',
+    // PPATK pre-screen (run automatically on KYC submit, BEFORE staff approve).
+    amlRedFlag: 'PPATK Red Flag',
+    amlPpatkPending: 'PPATK pending',
+    amlPpatkError: 'PPATK check error',
+    drPpatkSectionTitle: 'AML Pre-screen (PPATK / DTTOT / DPPSPM / UN-AQ)',
+    drPpatkLoading: 'Loading pre-screen results...',
+    drPpatkNotRun: 'Pre-screen has not been run yet for this profile.',
+    drPpatkErrorStatus: 'Pre-screen failed during KYC submit. Full AML check will run on approve.',
+    drPpatkNoMatches: 'No matches against local PPATK lists. ✓',
+    drPpatkStale: 'Pre-screen counters out of sync',
+    drPpatkStaleHint:
+      'Profile claims {count} match(es) but detailed alerts are no longer in the database. Re-submit the KYC to refresh, or run the data-cleanup migration to clear stale counters.',
+    drPpatkMatchCount: '{count} match(es) found against local PPATK lists',
+    drPpatkColRole: 'Role',
+    drPpatkColName: 'Submitted name',
+    drPpatkSource: 'List',
+    drPpatkColMatched: 'Matched name',
+    drPpatkSimilarity: 'Similarity',
+    drPpatkColEntryId: 'Entry ID',
+    drPpatkApproveWarning:
+      'This client has at least one local PPATK match. Review the matches above carefully before approving — consider Reject or Request Changes if the match is confirmed.',
     // Audit log viewer (ТЗ §4.12)
     auditPageTitle: 'Audit Log',
     auditEventLabel: 'event',
@@ -2700,6 +2721,28 @@ export const translations = {
       'Tidak ada klien terkait — periksa ulang PPATK hanya tersedia untuk klien dengan KYC disetujui',
     amlPpatkMatchFound: 'Cocokan PPATK',
     amlPpatkAlertsCount: 'Alert PPATK',
+    // PPATK pre-screen (jalan otomatis pada KYC submit, SEBELUM persetujuan staff).
+    amlRedFlag: 'Bendera Merah PPATK',
+    amlPpatkPending: 'PPATK menunggu',
+    amlPpatkError: 'Kesalahan pemeriksaan PPATK',
+    drPpatkSectionTitle: 'Pra-pemeriksaan AML (PPATK / DTTOT / DPPSPM / UN-AQ)',
+    drPpatkLoading: 'Memuat hasil pra-pemeriksaan...',
+    drPpatkNotRun: 'Pra-pemeriksaan belum dijalankan untuk profil ini.',
+    drPpatkErrorStatus:
+      'Pra-pemeriksaan gagal saat KYC submit. Pemeriksaan AML lengkap akan dijalankan saat persetujuan.',
+    drPpatkNoMatches: 'Tidak ada kecocokan terhadap daftar PPATK lokal. ✓',
+    drPpatkStale: 'Penghitung pra-pemeriksaan tidak sinkron',
+    drPpatkStaleHint:
+      'Profil menyatakan {count} kecocokan tetapi rincian peringatan tidak lagi ada di basis data. Kirim ulang KYC untuk menyegarkan, atau jalankan migrasi pembersihan data untuk menghapus penghitung usang.',
+    drPpatkMatchCount: '{count} kecocokan ditemukan terhadap daftar PPATK lokal',
+    drPpatkColRole: 'Peran',
+    drPpatkColName: 'Nama dikirim',
+    drPpatkSource: 'Daftar',
+    drPpatkColMatched: 'Nama cocok',
+    drPpatkSimilarity: 'Kesamaan',
+    drPpatkColEntryId: 'ID Entri',
+    drPpatkApproveWarning:
+      'Klien ini memiliki setidaknya satu kecocokan PPATK lokal. Tinjau kecocokan di atas dengan cermat sebelum menyetujui — pertimbangkan untuk Menolak atau Meminta Perubahan jika kecocokan dikonfirmasi.',
     // Audit log viewer (ТЗ §4.12)
     auditPageTitle: 'Log Audit',
     auditEventLabel: 'kejadian',

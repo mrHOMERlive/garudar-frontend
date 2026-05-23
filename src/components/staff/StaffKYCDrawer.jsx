@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Download, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { t } from '@/components/utils/language';
 
@@ -55,6 +55,19 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
     queryFn: () => apiClient.listKycDocuments(clientId),
     enabled: !!clientId && open,
   });
+
+  // Локальный PPATK pre-screen (DTTOT/DPPSPM/UN-AQ) — данные созданы при KYC
+  // submit, до того как staff-approve. Показываем staff'у санкционные хиты
+  // ДО решения, чтобы он не тратил CA-квоту на компании из списков.
+  // Эндпоинт staff-only — клиент его не увидит (tipping-off prevention).
+  const { data: ppatkData, isLoading: isPpatkLoading } = useQuery({
+    queryKey: ['kycPpatkAlerts', clientId],
+    queryFn: () => apiClient.getKycPpatkAlerts(clientId),
+    enabled: !!clientId && open,
+    // Не повторяем на 404 (нет KYC-профиля — нормально)
+    retry: false,
+  });
+  const ppatkRedFlag = Boolean(ppatkData?.has_red_flag);
 
   const decisionMutation = useMutation({
     mutationFn: async ({ status, comment }) => {
@@ -212,6 +225,84 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
             </CardBox>
           </div>
 
+          {/* AML Pre-screen (PPATK) — между Banking и UBO. Показывает локальные
+              санкционные матчи DTTOT/DPPSPM/UN-AQ, найденные на KYC submit
+              ДО staff-approve. См. backend: pre_screen_kyc_on_submit. */}
+          <div>
+            <h4
+              className={`font-semibold mb-2 flex items-center gap-2 ${ppatkRedFlag ? 'text-red-700' : 'text-[#1e3a5f]'}`}
+            >
+              {ppatkRedFlag && <ShieldAlert className="w-4 h-4" />}
+              {t('drPpatkSectionTitle')}
+            </h4>
+            <CardBox>
+              {isPpatkLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t('drPpatkLoading')}
+                </div>
+              ) : !ppatkData || ppatkData.status === null ? (
+                <div className="text-sm text-slate-500 italic">{t('drPpatkNotRun')}</div>
+              ) : ppatkData.status === 'error' ? (
+                <div className="text-sm text-yellow-700">{t('drPpatkErrorStatus')}</div>
+              ) : ppatkData.has_red_flag && (!ppatkData.matches || ppatkData.matches.length === 0) ? (
+                // Counter-source-of-truth говорит «есть матч», но детальные алерты
+                // отсутствуют — рассинхрон БД. Не врём, а сигналим оператору.
+                // Должно быть устранено data-migration'ом 31b6c2297cab; этот
+                // branch остаётся как защита от будущих edge-кейсов.
+                <div className="text-sm text-yellow-700 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-semibold">{t('drPpatkStale')}</div>
+                    <div className="text-xs text-slate-600 mt-1">
+                      {t('drPpatkStaleHint').replace('{count}', ppatkData.match_count)}
+                    </div>
+                  </div>
+                </div>
+              ) : !ppatkData.matches || ppatkData.matches.length === 0 ? (
+                <div className="text-sm text-green-700">{t('drPpatkNoMatches')}</div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold text-red-700 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    {t('drPpatkMatchCount').replace('{count}', ppatkData.match_count)}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-left text-slate-700">
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkColRole')}</th>
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkColName')}</th>
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkSource')}</th>
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkColMatched')}</th>
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkSimilarity')}</th>
+                          <th className="py-1 pr-2 font-medium">{t('drPpatkColEntryId')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-slate-600">
+                        {ppatkData.matches.map((m, idx) => (
+                          <tr key={`${m.entry_id}-${idx}`} className="border-b border-slate-100">
+                            <td className="py-1 pr-2 uppercase font-mono text-slate-500">{m.role}</td>
+                            <td className="py-1 pr-2">{m.name}</td>
+                            <td className="py-1 pr-2">
+                              <span className="px-1.5 py-0.5 bg-red-50 text-red-700 rounded font-medium">
+                                {m.source_list}
+                              </span>
+                            </td>
+                            <td className="py-1 pr-2">{m.matched_name || m.full_name || '-'}</td>
+                            <td className="py-1 pr-2 font-mono">
+                              {m.similarity != null ? Number(m.similarity).toFixed(2) : '-'}
+                            </td>
+                            <td className="py-1 pr-2 font-mono text-slate-400">{m.entry_id}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </CardBox>
+          </div>
+
           <div>
             <h4 className="font-semibold mb-2 text-[#1e3a5f]">Ownership / UBO</h4>
             <CardBox>
@@ -289,6 +380,16 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
               className="min-h-[100px]"
             />
           </div>
+
+          {/* Если есть PPATK-red_flag — предупреждаем staff перед approve.
+              Кнопка остаётся активной (UI-only flow): finальное решение
+              принимает сотрудник, не система. */}
+          {ppatkRedFlag && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+              <ShieldAlert className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>{t('drPpatkApproveWarning')}</div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <div className="flex gap-3">

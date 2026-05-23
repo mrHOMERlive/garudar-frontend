@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Eye, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Eye, Loader2, AlertTriangle } from 'lucide-react';
 import StaffKYCDrawer from '../components/staff/StaffKYCDrawer';
 import { t } from '@/components/utils/language';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -142,6 +142,26 @@ export default function StaffKYCQueue() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* AML pre-screen (PPATK) индикаторы. Бэкенд проставляет эти
+                          поля при KYC submit ДО approve. Красный бейдж = есть
+                          high-severity матч (DTTOT/DPPSPM/UN-AQ); жёлтый =
+                          скрининг упал; outline pending = ещё считается. */}
+                      {item.aml_local_red_flag && (
+                        <Badge className="bg-red-100 text-red-800 border border-red-300 flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" />
+                          {t('amlRedFlag')} ({item.aml_local_match_count})
+                        </Badge>
+                      )}
+                      {!item.aml_local_red_flag && item.aml_local_screening_status === 'pending' && (
+                        <Badge variant="outline" className="text-slate-600">
+                          {t('amlPpatkPending')}
+                        </Badge>
+                      )}
+                      {!item.aml_local_red_flag && item.aml_local_screening_status === 'error' && (
+                        <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300">
+                          {t('amlPpatkError')}
+                        </Badge>
+                      )}
                       <Badge className={statusColors[item.status] || 'bg-gray-100 text-gray-800'}>
                         {formatStatus(item.status)}
                       </Badge>
