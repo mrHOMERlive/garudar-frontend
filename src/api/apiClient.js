@@ -1090,6 +1090,232 @@ class ApiClient {
     a.remove();
     URL.revokeObjectURL(a.href);
   }
+
+  // ============================================================
+  // Ops PTG module (OPS_ADMIN role, isolated environment)
+  // ============================================================
+
+  _downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
+
+  async _opsBlobDownload(path, fallbackName, options = {}) {
+    const resp = await fetch(`${this.baseUrl}/ops${path}`, {
+      credentials: 'include',
+      ...options,
+    });
+    if (!resp.ok) {
+      const errorText = await resp.text();
+      throw new Error(errorText || `Download failed: ${resp.status}`);
+    }
+    const blob = await resp.blob();
+    const filename = (resp.headers.get('Content-Disposition') || '').match(/filename="?([^"]+)"?/)?.[1] || fallbackName;
+    this._downloadBlob(blob, filename);
+  }
+
+  // --- companies & settings ---
+  async opsGetCompanies() {
+    return this.request('/ops/companies');
+  }
+
+  async opsUpdateCompany(companyId, data) {
+    return this.request(`/ops/companies/${companyId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsCreateCompany(data) {
+    return this.request('/ops/companies', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async opsAddDebitAccount(companyId, data) {
+    return this.request(`/ops/companies/${companyId}/debit-accounts`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsUpdateDebitAccount(companyId, accountId, data) {
+    return this.request(`/ops/companies/${companyId}/debit-accounts/${accountId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsDeleteDebitAccount(companyId, accountId) {
+    return this.request(`/ops/companies/${companyId}/debit-accounts/${accountId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async opsGetThresholds() {
+    return this.request('/ops/thresholds');
+  }
+
+  async opsSaveThresholds(items) {
+    return this.request('/ops/thresholds', { method: 'PUT', body: JSON.stringify(items) });
+  }
+
+  async opsGetClients() {
+    return this.request('/ops/clients');
+  }
+
+  async opsCreateClient(data) {
+    return this.request('/ops/clients', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async opsUpdateClient(clientId, data) {
+    return this.request(`/ops/clients/${clientId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsDeleteClient(clientId) {
+    return this.request(`/ops/clients/${clientId}`, { method: 'DELETE' });
+  }
+
+  async opsSearchBic(query) {
+    const qs = query ? `?query=${encodeURIComponent(query)}` : '';
+    return this.request(`/ops/bic-reference${qs}`);
+  }
+
+  async opsAddBic(data) {
+    return this.request('/ops/bic-reference', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async opsDeleteBic(bic) {
+    return this.request(`/ops/bic-reference/${encodeURIComponent(bic)}`, { method: 'DELETE' });
+  }
+
+  // --- batches ---
+  async opsGetBatches(filters = {}) {
+    const qp = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) {
+      if (v !== undefined && v !== null && v !== '') qp.append(k, v);
+    }
+    const qs = qp.toString();
+    return this.request(`/ops/batches${qs ? `?${qs}` : ''}`);
+  }
+
+  async opsCreateBatch(companyCode, sourceType, files, accountAlias = null, debitIdx = 1) {
+    const formData = new FormData();
+    formData.append('company_code', companyCode);
+    formData.append('source_type', sourceType);
+    formData.append('debit_idx', String(debitIdx));
+    if (accountAlias) {
+      formData.append('account_alias', accountAlias);
+    }
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    const response = await fetch(`${this.baseUrl}/ops/batches`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Batch upload failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async opsGetBatch(batchId) {
+    return this.request(`/ops/batches/${batchId}`);
+  }
+
+  async opsDeleteBatch(batchId) {
+    return this.request(`/ops/batches/${batchId}`, { method: 'DELETE' });
+  }
+
+  async opsCloneBatch(batchId) {
+    return this.request(`/ops/batches/${batchId}/clone`, { method: 'POST' });
+  }
+
+  async opsUpdateBatchRow(batchId, rowId, data) {
+    return this.request(`/ops/batches/${batchId}/rows/${rowId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsAddBatchRow(batchId, data) {
+    return this.request(`/ops/batches/${batchId}/rows`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsDeleteBatchRow(batchId, rowId) {
+    return this.request(`/ops/batches/${batchId}/rows/${rowId}`, { method: 'DELETE' });
+  }
+
+  async opsExportBatchTxt(batchId, batchName) {
+    return this._opsBlobDownload(`/batches/${batchId}/export-txt`, `${batchName || batchId}.txt`, { method: 'POST' });
+  }
+
+  async opsExportBatchXlsx(batchId, batchName) {
+    return this._opsBlobDownload(`/batches/${batchId}/export-xlsx`, `${batchName || batchId}.xlsx`);
+  }
+
+  // --- statements ---
+  async opsGetStatements() {
+    return this.request('/ops/statements');
+  }
+
+  async opsUploadStatement(source, file, companyCode = null, codesFile = null) {
+    const formData = new FormData();
+    formData.append('source', source);
+    if (companyCode) formData.append('company_code', companyCode);
+    formData.append('file', file);
+    // Optional Mandiri companion CSV carrying the transaction codes.
+    if (codesFile) formData.append('codes_file', codesFile);
+    const response = await fetch(`${this.baseUrl}/ops/statements`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Statement upload failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async opsGetStatement(statementId) {
+    return this.request(`/ops/statements/${statementId}`);
+  }
+
+  async opsDeleteStatement(statementId) {
+    return this.request(`/ops/statements/${statementId}`, { method: 'DELETE' });
+  }
+
+  async opsRematchStatement(statementId) {
+    return this.request(`/ops/statements/${statementId}/rematch`, { method: 'POST' });
+  }
+
+  async opsExportStatementXlsx(statementId, source) {
+    return this._opsBlobDownload(
+      `/statements/${statementId}/export-xlsx`,
+      `${(source || 'statement').toLowerCase()}_${statementId.slice(0, 8)}.xlsx`
+    );
+  }
+
+  async opsExportCombinedStatements(statementIds) {
+    return this._opsBlobDownload(`/statements/export-combined-xlsx`, 'mandiri_combined_fx.zip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statement_ids: statementIds }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

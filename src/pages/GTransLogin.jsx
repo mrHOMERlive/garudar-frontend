@@ -2,15 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
 import ObligationsModal from '@/components/ObligationsModal';
 
-const LOGO_URL = "/gan.png";
+const LOGO_URL = '/gan.png';
+
+// Internal roles skip the client obligations/terms gate.
+const isInternalRole = (role) => role === 'ADMIN' || role === 'OPS_ADMIN';
+
+const dashboardForRole = (role) => {
+  if (role === 'ADMIN') return 'StaffDashboard';
+  if (role === 'OPS_ADMIN') return 'OpsDashboard';
+  return 'UserDashboard';
+};
 
 import { getLanguage, setLanguage } from '@/components/utils/language';
 
@@ -27,12 +36,11 @@ export default function GTransLogin() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (!user.terms_accepted && user.role !== 'ADMIN') {
+      if (!user.terms_accepted && !isInternalRole(user.role)) {
         // Stay on login page — obligations modal will handle redirect
         return;
       }
-      const targetPage = user.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
-      navigate(createPageUrl(targetPage), { replace: true });
+      navigate(createPageUrl(dashboardForRole(user.role)), { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -49,8 +57,8 @@ export default function GTransLogin() {
     try {
       const userData = await login(username, password);
       toast.success(language === 'en' ? 'Login successful!' : 'Login berhasil!');
-      const targetPage = userData.role === 'ADMIN' ? 'StaffDashboard' : 'UserDashboard';
-      if (!userData.terms_accepted && userData.role !== 'ADMIN') {
+      const targetPage = dashboardForRole(userData.role);
+      if (!userData.terms_accepted && !isInternalRole(userData.role)) {
         setPendingTarget(createPageUrl(targetPage));
         setShowObligations(true);
       } else {
@@ -58,9 +66,8 @@ export default function GTransLogin() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(language === 'en'
-        ? 'Invalid credentials. Please try again.'
-        : 'Kredensial tidak valid. Silakan coba lagi.'
+      toast.error(
+        language === 'en' ? 'Invalid credentials. Please try again.' : 'Kredensial tidak valid. Silakan coba lagi.'
       );
     } finally {
       setLoading(false);
@@ -75,121 +82,108 @@ export default function GTransLogin() {
 
   return (
     <>
-    <ObligationsModal open={showObligations} onAgreed={handleObligationsAgreed} />
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to={createPageUrl('GTrans')} className="inline-flex items-center gap-3">
-            <div className="w-14 h-14 bg-white rounded-xl shadow-lg p-2">
-              <img src={LOGO_URL} alt="GTrans" className="w-full h-full object-contain" />
-            </div>
-            <span className="text-2xl font-bold text-[#1e3a5f]">GTrans</span>
-          </Link>
-        </div>
+      <ObligationsModal open={showObligations} onAgreed={handleObligationsAgreed} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link to={createPageUrl('GTrans')} className="inline-flex items-center gap-3">
+              <div className="w-14 h-14 bg-white rounded-xl shadow-lg p-2">
+                <img src={LOGO_URL} alt="GTrans" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-2xl font-bold text-[#1e3a5f]">GTrans</span>
+            </Link>
+          </div>
 
-        <Card className="border-slate-200 shadow-xl">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                {language === 'en' ? 'Client Login' : 'Login Klien'}
-              </h1>
-              <p className="text-slate-500">
-                {language === 'en'
-                  ? 'Access your GTrans account'
-                  : 'Akses akun GTrans Anda'
-                }
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-slate-700">{language === 'en' ? 'Username' : 'Nama Pengguna'}</Label>
-                <Input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="username"
-                  className="border-slate-300"
-                  required
-                />
+          <Card className="border-slate-200 shadow-xl">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-[#1e3a5f] mb-2">
+                  {language === 'en' ? 'Client Login' : 'Login Klien'}
+                </h1>
+                <p className="text-slate-500">
+                  {language === 'en' ? 'Access your GTrans account' : 'Akses akun GTrans Anda'}
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-slate-700">
-                    {language === 'en' ? 'Password' : 'Kata Sandi'}
-                  </Label>
-                </div>
-                <div className="relative">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-700">{language === 'en' ? 'Username' : 'Nama Pengguna'}</Label>
                   <Input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="border-slate-300 pr-10"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="username"
+                    className="border-slate-300"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
                 </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-slate-700">{language === 'en' ? 'Password' : 'Kata Sandi'}</Label>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="border-slate-300 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button type="submit" disabled={loading} className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6">
+                  {loading ? (language === 'en' ? 'Logging in...' : 'Masuk...') : language === 'en' ? 'Login' : 'Masuk'}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </form>
+
+              <div className="mt-8 text-center">
+                <p className="text-slate-500 text-sm">
+                  {language === 'en' ? "Don't have an account?" : 'Belum punya akun?'}
+                </p>
+                <Link
+                  to={createPageUrl('GTransContactSales')}
+                  className="text-[#1e3a5f] font-medium hover:underline text-sm"
+                >
+                  {language === 'en' ? 'Contact Sales to Get Started' : 'Hubungi Sales untuk Memulai'}
+                </Link>
               </div>
+            </CardContent>
+          </Card>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#1e3a5f] hover:bg-[#152a45] py-6"
-              >
-                {loading
-                  ? (language === 'en' ? 'Logging in...' : 'Masuk...')
-                  : (language === 'en' ? 'Login' : 'Masuk')
-                }
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </form>
+          <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-sm">
+            <Shield className="w-4 h-4" />
+            {language === 'en'
+              ? 'Secured by Bank Indonesia PSP framework'
+              : 'Diamankan oleh kerangka PSP Bank Indonesia'}
+          </div>
 
-            <div className="mt-8 text-center">
-              <p className="text-slate-500 text-sm">
-                {language === 'en' ? "Don't have an account?" : 'Belum punya akun?'}
-              </p>
-              <Link
-                to={createPageUrl('GTransContactSales')}
-                className="text-[#1e3a5f] font-medium hover:underline text-sm"
-              >
-                {language === 'en' ? 'Contact Sales to Get Started' : 'Hubungi Sales untuk Memulai'}
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+              className="text-sm text-slate-500 hover:text-[#1e3a5f]"
+            >
+              {language === 'en' ? 'Bahasa Indonesia' : 'English'}
+            </button>
+          </div>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-sm">
-          <Shield className="w-4 h-4" />
-          {language === 'en' ? 'Secured by Bank Indonesia PSP framework' : 'Diamankan oleh kerangka PSP Bank Indonesia'}
-        </div>
-
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
-            className="text-sm text-slate-500 hover:text-[#1e3a5f]"
-          >
-            {language === 'en' ? 'Bahasa Indonesia' : 'English'}
-          </button>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Link
-            to={createPageUrl('GTrans')}
-            className="text-slate-500 hover:text-[#1e3a5f] text-sm"
-          >
-            ← {language === 'en' ? 'Back to Home' : 'Kembali ke Beranda'}
-          </Link>
+          <div className="mt-6 text-center">
+            <Link to={createPageUrl('GTrans')} className="text-slate-500 hover:text-[#1e3a5f] text-sm">
+              ← {language === 'en' ? 'Back to Home' : 'Kembali ke Beranda'}
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

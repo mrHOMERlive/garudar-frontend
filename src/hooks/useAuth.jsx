@@ -117,4 +117,33 @@ export function RequireAdmin({ children }) {
   return children;
 }
 
+export function RequireOpsAdmin({ children }) {
+  const { isAuthenticated, loading, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        navigate('/gtranslogin', { replace: true });
+      } else if (user && user.role !== 'OPS_ADMIN') {
+        navigate('/userdashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, loading, user, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e3a5f]"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || (user && user.role !== 'OPS_ADMIN')) {
+    return null;
+  }
+
+  return children;
+}
+
 export default useAuth;

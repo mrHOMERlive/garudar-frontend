@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { AuthProvider, RequireAuth, RequireAdmin } from '@/hooks/useAuth';
+import { AuthProvider, RequireAuth, RequireAdmin, RequireOpsAdmin } from '@/hooks/useAuth';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import Layout from './Layout.jsx';
 
@@ -42,6 +42,11 @@ const ClientServiceAgreement = lazy(() => import('./ClientServiceAgreement'));
 const StaffCustomerReport = lazy(() => import('./StaffCustomerReport'));
 const StaffTransactionReport = lazy(() => import('./StaffTransactionReport'));
 const StaffComplyAdvantage = lazy(() => import('./StaffComplyAdvantage'));
+const OpsDashboard = lazy(() => import('./OpsDashboard'));
+const OpsBatches = lazy(() => import('./OpsBatches'));
+const OpsBatchEditor = lazy(() => import('./OpsBatchEditor'));
+const OpsStatements = lazy(() => import('./OpsStatements'));
+const OpsSettings = lazy(() => import('./OpsSettings'));
 
 const PAGES = {
   CreateOrder: CreateOrder,
@@ -117,6 +122,12 @@ const PAGES = {
   StaffTransactionReport: StaffTransactionReport,
 
   StaffComplyAdvantage: StaffComplyAdvantage,
+
+  OpsDashboard: OpsDashboard,
+  OpsBatches: OpsBatches,
+  OpsBatchEditor: OpsBatchEditor,
+  OpsStatements: OpsStatements,
+  OpsSettings: OpsSettings,
 };
 
 function _getCurrentPage(url) {
@@ -408,6 +419,47 @@ function PagesContent() {
                 <RequireAdmin>
                   <StaffNDA />
                 </RequireAdmin>
+              }
+            />
+
+            <Route
+              path="/opsdashboard"
+              element={
+                <RequireOpsAdmin>
+                  <OpsDashboard />
+                </RequireOpsAdmin>
+              }
+            />
+            <Route
+              path="/opsbatches"
+              element={
+                <RequireOpsAdmin>
+                  <OpsBatches />
+                </RequireOpsAdmin>
+              }
+            />
+            <Route
+              path="/opsbatcheditor"
+              element={
+                <RequireOpsAdmin>
+                  <OpsBatchEditor />
+                </RequireOpsAdmin>
+              }
+            />
+            <Route
+              path="/opsstatements"
+              element={
+                <RequireOpsAdmin>
+                  <OpsStatements />
+                </RequireOpsAdmin>
+              }
+            />
+            <Route
+              path="/opssettings"
+              element={
+                <RequireOpsAdmin>
+                  <OpsSettings />
+                </RequireOpsAdmin>
               }
             />
           </Routes>
