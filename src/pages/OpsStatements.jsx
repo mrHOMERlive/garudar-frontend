@@ -137,13 +137,18 @@ export default function OpsStatements() {
                 </Select>
               </div>
               <div className="space-y-1 w-44">
-                <Label>Company (optional)</Label>
-                <Select value={companyCode || 'ALL'} onValueChange={(v) => setCompanyCode(v === 'ALL' ? '' : v)}>
+                {/* Mandiri needs a company (fx_counterparty drives FOREX/Kind and
+                    enables Combined FX export); VTB keeps it optional. */}
+                <Label>{isMandiri ? 'Company' : 'Company (optional)'}</Label>
+                <Select
+                  value={companyCode || (isMandiri ? undefined : 'ALL')}
+                  onValueChange={(v) => setCompanyCode(v === 'ALL' ? '' : v)}
+                >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select company" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All companies</SelectItem>
+                    {!isMandiri && <SelectItem value="ALL">All companies</SelectItem>}
                     {companies.map((c) => (
                       <SelectItem key={c.code} value={c.code}>
                         {c.name} ({c.code})
@@ -171,7 +176,7 @@ export default function OpsStatements() {
 
               <Button
                 onClick={() => uploadMutation.mutate()}
-                disabled={!primaryFile || uploadMutation.isPending}
+                disabled={!primaryFile || (isMandiri && !companyCode) || uploadMutation.isPending}
                 className="bg-[#1e3a5f] hover:bg-[#16304f]"
               >
                 {uploadMutation.isPending ? (

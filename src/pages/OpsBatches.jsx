@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/apiClient';
@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Copy, FileSpreadsheet, FileText, FileUp, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Copy, FileSpreadsheet, FileText, Loader2, Trash2 } from 'lucide-react';
 
 const SOURCE_TYPES = [
   {
@@ -54,11 +53,7 @@ const decodeAccount = (key) => {
 export default function OpsBatches() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const fileInputRef = useRef(null);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [sourceType, setSourceType] = useState('TYPE1_GPB_EXCEL');
-  const [selectedFiles, setSelectedFiles] = useState([]);
   // Selected account-set: "<companyCode>␟<alias>"
   const [accountKey, setAccountKey] = useState('');
   const [busyType, setBusyType] = useState(null);
@@ -105,8 +100,6 @@ export default function OpsBatches() {
       } else {
         toast.success(`Batch ${batch.batch_name} created (${batch.row_count} rows)`);
       }
-      setDialogOpen(false);
-      setSelectedFiles([]);
       navigate(`/opsbatcheditor?id=${batch.id}`);
     },
     onError: (error) => toast.error(error.message),
@@ -131,9 +124,6 @@ export default function OpsBatches() {
     onError: (error) => toast.error(error.message),
   });
 
-  const sourceCfg = SOURCE_TYPES.find((s) => s.value === sourceType);
-  const acceptStr = sourceCfg.accept.join(',');
-  const canSubmitDialog = selected && sourceType && selectedFiles.length > 0 && !createMutation.isPending;
   const noAccount = !selected;
 
   return (
@@ -194,102 +184,8 @@ export default function OpsBatches() {
 
         {/* Batch list */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-[#1e3a5f]">Batches</CardTitle>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New batch (form)
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>New batch</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-2">
-                  <div className="space-y-2">
-                    <Label>Account (company · alias)</Label>
-                    <Select value={accountKey} onValueChange={setAccountKey}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an account-set" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accountSets.map((a) => (
-                          <SelectItem
-                            key={encodeAccount(a.companyCode, a.alias)}
-                            value={encodeAccount(a.companyCode, a.alias)}
-                          >
-                            {a.companyName} · {a.alias}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Source type</Label>
-                    <Select
-                      value={sourceType}
-                      onValueChange={(v) => {
-                        setSourceType(v);
-                        setSelectedFiles([]);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SOURCE_TYPES.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>
-                            {s.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-slate-500">{sourceCfg.hint}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Source files</Label>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      accept={acceptStr}
-                      className="hidden"
-                      onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <FileUp className="w-4 h-4 mr-2" />
-                      {selectedFiles.length
-                        ? `${selectedFiles.length} file(s) selected`
-                        : `Choose files (${acceptStr})`}
-                    </Button>
-                    {selectedFiles.length > 0 && (
-                      <ul className="text-xs text-slate-500 max-h-24 overflow-y-auto space-y-1">
-                        {selectedFiles.map((f) => (
-                          <li key={f.name}>{f.name}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    disabled={!canSubmitDialog}
-                    onClick={() => createMutation.mutate({ sType: sourceType, files: selectedFiles })}
-                    className="bg-[#1e3a5f] hover:bg-[#16304f]"
-                  >
-                    {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Upload & parse
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </CardHeader>
           <CardContent>
             {isLoading ? (
