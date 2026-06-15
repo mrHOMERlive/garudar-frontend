@@ -1271,13 +1271,11 @@ class ApiClient {
     return this.request('/ops/statements');
   }
 
-  async opsUploadStatement(source, file, companyCode = null, codesFile = null) {
+  async opsUploadStatement(source, file, companyCode = null) {
     const formData = new FormData();
     formData.append('source', source);
     if (companyCode) formData.append('company_code', companyCode);
     formData.append('file', file);
-    // Optional Mandiri companion CSV carrying the transaction codes.
-    if (codesFile) formData.append('codes_file', codesFile);
     const response = await fetch(`${this.baseUrl}/ops/statements`, {
       method: 'POST',
       credentials: 'include',

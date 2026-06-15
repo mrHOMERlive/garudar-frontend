@@ -33,7 +33,6 @@ const EDIT_FIELDS = [
   'bank_name',
   'country',
   'transaction_reference',
-  'inv_remark',
   'remark',
   'invoice',
   'order_id',

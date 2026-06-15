@@ -23,7 +23,7 @@ function CompaniesTab() {
 
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
-  const [newAccount, setNewAccount] = useState({ alias: '', currency: '', idx: 1, account_no: '' });
+  const [newAccount, setNewAccount] = useState({ alias: '', currency: '', account_no: '' });
 
   useEffect(() => {
     if (editing) {
@@ -53,7 +53,7 @@ function CompaniesTab() {
     onSuccess: (company) => {
       invalidate();
       toast.success('Account added');
-      setNewAccount({ alias: '', currency: '', idx: 1, account_no: '' });
+      setNewAccount({ alias: '', currency: '', account_no: '' });
       setEditing(company);
     },
     onError: (e) => toast.error(e.message),
