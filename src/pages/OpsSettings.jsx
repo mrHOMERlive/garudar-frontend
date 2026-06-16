@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/apiClient';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Loader2, Pencil, Plus, Save, Search, Trash2 } from 'lucide-react';
+import { Loader2, Pencil, Plus, Save, Search, Trash2, Upload } from 'lucide-react';
 
 // ----------------------------------------------------------------- Companies
 function CompaniesTab() {
@@ -302,6 +302,7 @@ function ClientsTab() {
       setForm({ ...editing });
     } else if (editing === 'new') {
       setForm({
+        number: '',
         name: '',
         country: '',
         default_bank_name: '',
@@ -314,8 +315,12 @@ function ClientsTab() {
   }, [editing]);
 
   const saveMutation = useMutation({
-    mutationFn: () =>
-      editing === 'new' ? apiClient.opsCreateClient(form) : apiClient.opsUpdateClient(editing.id, form),
+    mutationFn: () => {
+      const numberVal =
+        form.number !== '' && form.number !== undefined && form.number !== null ? parseInt(form.number, 10) : null;
+      const payload = { ...form, number: numberVal };
+      return editing === 'new' ? apiClient.opsCreateClient(payload) : apiClient.opsUpdateClient(editing.id, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ops-clients'] });
       toast.success(editing === 'new' ? 'Client created' : 'Client updated');
@@ -350,6 +355,7 @@ function ClientsTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16">№</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Country</TableHead>
                 <TableHead>Bank</TableHead>
@@ -361,6 +367,7 @@ function ClientsTab() {
             <TableBody>
               {clients.map((client) => (
                 <TableRow key={client.id} className={!client.is_active ? 'opacity-50' : ''}>
+                  <TableCell className="font-mono text-xs">{client.number ?? ''}</TableCell>
                   <TableCell className="font-medium">{client.name}</TableCell>
                   <TableCell>{client.country}</TableCell>
                   <TableCell className="text-sm">{client.default_bank_name}</TableCell>
@@ -395,6 +402,18 @@ function ClientsTab() {
               <SheetTitle>{editing === 'new' ? 'New client' : `Edit ${editing?.name || ''}`}</SheetTitle>
             </SheetHeader>
             <div className="space-y-3 py-4">
+              <div className="space-y-1">
+                <Label>№ (number)</Label>
+                <Input
+                  type="number"
+                  value={form.number ?? ''}
+                  placeholder="e.g. 1"
+                  onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))}
+                />
+                {editing === 'new' && (form.number === '' || form.number === undefined) && (
+                  <p className="text-xs text-amber-600">Required for new clients</p>
+                )}
+              </div>
               {[
                 ['name', 'Name'],
                 ['country', 'Country'],
@@ -418,7 +437,7 @@ function ClientsTab() {
             </div>
             <SheetFooter>
               <Button
-                disabled={!form.name}
+                disabled={!form.name || (editing === 'new' && (form.number === '' || form.number === undefined))}
                 onClick={() => saveMutation.mutate()}
                 className="bg-[#1e3a5f] hover:bg-[#16304f]"
               >
@@ -537,6 +556,69 @@ function BicTab() {
   );
 }
 
+// ------------------------------------------------------------------- Orders
+function OrdersTab() {
+  const queryClient = useQueryClient();
+  const fileRef = useRef(null);
+  const { data: summary, isLoading } = useQuery({
+    queryKey: ['ops-orders-summary'],
+    queryFn: () => apiClient.opsOrdersSummary(),
+  });
+
+  const importMutation = useMutation({
+    mutationFn: (file) => apiClient.opsImportOrders(file),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['ops-orders-summary'] });
+      toast.success(`Orders imported: ${res.inserted} new, ${res.updated} updated (total ${res.total})`);
+      if (fileRef.current) fileRef.current.value = '';
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Orders reference (orders_general.xlsx)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-slate-500 max-w-2xl">
+          Bank-statement rows are reconciled against these orders to fill the
+          <code className="mx-1">order_id_auto</code> column on the Mandiri export. Import the cumulative{' '}
+          <b>orders_general.xlsx</b> (produced by orders_aggregate); re-importing upserts by transaction reference.
+        </p>
+        <div className="text-sm text-slate-700">
+          {isLoading ? (
+            '…'
+          ) : (
+            <>
+              Loaded orders: <b>{summary?.count ?? 0}</b>
+              {summary?.last_imported_at && <> · last import {new Date(summary.last_imported_at).toLocaleString()}</>}
+            </>
+          )}
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".xlsx,.xls"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) importMutation.mutate(f);
+          }}
+        />
+        <Button onClick={() => fileRef.current?.click()} disabled={importMutation.isPending}>
+          {importMutation.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : (
+            <Upload className="w-4 h-4 mr-2" />
+          )}
+          Import orders_general.xlsx
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function OpsSettings() {
   return (
     <div className="min-h-screen bg-slate-50">
@@ -546,6 +628,7 @@ export default function OpsSettings() {
           <TabsList className="mb-4">
             <TabsTrigger value="companies">Companies & Accounts</TabsTrigger>
             <TabsTrigger value="thresholds">Thresholds</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="bic">BIC Reference</TabsTrigger>
           </TabsList>
@@ -554,6 +637,9 @@ export default function OpsSettings() {
           </TabsContent>
           <TabsContent value="thresholds">
             <ThresholdsTab />
+          </TabsContent>
+          <TabsContent value="orders">
+            <OrdersTab />
           </TabsContent>
           <TabsContent value="clients">
             <ClientsTab />

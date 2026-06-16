@@ -1182,6 +1182,11 @@ class ApiClient {
     return this.request(`/ops/clients/${clientId}`, { method: 'DELETE' });
   }
 
+  async opsClientNextOrder(clientId, inFlight = []) {
+    const q = inFlight.length ? `?in_flight=${encodeURIComponent(inFlight.join(','))}` : '';
+    return this.request(`/ops/clients/${clientId}/next-order${q}`);
+  }
+
   async opsSearchBic(query) {
     const qs = query ? `?query=${encodeURIComponent(query)}` : '';
     return this.request(`/ops/bic-reference${qs}`);
@@ -1290,6 +1295,25 @@ class ApiClient {
 
   async opsGetStatement(statementId) {
     return this.request(`/ops/statements/${statementId}`);
+  }
+
+  async opsImportOrders(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(`${this.baseUrl}/ops/orders/import`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Orders import failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async opsOrdersSummary() {
+    return this.request('/ops/orders/summary');
   }
 
   async opsDeleteStatement(statementId) {
