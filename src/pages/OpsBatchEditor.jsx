@@ -35,6 +35,7 @@ const EDIT_FIELDS = [
   'transaction_reference',
   'remark',
   'invoice',
+  'client_id',
   'order_id',
   'include',
 ];
@@ -128,6 +129,11 @@ export default function OpsBatchEditor() {
     queryFn: () => apiClient.opsGetCompanies(),
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ['ops-clients'],
+    queryFn: () => (apiClient.opsGetClients ? apiClient.opsGetClients() : apiClient.request('/ops/clients')),
+  });
+
   const readOnly = batch?.status === 'EXPORTED';
 
   // {currency: account_no} for the batch's selected account-set, used by the
@@ -218,6 +224,19 @@ export default function OpsBatchEditor() {
   );
 
   const setField = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target?.value ?? e }));
+
+  const onPickClient = async (clientId) => {
+    setForm((f) => ({ ...f, client_id: clientId }));
+    if (!clientId) return;
+    const inFlight = (batch?.rows || []).filter((r) => r.id !== editingRow?.id && r.order_id).map((r) => r.order_id);
+    try {
+      const nx = await apiClient.opsClientNextOrder(clientId, inFlight);
+      setForm((f) => ({ ...f, order_id: nx.suggested_ord_ref || nx.prefix }));
+      if (nx.last_ord_ref) toast.message(`Last order for client: ${nx.last_ord_ref}`);
+    } catch (e) {
+      toast.error(e.message);
+    }
+  };
 
   if (!batchId) {
     return (
@@ -493,6 +512,26 @@ export default function OpsBatchEditor() {
                 </div>
                 <Textarea rows={3} value={form.remark || ''} onChange={setField('remark')} />
                 <RemarkPreview remark={form.remark} />
+              </div>
+
+              <div className="space-y-1">
+                <Label>Client</Label>
+                <select
+                  className="w-full border rounded h-9 px-2 text-sm"
+                  value={form.client_id || ''}
+                  onChange={(e) => onPickClient(e.target.value ? Number(e.target.value) : null)}
+                  disabled={readOnly}
+                >
+                  <option value="">—</option>
+                  {clients
+                    .filter((c) => c.number != null)
+                    .sort((a, b) => a.number - b.number)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.number} — {c.name}
+                      </option>
+                    ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
