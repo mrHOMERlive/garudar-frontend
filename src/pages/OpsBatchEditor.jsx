@@ -228,10 +228,14 @@ export default function OpsBatchEditor() {
   const onPickClient = async (clientId) => {
     setForm((f) => ({ ...f, client_id: clientId }));
     if (!clientId) return;
-    const inFlight = (batch?.rows || []).filter((r) => r.id !== editingRow?.id && r.order_id).map((r) => r.order_id);
+    // The ORD goes into Transaction Reference (Order Id stays empty, like the
+    // reference); chain bulk numbering off the other rows' Transaction References.
+    const inFlight = (batch?.rows || [])
+      .filter((r) => r.id !== editingRow?.id && r.transaction_reference)
+      .map((r) => r.transaction_reference);
     try {
       const nx = await apiClient.opsClientNextOrder(clientId, inFlight);
-      setForm((f) => ({ ...f, order_id: nx.suggested_ord_ref || nx.prefix }));
+      setForm((f) => ({ ...f, transaction_reference: nx.suggested_ord_ref || nx.prefix }));
       if (nx.last_ord_ref) toast.message(`Last order for client: ${nx.last_ord_ref}`);
     } catch (e) {
       toast.error(e.message);
