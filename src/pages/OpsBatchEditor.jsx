@@ -510,6 +510,19 @@ export default function OpsBatchEditor() {
               </div>
 
               <div className="space-y-1">
+                <Label>rem_info1 (XLSX column, read-only)</Label>
+                <Input
+                  value={editingRow?.rem_info1 || ''}
+                  readOnly
+                  className="bg-slate-50 text-slate-600 font-mono text-xs"
+                />
+                <p className="text-xs text-slate-400">
+                  Bank payment description that goes into the rem_info1 column. The Remark below (with its “Payment
+                  under …” prefix) is what feeds the TXT.
+                </p>
+              </div>
+
+              <div className="space-y-1">
                 <div className="flex justify-between">
                   <Label>Remark (payment purpose)</Label>
                   <CharCounter value={(form.remark || '').replace(/\s+/g, ' ').trim()} limit={REMARK_LIMIT} />
