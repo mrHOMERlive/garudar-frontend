@@ -399,6 +399,7 @@ function ClientsTab() {
         default_bank_name: '',
         default_bic: '',
         default_account_no: '',
+        default_source_type: '',
         notes: '',
         is_active: true,
       });
@@ -521,6 +522,19 @@ function ClientsTab() {
                   />
                 </div>
               ))}
+              <div className="space-y-1">
+                <Label>Default for source type (auto-fill Client on upload)</Label>
+                <select
+                  className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm"
+                  value={form.default_source_type || ''}
+                  onChange={(e) => setForm((f) => ({ ...f, default_source_type: e.target.value }))}
+                >
+                  <option value="">— none —</option>
+                  <option value="TYPE1_GPB_EXCEL">GPB (Excel)</option>
+                  <option value="TYPE3_SPB_EXCEL">SPB (Excel)</option>
+                  <option value="TYPE2_VTB_PDF">VTB (PDF)</option>
+                </select>
+              </div>
               <div className="flex items-center gap-3">
                 <Switch checked={!!form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
                 <Label>Active</Label>
