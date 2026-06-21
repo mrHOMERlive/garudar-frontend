@@ -286,6 +286,97 @@ function ThresholdsTab() {
   );
 }
 
+// -------------------------------------------------------- Remark rules
+function RemarkReplacementsTab() {
+  const queryClient = useQueryClient();
+  const { data: replacements = [], isLoading } = useQuery({
+    queryKey: ['ops-remark-replacements'],
+    queryFn: () => apiClient.opsGetRemarkReplacements(),
+  });
+  const [items, setItems] = useState(null);
+
+  const rows = items ?? replacements;
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      apiClient.opsSaveRemarkReplacements(
+        rows
+          .filter((r) => (r.pattern || '').trim())
+          .map((r) => ({ pattern: r.pattern, replacement: r.replacement || '' }))
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops-remark-replacements'] });
+      setItems(null);
+      toast.success('Remark rules saved');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  if (isLoading) return <Loader2 className="w-6 h-6 animate-spin text-[#1e3a5f] mx-auto my-8" />;
+
+  const update = (i, field, value) => {
+    setItems(rows.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base text-[#1e3a5f]">
+            Remark rules (expand bank shorthand in the default Remark)
+          </CardTitle>
+          <p className="text-xs text-slate-500 mt-1">
+            Applied top-to-bottom when a new batch is parsed, e.g. <code>PYMT INV.</code> → <code>Invoice</code>.
+            Matching is case-insensitive and whole-word; rem_info1 stays raw.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setItems([...(rows || []), { pattern: '', replacement: '' }])}
+          >
+            <Plus className="w-4 h-4 mr-1" /> Add
+          </Button>
+          <Button size="sm" onClick={() => saveMutation.mutate()} className="bg-[#1e3a5f] hover:bg-[#16304f]">
+            <Save className="w-4 h-4 mr-1" /> Save
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
+          <span className="w-64">Pattern (bank text)</span>
+          <span className="w-64">Replacement</span>
+        </div>
+        {rows.map((row, i) => (
+          <div key={row.id ?? `new-${i}`} className="flex items-center gap-3">
+            <Input
+              className="w-64 font-mono text-xs"
+              value={row.pattern || ''}
+              placeholder="PYMT INV."
+              onChange={(e) => update(i, 'pattern', e.target.value)}
+            />
+            <Input
+              className="w-64 font-mono text-xs"
+              value={row.replacement || ''}
+              placeholder="Invoice"
+              onChange={(e) => update(i, 'replacement', e.target.value)}
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-600"
+              onClick={() => setItems(rows.filter((_, idx) => idx !== i))}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ----------------------------------------------------------------- Clients
 function ClientsTab() {
   const queryClient = useQueryClient();
@@ -622,12 +713,13 @@ function OrdersTab() {
 export default function OpsSettings() {
   return (
     <div className="min-h-screen bg-slate-50">
-      <OpsHeader title="Settings" subtitle="Companies, thresholds, clients, BIC reference" />
+      <OpsHeader title="Settings" subtitle="Companies, thresholds, remark rules, clients, BIC reference" />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="companies">
           <TabsList className="mb-4">
             <TabsTrigger value="companies">Companies & Accounts</TabsTrigger>
             <TabsTrigger value="thresholds">Thresholds</TabsTrigger>
+            <TabsTrigger value="remarks">Remark rules</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="bic">BIC Reference</TabsTrigger>
@@ -637,6 +729,9 @@ export default function OpsSettings() {
           </TabsContent>
           <TabsContent value="thresholds">
             <ThresholdsTab />
+          </TabsContent>
+          <TabsContent value="remarks">
+            <RemarkReplacementsTab />
           </TabsContent>
           <TabsContent value="orders">
             <OrdersTab />

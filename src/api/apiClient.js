@@ -1163,6 +1163,14 @@ class ApiClient {
     return this.request('/ops/thresholds', { method: 'PUT', body: JSON.stringify(items) });
   }
 
+  async opsGetRemarkReplacements() {
+    return this.request('/ops/remark-replacements');
+  }
+
+  async opsSaveRemarkReplacements(items) {
+    return this.request('/ops/remark-replacements', { method: 'PUT', body: JSON.stringify(items) });
+  }
+
   async opsGetClients() {
     return this.request('/ops/clients');
   }
