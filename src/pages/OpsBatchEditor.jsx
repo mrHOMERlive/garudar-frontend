@@ -516,10 +516,6 @@ export default function OpsBatchEditor() {
                   readOnly
                   className="bg-slate-50 text-slate-600 font-mono text-xs"
                 />
-                <p className="text-xs text-slate-400">
-                  Bank payment description that goes into the rem_info1 column. The Remark below (with its “Payment
-                  under …” prefix) is what feeds the TXT.
-                </p>
               </div>
 
               <div className="space-y-1">
