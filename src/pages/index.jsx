@@ -47,6 +47,7 @@ const OpsBatches = lazy(() => import('./OpsBatches'));
 const OpsBatchEditor = lazy(() => import('./OpsBatchEditor'));
 const OpsStatements = lazy(() => import('./OpsStatements'));
 const OpsSettings = lazy(() => import('./OpsSettings'));
+const OpsOrders = lazy(() => import('./OpsOrders'));
 
 const PAGES = {
   CreateOrder: CreateOrder,
@@ -128,6 +129,7 @@ const PAGES = {
   OpsBatchEditor: OpsBatchEditor,
   OpsStatements: OpsStatements,
   OpsSettings: OpsSettings,
+  OpsOrders: OpsOrders,
 };
 
 function _getCurrentPage(url) {
@@ -459,6 +461,14 @@ function PagesContent() {
               element={
                 <RequireOpsAdmin>
                   <OpsSettings />
+                </RequireOpsAdmin>
+              }
+            />
+            <Route
+              path="/opsorders"
+              element={
+                <RequireOpsAdmin>
+                  <OpsOrders />
                 </RequireOpsAdmin>
               }
             />

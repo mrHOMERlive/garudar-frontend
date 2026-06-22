@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Landmark, Settings } from 'lucide-react';
+import { ClipboardList, FileText, Landmark, Settings } from 'lucide-react';
 import OpsHeader from '@/components/ops/OpsHeader';
 
 const modules = [
@@ -12,6 +12,13 @@ const modules = [
     icon: FileText,
     page: 'OpsBatches',
     color: 'bg-[#1e3a5f]',
+  },
+  {
+    title: 'Orders Ledger',
+    description: 'Persisted orders: amount, currency, reward, rate-fixation & execution dates, status',
+    icon: ClipboardList,
+    page: 'OpsOrders',
+    color: 'bg-indigo-600',
   },
   {
     title: 'Bank Statements',
