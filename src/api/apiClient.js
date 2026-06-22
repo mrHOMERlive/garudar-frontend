@@ -1241,6 +1241,23 @@ class ApiClient {
     return response.json();
   }
 
+  async opsAppendBatchFiles(batchId, files) {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    const response = await fetch(`${this.baseUrl}/ops/batches/${batchId}/upload`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Append upload failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
   async opsGetBatch(batchId) {
     return this.request(`/ops/batches/${batchId}`);
   }
@@ -1277,6 +1294,10 @@ class ApiClient {
 
   async opsExportBatchXlsx(batchId, batchName) {
     return this._opsBlobDownload(`/batches/${batchId}/export-xlsx`, `${batchName || batchId}.xlsx`);
+  }
+
+  async opsDownloadBatchTxt(batchId, batchName) {
+    return this._opsBlobDownload(`/batches/${batchId}/download-txt`, `${batchName || batchId}.txt`);
   }
 
   // --- statements ---
@@ -1322,6 +1343,32 @@ class ApiClient {
 
   async opsOrdersSummary() {
     return this.request('/ops/orders/summary');
+  }
+
+  // --- orders ledger (Stage 4) ---
+  async opsGetOrders(filters = {}) {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) {
+      if (v !== undefined && v !== null && v !== '') params.append(k, v);
+    }
+    const qs = params.toString();
+    return this.request(`/ops/orders${qs ? `?${qs}` : ''}`);
+  }
+
+  async opsUpdateOrder(orderId, data) {
+    return this.request(`/ops/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async opsExportOrders(filters = {}) {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) {
+      if (v !== undefined && v !== null && v !== '') params.append(k, v);
+    }
+    const qs = params.toString();
+    return this._opsBlobDownload(`/orders/export-xlsx${qs ? `?${qs}` : ''}`, 'ops_orders_ledger.xlsx');
   }
 
   async opsDeleteStatement(statementId) {

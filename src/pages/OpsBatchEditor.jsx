@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/apiClient';
@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { AlertTriangle, Copy, Download, FileDown, Loader2, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { AlertTriangle, Copy, Download, FileDown, Loader2, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react';
 
 const LINE_LIMIT = 35;
 const REMARK_LIMIT = 120;
@@ -36,7 +36,6 @@ const EDIT_FIELDS = [
   'remark',
   'invoice',
   'client_id',
-  'order_id',
   'include',
 ];
 
@@ -117,6 +116,7 @@ export default function OpsBatchEditor() {
   const [editingRow, setEditingRow] = useState(null);
   const [form, setForm] = useState({});
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   const { data: batch, isLoading } = useQuery({
     queryKey: ['ops-batch', batchId],
@@ -195,6 +195,15 @@ export default function OpsBatchEditor() {
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: ['ops-batch', batchId] });
       setEditingRow(row);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const appendMutation = useMutation({
+    mutationFn: (files) => apiClient.opsAppendBatchFiles(batchId, files),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['ops-batch', batchId] });
+      toast.success(`Files added — ${data?.rows?.length ?? 0} row(s) in the batch now`);
     },
     onError: (error) => toast.error(error.message),
   });
@@ -285,6 +294,33 @@ export default function OpsBatchEditor() {
             </div>
             <div className="flex gap-2 flex-wrap">
               {!readOnly && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length) appendMutation.mutate(files);
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={appendMutation.isPending}
+                  >
+                    {appendMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    Add files
+                  </Button>
+                </>
+              )}
+              {!readOnly && (
                 <Button variant="outline" onClick={() => addRowMutation.mutate()}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add row
@@ -335,7 +371,7 @@ export default function OpsBatchEditor() {
                       <TableHead>SWIFT</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Remark (purpose)</TableHead>
-                      <TableHead>Order Id</TableHead>
+                      <TableHead>Order №</TableHead>
                       <TableHead>Warnings</TableHead>
                       <TableHead>Incl.</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -358,7 +394,7 @@ export default function OpsBatchEditor() {
                         <TableCell className="max-w-64">
                           <div className="text-xs truncate">{row.remark}</div>
                         </TableCell>
-                        <TableCell className="text-xs font-mono">{row.order_id}</TableCell>
+                        <TableCell className="text-xs font-mono">{row.transaction_reference}</TableCell>
                         <TableCell>
                           {row.warnings?.length > 0 && (
                             <div className="flex flex-col gap-1 max-w-52">
@@ -504,8 +540,12 @@ export default function OpsBatchEditor() {
                   <Input value={form.country || ''} onChange={setField('country')} />
                 </div>
                 <div className="space-y-1">
-                  <Label>Transaction reference</Label>
-                  <Input value={form.transaction_reference || ''} onChange={setField('transaction_reference')} />
+                  <Label>Order number</Label>
+                  <Input
+                    value={form.transaction_reference || ''}
+                    onChange={setField('transaction_reference')}
+                    placeholder="ORD/8-12/ — auto-filled from Client"
+                  />
                 </div>
               </div>
 
@@ -547,19 +587,9 @@ export default function OpsBatchEditor() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Order Id</Label>
-                  <Input
-                    value={form.order_id || ''}
-                    onChange={setField('order_id')}
-                    placeholder="e.g. 123-456 -> ID/123-456/"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Invoice</Label>
-                  <Input value={form.invoice || ''} onChange={setField('invoice')} />
-                </div>
+              <div className="space-y-1">
+                <Label>Invoice</Label>
+                <Input value={form.invoice || ''} onChange={setField('invoice')} />
               </div>
 
               <div className="flex items-center gap-3 pt-2">

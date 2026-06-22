@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, FileSpreadsheet, FileText, Loader2, Trash2 } from 'lucide-react';
+import { Copy, Download, FileSpreadsheet, FileText, Loader2, Trash2 } from 'lucide-react';
 
 const SOURCE_TYPES = [
   {
@@ -57,6 +57,7 @@ export default function OpsBatches() {
   // Selected account-set: "<companyCode>␟<alias>"
   const [accountKey, setAccountKey] = useState('');
   const [busyType, setBusyType] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   const { data: companies = [] } = useQuery({
     queryKey: ['ops-companies'],
@@ -126,6 +127,11 @@ export default function OpsBatches() {
 
   const noAccount = !selected;
 
+  const filteredBatches = useMemo(
+    () => (statusFilter === 'ALL' ? batches : batches.filter((b) => b.status === statusFilter)),
+    [batches, statusFilter]
+  );
+
   return (
     <div className="min-h-screen bg-slate-50">
       <OpsHeader title="Payment Orders" subtitle="Drop заявки by bank, edit, export TXT" />
@@ -184,17 +190,36 @@ export default function OpsBatches() {
 
         {/* Batch list */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-[#1e3a5f]">Batches</CardTitle>
+            <div className="flex gap-1">
+              {[
+                { k: 'ALL', label: 'All' },
+                { k: 'DRAFT', label: 'Drafts' },
+                { k: 'EXPORTED', label: 'Export history' },
+              ].map((f) => (
+                <Button
+                  key={f.k}
+                  size="sm"
+                  variant={statusFilter === f.k ? 'default' : 'outline'}
+                  className={statusFilter === f.k ? 'bg-[#1e3a5f] hover:bg-[#16304f]' : ''}
+                  onClick={() => setStatusFilter(f.k)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="flex justify-center py-10">
                 <Loader2 className="w-6 h-6 animate-spin text-[#1e3a5f]" />
               </div>
-            ) : batches.length === 0 ? (
+            ) : filteredBatches.length === 0 ? (
               <p className="text-slate-500 text-sm py-6 text-center">
-                No batches yet — drop files into a bank zone above.
+                {statusFilter === 'EXPORTED'
+                  ? 'No exported batches yet.'
+                  : 'No batches yet — drop files into a bank zone above.'}
               </p>
             ) : (
               <Table>
@@ -211,7 +236,7 @@ export default function OpsBatches() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {batches.map((batch) => (
+                  {filteredBatches.map((batch) => (
                     <TableRow
                       key={batch.id}
                       className="cursor-pointer hover:bg-slate-50"
@@ -238,6 +263,22 @@ export default function OpsBatches() {
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
+                          {batch.status === 'EXPORTED' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              title={`Download exported TXT${
+                                batch.exported_at ? ' · ' + new Date(batch.exported_at).toLocaleString() : ''
+                              }`}
+                              onClick={() =>
+                                apiClient
+                                  .opsDownloadBatchTxt(batch.id, batch.batch_name)
+                                  .catch((e) => toast.error(e.message))
+                              }
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          )}
                           {batch.status === 'EXPORTED' && (
                             <Button
                               size="sm"
