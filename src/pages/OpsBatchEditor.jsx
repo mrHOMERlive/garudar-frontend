@@ -544,8 +544,17 @@ export default function OpsBatchEditor() {
                   <Input
                     value={form.transaction_reference || ''}
                     onChange={setField('transaction_reference')}
-                    placeholder="ORD/8-12/ — auto-filled from Client"
+                    placeholder="напр. I_2187_12 — префикс ORD/.../ проставится сам"
                   />
+                  {(() => {
+                    const num = clients.find((c) => c.id === form.client_id)?.number;
+                    return num != null ? (
+                      <p className="text-xs text-slate-500">
+                        Можно ввести только номер заявки (напр. <span className="font-mono">I_2187_12</span>) — он
+                        станет <span className="font-mono">ORD/{num}-I_2187_12/</span> автоматически.
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </div>
 
