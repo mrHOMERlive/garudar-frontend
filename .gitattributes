@@ -1,0 +1,25 @@
+# Normalise all text files to LF in the working tree on every platform.
+# Prevents CRLF churn when the repo is checked out / edited on Windows and
+# then moved to macOS/Linux (which happened during the Win -> macOS move:
+# 83 files showed up "modified" with nothing but CRLF -> LF changes).
+#
+# `text=auto`  -> Git auto-detects text vs binary
+# `eol=lf`     -> text files always get LF in the working tree
+#
+# Applies retroactively after `git add --renormalize .` is run once.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings (belt-and-suspenders on top of
+# text=auto's auto-detection).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.svg   text eol=lf
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
