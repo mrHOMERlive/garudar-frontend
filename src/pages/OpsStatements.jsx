@@ -392,6 +392,7 @@ function VtbRows({ rows }) {
           <TableHead>Order retrieved</TableHead>
           <TableHead>Order date</TableHead>
           <TableHead>Matched</TableHead>
+          <TableHead>Client</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -411,6 +412,9 @@ function VtbRows({ rows }) {
             <TableCell className="font-mono text-xs">{row.retrieved_order_no || ''}</TableCell>
             <TableCell className="text-sm whitespace-nowrap">{fmtDate(row.retrieved_order_date)}</TableCell>
             <TableCell className="font-mono text-xs">{row.matched_order_id || ''}</TableCell>
+            <TableCell className="text-xs max-w-48 truncate" title={row.client_name || ''}>
+              {row.client_name || ''}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
