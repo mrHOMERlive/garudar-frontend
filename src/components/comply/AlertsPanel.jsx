@@ -37,9 +37,12 @@ export default function AlertsPanel() {
   const handleAction = async (alertId, action) => {
     setActing((p) => ({ ...p, [alertId]: true }));
     try {
-      if (action === 'confirm') await apiClient.confirmAlert(alertId);
-      else await apiClient.dismissAlert(alertId);
-      toast.success(`Alert ${action}ed`);
+      const res = action === 'confirm' ? await apiClient.confirmAlert(alertId) : await apiClient.dismissAlert(alertId);
+      // Показываем пересчитанный риск: решение по алерту теперь влияет на карточку.
+      toast.success(res?.risk_level ? `Alert ${action}ed — risk is now ${res.risk_level}` : `Alert ${action}ed`);
+      if (res && res.ca_synced === false) {
+        toast.warning('Saved locally, but ComplyAdvantage was not updated');
+      }
       load();
     } catch (err) {
       toast.error(err.message || 'Failed');

@@ -81,6 +81,8 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
   const sources = Array.isArray(md.sources) ? md.sources : [];
   const aliases = Array.isArray(md.aliases) ? md.aliases : [];
   const amlTypes = Array.isArray(md.aml_types) ? md.aml_types : [];
+  // Оценка силы совпадения. Отсутствует у алертов, сохранённых до её появления.
+  const matchQuality = md.match_quality || null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -115,6 +117,40 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
                     {t}
                   </Badge>
                 ))}
+              </div>
+            )}
+
+            {/* Качество совпадения: почему этот профиль вообще всплыл.
+                Слабое совпадение НЕ поднимает риск клиента автоматически —
+                оператор должен видеть это до разбора санкционных списков. */}
+            {matchQuality && (
+              <div
+                className={`rounded-lg border p-3 text-sm ${
+                  matchQuality.strong
+                    ? 'bg-slate-50 border-slate-200 text-slate-700'
+                    : 'bg-amber-50 border-amber-200 text-amber-900'
+                }`}
+                data-testid="match-quality-banner"
+              >
+                <div className="font-semibold mb-1">
+                  {matchQuality.strong ? 'Name match confirmed' : 'Weak name match — needs review'}
+                </div>
+                {matchQuality.reason ? <div className="leading-relaxed">{matchQuality.reason}</div> : null}
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
+                  {typeof matchQuality.score === 'number' && (
+                    <span>Name overlap: {Math.round(matchQuality.score * 100)}%</span>
+                  )}
+                  {matchQuality.ca_match_types?.length > 0 && (
+                    <span>ComplyAdvantage: {matchQuality.ca_match_types.join(', ')}</span>
+                  )}
+                  {matchQuality.risk_count > 1 && <span>Profiles in alert: {matchQuality.risk_count}</span>}
+                </div>
+                {!matchQuality.strong && (
+                  <div className="mt-2 text-xs leading-relaxed">
+                    The listings below belong to the matched profile, which may bundle unrelated entities as aliases.
+                    Verify against the registration number before acting.
+                  </div>
+                )}
               </div>
             )}
 

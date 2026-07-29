@@ -3,7 +3,7 @@ import apiClient from '@/api/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Loader2, CheckCircle, FileSearch } from 'lucide-react';
+import { Shield, Loader2, CheckCircle, FileSearch, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import HitDetailsDrawer from './HitDetailsDrawer';
 import { t } from '@/components/utils/language';
@@ -25,6 +25,12 @@ export default function ScreeningForm({ type, onResult }) {
   });
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  // Скрининг компании по одному названию — наименее точный режим: у CA нет
+  // ничего, кроме строки, и совпадение может прийти по родовым словам
+  // ("imp exp co ltd"). Предупреждаем до запуска, а не после разбора алерта.
+  const nameOnlyCompanyScreen =
+    type === 'company' && form.name.trim() && !form.registration_number.trim() && !form.incorporation_country.trim();
 
   const handleScreen = async () => {
     if (!form.name.trim()) {
@@ -116,6 +122,20 @@ export default function ScreeningForm({ type, onResult }) {
           </>
         )}
       </div>
+      {nameOnlyCompanyScreen && (
+        <div
+          className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900"
+          data-testid="name-only-screen-warning"
+        >
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>
+            Screening by name only. Without a registration number or incorporation country the match can be driven by
+            generic words alone (&quot;imp&quot;, &quot;exp&quot;, &quot;co&quot;, &quot;ltd&quot;), and an ambiguous
+            hit cannot be resolved afterwards. Fill either field if you have it.
+          </span>
+        </div>
+      )}
+
       <Button onClick={handleScreen} disabled={loading} className="bg-[#1e3a5f] hover:bg-[#152a45]">
         {loading ? (
           <>

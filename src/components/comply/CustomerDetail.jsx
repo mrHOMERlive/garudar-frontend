@@ -321,9 +321,13 @@ export default function CustomerDetail({ customer, onBack }) {
   const handleAlertAction = async (alertId, action) => {
     setLoad(`alert_${alertId}`, true);
     try {
-      if (action === 'confirm') await apiClient.confirmAlert(alertId);
-      else await apiClient.dismissAlert(alertId);
-      toast.success(`Alert ${action}ed`);
+      const res = action === 'confirm' ? await apiClient.confirmAlert(alertId) : await apiClient.dismissAlert(alertId);
+      // Риск клиента пересчитывается по оставшимся неснятым алертам — говорим
+      // об этом явно, иначе непонятно, изменило ли решение хоть что-то.
+      toast.success(res?.risk_level ? `Alert ${action}ed — risk is now ${res.risk_level}` : `Alert ${action}ed`);
+      if (res && res.ca_synced === false) {
+        toast.warning('Saved locally, but ComplyAdvantage was not updated');
+      }
       loadAll();
     } catch (err) {
       toast.error(err.message || 'Failed');
