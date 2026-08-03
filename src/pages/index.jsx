@@ -23,6 +23,8 @@ const StaffAudit = lazy(() => import('./StaffAudit'));
 const StaffActiveOrders = lazy(() => import('./StaffActiveOrders'));
 const StaffExecutedOrders = lazy(() => import('./StaffExecutedOrders'));
 const StaffPayeerAccounts = lazy(() => import('./StaffPayeerAccounts'));
+
+const StaffUsers = lazy(() => import('./StaffUsers'));
 const GTrans = lazy(() => import('./GTrans'));
 const GTransContactSales = lazy(() => import('./GTransContactSales'));
 const GTransWorkScheme = lazy(() => import('./GTransWorkScheme'));
@@ -86,6 +88,8 @@ const PAGES = {
   StaffExecutedOrders: StaffExecutedOrders,
 
   StaffPayeerAccounts: StaffPayeerAccounts,
+
+  StaffUsers: StaffUsers,
 
   GTrans: GTrans,
 
@@ -326,6 +330,15 @@ function PagesContent() {
               element={
                 <RequireAdmin>
                   <StaffPayeerAccounts />
+                </RequireAdmin>
+              }
+            />
+
+            <Route
+              path="/staffusers"
+              element={
+                <RequireAdmin>
+                  <StaffUsers />
                 </RequireAdmin>
               }
             />

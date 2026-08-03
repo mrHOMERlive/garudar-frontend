@@ -18,6 +18,7 @@ import {
   BarChart2,
   Inbox,
   ScrollText,
+  UserCog,
 } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { t } from '@/components/utils/language';
@@ -36,6 +37,13 @@ const modules = [
     icon: Inbox,
     page: 'StaffLeads',
     color: 'bg-[#f5a623]',
+  },
+  {
+    titleKey: 'mod_users_title',
+    descKey: 'mod_users_desc',
+    icon: UserCog,
+    page: 'StaffUsers',
+    color: 'bg-slate-700',
   },
   {
     titleKey: 'mod_activeOrders_title',
@@ -84,7 +92,7 @@ export default function StaffDashboard() {
   };
 
   const administrationModules = modules.filter((m) =>
-    ['StaffClients', 'StaffLeads', 'StaffPayeerAccounts'].includes(m.page)
+    ['StaffClients', 'StaffLeads', 'StaffUsers', 'StaffPayeerAccounts'].includes(m.page)
   );
   const ordersModules = modules.filter((m) => ['StaffActiveOrders', 'StaffExecutedOrders'].includes(m.page));
   const kycModules = modules.filter((m) => ['StaffKYC', 'StaffKYCQueue'].includes(m.page));
