@@ -117,6 +117,39 @@ export function RequireAdmin({ children }) {
   return children;
 }
 
+// Роли, которым открыт AML-модуль. Должно совпадать с ALLOWED_AML_ROLES
+// в app/deps.py на бэкенде: STAFF убран намеренно.
+const AML_ROLES = ['ADMIN', 'AML_OPERATOR'];
+
+export function RequireAmlAccess({ children }) {
+  const { isAuthenticated, loading, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        navigate('/gtranslogin', { replace: true });
+      } else if (user && !AML_ROLES.includes(user.role)) {
+        navigate('/userdashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, loading, user, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e3a5f]"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || (user && !AML_ROLES.includes(user.role))) {
+    return null;
+  }
+
+  return children;
+}
+
 export function RequireOpsAdmin({ children }) {
   const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();

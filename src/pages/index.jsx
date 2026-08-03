@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { AuthProvider, RequireAuth, RequireAdmin, RequireOpsAdmin } from '@/hooks/useAuth';
+import { AuthProvider, RequireAuth, RequireAdmin, RequireOpsAdmin, RequireAmlAccess } from '@/hooks/useAuth';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import Layout from './Layout.jsx';
 
@@ -402,9 +402,9 @@ function PagesContent() {
             <Route
               path="/staffcomplyadvantage"
               element={
-                <RequireAdmin>
+                <RequireAmlAccess>
                   <StaffComplyAdvantage />
-                </RequireAdmin>
+                </RequireAmlAccess>
               }
             />
             <Route

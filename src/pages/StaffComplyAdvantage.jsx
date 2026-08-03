@@ -19,8 +19,10 @@ import {
   Bell,
   AlertTriangle,
   BarChart2,
+  LogOut,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 import { t } from '@/components/utils/language';
 import RiskBadge from '@/components/comply/RiskBadge';
@@ -385,19 +387,33 @@ export default function StaffComplyAdvantage() {
 }
 
 function PageHeader({ onBack }) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  // AML_OPERATOR живёт только в этом модуле: staff-дашборда у него нет, и
+  // кнопка «Назад» увела бы его на страницу, с которой гард выкинет обратно.
+  // Взамен даём выход из системы — иначе выйти было бы неоткуда.
+  const canGoBack = user?.role === 'ADMIN';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/gtranslogin');
+  };
+
   return (
     <header className="bg-[#1e3a5f] border-b shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white/80 hover:text-white hover:bg-white/10"
-              onClick={onBack}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            {canGoBack && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white/80 hover:text-white hover:bg-white/10"
+                onClick={onBack}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
             <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-lg">
               <img src="/gan.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
@@ -410,6 +426,22 @@ function PageHeader({ onBack }) {
               </div>
               <p className="text-slate-300 text-xs">{t('caHeaderSubtitle')}</p>
             </div>
+          </div>
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-2 text-white">
+                <User className="w-4 h-4" />
+                <span className="text-sm">{user.username}</span>
+              </div>
+            )}
+            <Button
+              onClick={handleLogout}
+              className="bg-white text-[#1e3a5f] hover:bg-slate-100"
+              data-testid="aml-logout"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>

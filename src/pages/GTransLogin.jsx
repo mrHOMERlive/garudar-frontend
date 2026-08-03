@@ -13,11 +13,14 @@ import ObligationsModal from '@/components/ObligationsModal';
 const LOGO_URL = '/gan.png';
 
 // Internal roles skip the client obligations/terms gate.
-const isInternalRole = (role) => role === 'ADMIN' || role === 'OPS_ADMIN';
+const isInternalRole = (role) => role === 'ADMIN' || role === 'OPS_ADMIN' || role === 'AML_OPERATOR';
 
 const dashboardForRole = (role) => {
   if (role === 'ADMIN') return 'StaffDashboard';
   if (role === 'OPS_ADMIN') return 'OpsDashboard';
+  // У роли комплаенса нет своего дашборда: её единственный модуль — скрининг,
+  // туда и отправляем сразу после входа.
+  if (role === 'AML_OPERATOR') return 'StaffComplyAdvantage';
   return 'UserDashboard';
 };
 
