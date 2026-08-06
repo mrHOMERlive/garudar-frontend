@@ -1201,6 +1201,21 @@ export const translations = {
     // Comply (AML)
     complyUnexpectedResponse: 'Unexpected response from server',
     complyRescreenTriggered: 'Re-screen triggered',
+
+    // Refined re-screen: push corrected company identifiers to ComplyAdvantage
+    amlRefineBtn: 'Re-screen with details',
+    amlRefineTitle: 'Re-screen with corrected details',
+    amlRefineDesc:
+      'A plain re-screen sends only the customer id, so ComplyAdvantage keeps matching on the name it already has. Correcting the details here updates its record first, then screens again.',
+    amlRefineNameLabel: 'Legal name',
+    amlRefineRegNumberLabel: 'Registration number',
+    amlRefineCountryLabel: 'Incorporation country (ISO)',
+    amlRefineHint:
+      'This company was screened by name only. A registration number or country lets ComplyAdvantage match on an identifier instead of boilerplate words.',
+    amlRefineClearOverride: 'Also clear the manual risk assessment (otherwise the risk cannot go down)',
+    amlRefineSubmit: 'Update and re-screen',
+    amlRefineNoChanges: 'Nothing changed — edit a field before re-screening',
+    amlRefineDone: 'Details updated, re-screened; earlier matches marked outdated',
     complySelectRiskLevel: 'Select a risk level',
     // PPATK / local sanctions screening (DTTOT, DPPSPM, UN-AQ).
     amlPpatkRescreen: 'Re-screen PPATK',
@@ -2787,6 +2802,21 @@ export const translations = {
     // Comply (AML)
     complyUnexpectedResponse: 'Respons tak terduga dari server',
     complyRescreenTriggered: 'Pemindaian ulang dipicu',
+
+    // Pemindaian ulang dengan data yang diperbarui
+    amlRefineBtn: 'Pindai ulang dengan data',
+    amlRefineTitle: 'Pindai ulang dengan data yang dikoreksi',
+    amlRefineDesc:
+      'Pemindaian ulang biasa hanya mengirim id pelanggan, sehingga ComplyAdvantage tetap mencocokkan nama yang sudah ada. Mengoreksi data di sini akan memperbarui catatan mereka lebih dulu, lalu memindai lagi.',
+    amlRefineNameLabel: 'Nama resmi',
+    amlRefineRegNumberLabel: 'Nomor registrasi',
+    amlRefineCountryLabel: 'Negara pendirian (ISO)',
+    amlRefineHint:
+      'Perusahaan ini dipindai hanya berdasarkan nama. Nomor registrasi atau negara memungkinkan ComplyAdvantage mencocokkan berdasarkan identitas, bukan kata umum.',
+    amlRefineClearOverride: 'Hapus juga penilaian risiko manual (jika tidak, risiko tidak dapat turun)',
+    amlRefineSubmit: 'Perbarui dan pindai ulang',
+    amlRefineNoChanges: 'Tidak ada perubahan — ubah salah satu kolom sebelum memindai ulang',
+    amlRefineDone: 'Data diperbarui, dipindai ulang; kecocokan sebelumnya ditandai usang',
     complySelectRiskLevel: 'Pilih tingkat risiko',
     // PPATK / penyaringan sanksi lokal (DTTOT, DPPSPM, UN-AQ).
     amlPpatkRescreen: 'Periksa ulang PPATK',

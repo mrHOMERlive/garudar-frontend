@@ -5,6 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import RiskBadge from './RiskBadge';
 import HitDetailsDrawer from './HitDetailsDrawer';
 import {
@@ -190,6 +201,14 @@ export default function CustomerDetail({ customer, onBack }) {
   const [riskOverride, setRiskOverride] = useState({ level: '', reason: '' });
   // selectedAlertId — id алерта для HitDetailsDrawer
   const [selectedAlertId, setSelectedAlertId] = useState(null);
+  // Уточняющий рескрин: реквизиты вводятся прямо в диалоге запуска.
+  const [refineOpen, setRefineOpen] = useState(false);
+  const [refineForm, setRefineForm] = useState({
+    name: '',
+    registration_number: '',
+    incorporation_country: '',
+    clear_risk_override: false,
+  });
 
   const setLoad = (key, val) => setLoading((p) => ({ ...p, [key]: val }));
 
@@ -250,11 +269,55 @@ export default function CustomerDetail({ customer, onBack }) {
     loadAll();
   }, [loadAll]);
 
+  // Обычный рескрин — без тела, поведение прежнее.
   const handleRescreen = async () => {
     setLoad('rescreen', true);
     try {
       await apiClient.rescreenCustomer(customer.id);
       toast.success(t('complyRescreenTriggered'));
+      loadAll();
+    } catch (err) {
+      toast.error(err.message || 'Failed');
+    } finally {
+      setLoad('rescreen', false);
+    }
+  };
+
+  const openRefineDialog = () => {
+    setRefineForm({
+      name: data.name || '',
+      registration_number: data.registration_number || '',
+      incorporation_country: data.incorporation_country || '',
+      clear_risk_override: false,
+    });
+    setRefineOpen(true);
+  };
+
+  // Уточняющий рескрин: шлём только то, что реально изменилось, чтобы
+  // не помечать алерты устаревшими без причины.
+  const handleRefinedRescreen = async () => {
+    const payload = {};
+    if (refineForm.name.trim() && refineForm.name.trim() !== (data.name || '')) {
+      payload.name = refineForm.name.trim();
+    }
+    if (refineForm.registration_number.trim() !== (data.registration_number || '')) {
+      payload.registration_number = refineForm.registration_number.trim();
+    }
+    if (refineForm.incorporation_country.trim() !== (data.incorporation_country || '')) {
+      payload.incorporation_country = refineForm.incorporation_country.trim();
+    }
+    if (refineForm.clear_risk_override) payload.clear_risk_override = true;
+
+    if (Object.keys(payload).length === 0) {
+      toast.error(t('amlRefineNoChanges'));
+      return;
+    }
+
+    setLoad('rescreen', true);
+    try {
+      await apiClient.rescreenCustomer(customer.id, payload);
+      toast.success(t('amlRefineDone'));
+      setRefineOpen(false);
       loadAll();
     } catch (err) {
       toast.error(err.message || 'Failed');
@@ -412,6 +475,16 @@ export default function CustomerDetail({ customer, onBack }) {
                       External ID: <span className="font-mono text-slate-700">{data.external_identifier}</span>
                     </div>
                   )}
+                  {data.type === 'company' && (
+                    <div data-testid="customer-identifiers">
+                      Reg. number: <span className="font-mono text-slate-700">{data.registration_number || '—'}</span>
+                      {'  ·  '}Country:{' '}
+                      <span className="font-mono text-slate-700">{data.incorporation_country || '—'}</span>
+                      {!data.registration_number && !data.incorporation_country && (
+                        <span className="ml-2 text-amber-700">screened by name only</span>
+                      )}
+                    </div>
+                  )}
                   {data.created_at && <div>Created: {new Date(data.created_at).toLocaleDateString()}</div>}
                   {data.updated_at && <div>Last updated: {new Date(data.updated_at).toLocaleDateString()}</div>}
                 </div>
@@ -426,6 +499,17 @@ export default function CustomerDetail({ customer, onBack }) {
                 )}{' '}
                 Re-screen
               </Button>
+              {data.type === 'company' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={openRefineDialog}
+                  disabled={loading.rescreen}
+                  data-testid="refine-rescreen-btn"
+                >
+                  <RefreshCw className="w-4 h-4 mr-1" /> {t('amlRefineBtn')}
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
@@ -647,13 +731,17 @@ export default function CustomerDetail({ customer, onBack }) {
                 <Card
                   key={a.id}
                   className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
-                    isPpatk
-                      ? 'border-l-red-700 bg-red-50/40'
-                      : a.status === 'pending'
-                        ? 'border-l-red-500'
-                        : a.status === 'confirmed'
-                          ? 'border-l-amber-500'
-                          : 'border-l-slate-300'
+                    // Устаревшие приглушаем: они найдены по прежним данным
+                    // карточки и на риск клиента больше не влияют.
+                    a.status === 'superseded'
+                      ? 'border-l-slate-300 opacity-60'
+                      : isPpatk
+                        ? 'border-l-red-700 bg-red-50/40'
+                        : a.status === 'pending'
+                          ? 'border-l-red-500'
+                          : a.status === 'confirmed'
+                            ? 'border-l-amber-500'
+                            : 'border-l-slate-300'
                   }`}
                   onClick={() => setSelectedAlertId(a.id)}
                   data-testid={`alert-card-${a.id}`}
@@ -987,6 +1075,84 @@ export default function CustomerDetail({ customer, onBack }) {
           if (!o) setSelectedAlertId(null);
         }}
       />
+
+      <Dialog open={refineOpen} onOpenChange={setRefineOpen}>
+        <DialogContent className="bg-white border-slate-200 text-slate-800">
+          <DialogHeader>
+            <DialogTitle className="text-[#1e3a5f]">{t('amlRefineTitle')}</DialogTitle>
+            <DialogDescription className="text-slate-500">{t('amlRefineDesc')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-600">{t('amlRefineNameLabel')}</Label>
+              <Input
+                value={refineForm.name}
+                onChange={(e) => setRefineForm({ ...refineForm, name: e.target.value })}
+                className="bg-white border-slate-300"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-slate-600">{t('amlRefineRegNumberLabel')}</Label>
+                <Input
+                  placeholder="e.g. 123456789"
+                  value={refineForm.registration_number}
+                  onChange={(e) => setRefineForm({ ...refineForm, registration_number: e.target.value })}
+                  className="bg-white border-slate-300"
+                  data-testid="refine-regnumber-input"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-slate-600">{t('amlRefineCountryLabel')}</Label>
+                <Input
+                  placeholder="e.g. ID, CN, GB"
+                  maxLength={2}
+                  value={refineForm.incorporation_country}
+                  onChange={(e) =>
+                    setRefineForm({ ...refineForm, incorporation_country: e.target.value.toUpperCase() })
+                  }
+                  className="bg-white border-slate-300"
+                />
+              </div>
+            </div>
+
+            {!data.registration_number && !data.incorporation_country && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{t('amlRefineHint')}</span>
+              </div>
+            )}
+
+            {/* Ручная оценка по умолчанию переживает рескрин, поэтому без явного
+                согласия оператора риск не опустится даже на чистом результате.
+                Если ручной оценки нет, снятие на бэкенде — no-op. */}
+            <label className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer">
+              <Checkbox
+                checked={refineForm.clear_risk_override}
+                onCheckedChange={(v) => setRefineForm({ ...refineForm, clear_risk_override: !!v })}
+                data-testid="refine-clear-override"
+              />
+              <span>{t('amlRefineClearOverride')}</span>
+            </label>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRefineOpen(false)} className="border-slate-300 text-slate-600">
+              {t('cancelLabel')}
+            </Button>
+            <Button
+              onClick={handleRefinedRescreen}
+              disabled={loading.rescreen}
+              className="bg-[#1e3a5f] hover:bg-[#152a45]"
+              data-testid="refine-submit-btn"
+            >
+              {loading.rescreen ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              {t('amlRefineSubmit')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

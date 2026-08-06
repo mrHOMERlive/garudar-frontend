@@ -950,8 +950,13 @@ class ApiClient {
     return this.request(`/aml/customers/${id}/screenings`);
   }
 
-  async rescreenCustomer(id) {
-    return this.request(`/aml/customers/${id}/rescreen`, { method: 'POST' });
+  // payload (опционально) — уточнённые реквизиты компании. Без него рескрин
+  // работает как раньше: CA получает только идентификатор карточки.
+  async rescreenCustomer(id, payload) {
+    return this.request(`/aml/customers/${id}/rescreen`, {
+      method: 'POST',
+      ...(payload ? { body: JSON.stringify(payload) } : {}),
+    });
   }
 
   async deleteAmlCustomer(id) {
