@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import RiskBadge from './RiskBadge';
 import HitDetailsDrawer from './HitDetailsDrawer';
+import CountrySelector from '@/components/kyc/CountrySelector';
 import {
   ArrowLeft,
   User,
@@ -201,6 +202,24 @@ export default function CustomerDetail({ customer, onBack }) {
   const [riskOverride, setRiskOverride] = useState({ level: '', reason: '' });
   // selectedAlertId — id алерта для HitDetailsDrawer
   const [selectedAlertId, setSelectedAlertId] = useState(null);
+  // Справочник стран для селектора в диалоге уточнения. Загружаем так же, как
+  // остальные данные этого компонента; на сервере ответ кэшируется на час.
+  const [countries, setCountries] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    apiClient
+      .getCountries()
+      .then((list) => {
+        if (!cancelled) setCountries(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCountries([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Уточняющий рескрин: реквизиты вводятся прямо в диалоге запуска.
   const [refineOpen, setRefineOpen] = useState(false);
   const [refineForm, setRefineForm] = useState({
@@ -1103,16 +1122,17 @@ export default function CustomerDetail({ customer, onBack }) {
                   data-testid="refine-regnumber-input"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-testid="refine-country">
                 <Label className="text-xs text-slate-600">{t('amlRefineCountryLabel')}</Label>
-                <Input
-                  placeholder="e.g. ID, CN, GB"
-                  maxLength={2}
+                {/* Значение остаётся строкой ISO alpha-2, поэтому сравнение
+                    «изменилось ли поле» в handleRefinedRescreen работает как прежде. */}
+                <CountrySelector
                   value={refineForm.incorporation_country}
-                  onChange={(e) =>
-                    setRefineForm({ ...refineForm, incorporation_country: e.target.value.toUpperCase() })
-                  }
-                  className="bg-white border-slate-300"
+                  onChange={(v) => setRefineForm({ ...refineForm, incorporation_country: v })}
+                  countries={countries}
+                  allowClear
+                  allowCustomCode
+                  fullWidthPopover
                 />
               </div>
             </div>

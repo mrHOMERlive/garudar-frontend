@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/api/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Shield, Loader2, CheckCircle, FileSearch, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import HitDetailsDrawer from './HitDetailsDrawer';
+import CountrySelector from '@/components/kyc/CountrySelector';
 import { t } from '@/components/utils/language';
 
 export default function ScreeningForm({ type, onResult }) {
+  // Тот же ключ кэша, что и в остальных формах со странами — список тянется один раз.
+  const { data: countries = [] } = useQuery({
+    queryKey: ['countries'],
+    queryFn: () => apiClient.getCountries(),
+    staleTime: 60 * 60 * 1000,
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   // latestAlertId — id последнего алерта созданного этим скринингом.
@@ -89,13 +97,17 @@ export default function ScreeningForm({ type, onResult }) {
               <Label className="text-xs text-slate-600">Date of Birth</Label>
               <Input type="date" value={form.date_of_birth} onChange={(e) => set('date_of_birth', e.target.value)} />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-600">Nationality (ISO 2-letter)</Label>
-              <Input
-                placeholder="e.g. ID, US, GB"
+            <div className="space-y-1.5" data-testid="screen-nationality">
+              <Label className="text-xs text-slate-600">Nationality</Label>
+              {/* Селектор отдаёт ISO alpha-2 из справочника — на бэкенд уходит
+                  ровно тот же формат, что и при ручном вводе. */}
+              <CountrySelector
                 value={form.nationality}
-                onChange={(e) => set('nationality', e.target.value.toUpperCase())}
-                maxLength={2}
+                onChange={(v) => set('nationality', v)}
+                countries={countries}
+                allowClear
+                allowCustomCode
+                fullWidthPopover
               />
             </div>
           </>
@@ -110,13 +122,15 @@ export default function ScreeningForm({ type, onResult }) {
                 onChange={(e) => set('registration_number', e.target.value)}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-600">Incorporation Country (ISO)</Label>
-              <Input
-                placeholder="e.g. ID, US, GB"
+            <div className="space-y-1.5" data-testid="screen-incorporation-country">
+              <Label className="text-xs text-slate-600">Incorporation Country</Label>
+              <CountrySelector
                 value={form.incorporation_country}
-                onChange={(e) => set('incorporation_country', e.target.value.toUpperCase())}
-                maxLength={2}
+                onChange={(v) => set('incorporation_country', v)}
+                countries={countries}
+                allowClear
+                allowCustomCode
+                fullWidthPopover
               />
             </div>
           </>

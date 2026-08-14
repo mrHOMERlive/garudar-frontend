@@ -265,6 +265,8 @@ export const translations = {
     selectCountry: 'Select country...',
     searchCountry: 'Search country...',
     noCountryFound: 'No country found.',
+    countryUseCode: 'Use code',
+    countryClear: 'Clear selection',
     characters: 'characters',
     // BankDetailsSection
     bankDetails: 'Bank Details',
@@ -1209,7 +1211,7 @@ export const translations = {
       'A plain re-screen sends only the customer id, so ComplyAdvantage keeps matching on the name it already has. Correcting the details here updates its record first, then screens again.',
     amlRefineNameLabel: 'Legal name',
     amlRefineRegNumberLabel: 'Registration number',
-    amlRefineCountryLabel: 'Incorporation country (ISO)',
+    amlRefineCountryLabel: 'Incorporation country',
     amlRefineHint:
       'This company was screened by name only. A registration number or country lets ComplyAdvantage match on an identifier instead of boilerplate words.',
     amlRefineClearOverride: 'Also clear the manual risk assessment (otherwise the risk cannot go down)',
@@ -1848,6 +1850,8 @@ export const translations = {
     selectCountry: 'Pilih negara...',
     searchCountry: 'Cari negara...',
     noCountryFound: 'Negara tidak ditemukan.',
+    countryUseCode: 'Gunakan kode',
+    countryClear: 'Hapus pilihan',
     characters: 'karakter',
     // BankDetailsSection
     bankDetails: 'Detail Bank',
@@ -2810,7 +2814,7 @@ export const translations = {
       'Pemindaian ulang biasa hanya mengirim id pelanggan, sehingga ComplyAdvantage tetap mencocokkan nama yang sudah ada. Mengoreksi data di sini akan memperbarui catatan mereka lebih dulu, lalu memindai lagi.',
     amlRefineNameLabel: 'Nama resmi',
     amlRefineRegNumberLabel: 'Nomor registrasi',
-    amlRefineCountryLabel: 'Negara pendirian (ISO)',
+    amlRefineCountryLabel: 'Negara pendirian',
     amlRefineHint:
       'Perusahaan ini dipindai hanya berdasarkan nama. Nomor registrasi atau negara memungkinkan ComplyAdvantage mencocokkan berdasarkan identitas, bukan kata umum.',
     amlRefineClearOverride: 'Hapus juga penilaian risiko manual (jika tidak, risiko tidak dapat turun)',
