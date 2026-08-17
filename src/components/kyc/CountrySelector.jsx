@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Search, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { t } from '@/components/utils/language';
+import { searchCountries } from './countrySearch';
 
 /**
  * Выбор страны с поиском по названию и по ISO-коду.
@@ -36,13 +37,10 @@ const CountrySelector = ({
   // We need to find the country object based on that.
   const selectedCountry = options.find((c) => (saveName ? c.name === value : c.code === value));
 
-  const filteredCountries = useMemo(() => {
-    if (!searchQuery) return options;
-    const query = searchQuery.toUpperCase();
-    return options.filter(
-      (country) => country.name.toUpperCase().startsWith(query) || country.code.toUpperCase().startsWith(query)
-    );
-  }, [options, searchQuery]);
+  // Поиск вынесен в отдельный модуль: сравнение только с началом строки не
+  // находило многословные названия по значимому слову («korea» не давал ни
+  // одной Кореи). См. countrySearch.js — там же ранжирование и опечатки.
+  const filteredCountries = useMemo(() => searchCountries(options, searchQuery), [options, searchQuery]);
 
   // Код, которого нет в справочнике: предлагаем использовать как есть, чтобы
   // экзотика не блокировала скрининг. Только когда ввод похож на ISO alpha-2.
