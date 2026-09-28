@@ -56,7 +56,7 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
     enabled: !!clientId && open,
   });
 
-  // Локальный PPATK pre-screen (DTTOT/DPPSPM/UN-AQ) — данные созданы при KYC
+  // Локальный pre-screen по санкционным спискам — данные созданы при KYC
   // submit, до того как staff-approve. Показываем staff'у санкционные хиты
   // ДО решения, чтобы он не тратил CA-квоту на компании из списков.
   // Эндпоинт staff-only — клиент его не увидит (tipping-off prevention).
@@ -292,7 +292,7 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
                             <td className="py-1 pr-2 font-mono">
                               {m.similarity != null ? Number(m.similarity).toFixed(2) : '-'}
                             </td>
-                            <td className="py-1 pr-2 font-mono text-slate-400">{m.entry_id}</td>
+                            <td className="py-1 pr-2 font-mono text-slate-400">{m.source_ref || m.entry_id}</td>
                           </tr>
                         ))}
                       </tbody>

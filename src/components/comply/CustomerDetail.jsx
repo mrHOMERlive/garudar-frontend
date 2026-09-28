@@ -360,10 +360,12 @@ export default function CustomerDetail({ customer, onBack }) {
       const r = await apiClient.rescreenClientPpatk(data.client_id);
       const total = r.matches_total ?? 0;
       const newOnes = r.new_alerts ?? 0;
-      toast.success(`PPATK: ${total} matches, ${newOnes} new alerts (account: ${r.account_status || 'active'})`);
+      toast.success(
+        `Sanctions lists: ${total} matches, ${newOnes} new alerts (account: ${r.account_status || 'active'})`
+      );
       loadAll();
     } catch (err) {
-      toast.error(err.message || 'PPATK rescreen failed');
+      toast.error(err.message || 'Sanctions list rescreen failed');
     } finally {
       setLoad('rescreen_ppatk', false);
     }
@@ -743,9 +745,9 @@ export default function CustomerDetail({ customer, onBack }) {
             alerts.map((a) => {
               const isPpatk = a.match_type === 'ppatk_local';
               // Source list: либо из match_details (новые алерты), либо из
-              // title "PPATK match: <SRC>" (fallback на случай старых записей).
-              const ppatkSource =
-                a.match_details?.source_list || (a.title?.startsWith('PPATK match: ') ? a.title.slice(13) : null);
+              // title "<prefix>: <SRC>" (fallback на случай старых записей).
+              const titleSource = a.title?.match(/^(?:PPATK match|Sanctions list match): (.+)$/)?.[1];
+              const ppatkSource = a.match_details?.source_list || titleSource || null;
               return (
                 <Card
                   key={a.id}
@@ -774,7 +776,7 @@ export default function CustomerDetail({ customer, onBack }) {
                               className="bg-red-700 text-white text-xs font-mono"
                               data-testid={`ppatk-badge-${a.id}`}
                             >
-                              PPATK{ppatkSource ? ` • ${ppatkSource}` : ''}
+                              LIST{ppatkSource ? ` • ${ppatkSource}` : ''}
                             </Badge>
                           )}
                           {a.title || a.match_type || `Alert ${a.id}`}

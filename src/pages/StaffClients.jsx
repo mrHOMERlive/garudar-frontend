@@ -565,7 +565,7 @@ export default function StaffClients() {
                             title={t('amlPpatkAlertsCount')}
                             data-testid={`ppatk-chip-${client.client_id}`}
                           >
-                            ⚠ PPATK {client.ppatk_pending_alerts_count}
+                            ⚠ Sanctions {client.ppatk_pending_alerts_count}
                           </Badge>
                         )}
                       </div>
