@@ -6,6 +6,10 @@
  * PEP позиции, Adverse Media, Sources. Для старых alerts (до расширения match_details)
  * многие секции пусты — показываем "No data" fallback.
  *
+ * Если backend прислал `profiles` (профили алерта по отдельности, совпавшие по имени —
+ * первыми), вердикт о совпадении и данные показываются для одного и того же профиля,
+ * а остальные профили — свёрнуто ниже. Иначе — старый склеенный `match_details`.
+ *
  * Использование:
  *   const [alertId, setAlertId] = useState(null);
  *   <HitDetailsDrawer alertId={alertId} open={!!alertId} onOpenChange={(o) => !o && setAlertId(null)} />
@@ -46,6 +50,203 @@ function amlTypeClass(t) {
   return 'bg-slate-500 text-white';
 }
 
+function asList(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function MatchBanner({ match, riskCount }) {
+  if (!match) return null;
+  return (
+    <div
+      className={`rounded-lg border p-3 text-sm ${
+        match.strong ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-amber-50 border-amber-200 text-amber-900'
+      }`}
+      data-testid="match-quality-banner"
+    >
+      <div className="font-semibold mb-1">
+        {match.strong ? 'Name match confirmed' : 'Weak name match — needs review'}
+      </div>
+      {match.reason ? <div className="leading-relaxed">{match.reason}</div> : null}
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
+        {typeof match.score === 'number' && <span>Name overlap: {Math.round(match.score * 100)}%</span>}
+        {match.ca_match_types?.length > 0 && <span>ComplyAdvantage: {match.ca_match_types.join(', ')}</span>}
+        {riskCount > 1 && <span>Profiles in alert: {riskCount}</span>}
+      </div>
+      {!match.strong && (
+        <div className="mt-2 text-xs leading-relaxed">
+          The listings below belong to the matched profile, which may bundle unrelated entities as aliases. Verify
+          against the registration number before acting.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AmlTypeBadges({ types }) {
+  if (!types.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {types.map((t) => (
+        <Badge key={t} className={`text-xs ${amlTypeClass(t)}`}>
+          {t}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+/** Profile / Sanctions / PEP / Adverse media / Sources одного набора данных. */
+function ProfileSections({ profile, aliases, sanctions, pep, adverseMedia, sources }) {
+  return (
+    <>
+      {/* Profile */}
+      <Section icon={User} title="Profile" empty={!profile}>
+        {profile ? (
+          <div className="space-y-1 bg-slate-50 border border-slate-100 rounded p-3">
+            <KV k="Matching name" v={profile.matching_name} />
+            <KV k="Date of birth" v={profile.date_of_birth} />
+            <KV k="Nationality" v={profile.nationality} />
+            {aliases.length > 0 && (
+              <div className="mt-2">
+                <div className="text-xs text-slate-500 mb-1">Aliases</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {aliases.slice(0, 20).map((a, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">
+                      {a.name}
+                      {a.type ? <span className="text-slate-400 ml-1">({a.type})</span> : null}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </Section>
+
+      {/* Sanctions */}
+      <Section icon={Shield} title={`Sanctions (${sanctions.length})`} empty={sanctions.length === 0}>
+        <div className="space-y-2">
+          {sanctions.map((s, i) => (
+            <div key={i} className="border border-red-100 bg-red-50 rounded p-2.5 space-y-0.5">
+              <div className="font-medium text-slate-800 text-sm">{s.name || 'Unknown sanctions list'}</div>
+              <KV k="Regulator" v={s.regulator} />
+              <KV k="Date added" v={s.date_added} />
+              <KV k="Status" v={s.status} />
+              {s.description ? (
+                <div className="text-xs text-slate-600 mt-1 leading-relaxed">{s.description}</div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* PEP */}
+      <Section icon={User} title={`PEP positions (${pep.length})`} empty={pep.length === 0}>
+        <div className="space-y-2">
+          {pep.map((p, i) => (
+            <div key={i} className="border border-orange-100 bg-orange-50 rounded p-2.5 space-y-0.5">
+              <div className="font-medium text-slate-800 text-sm">{p.position || 'Political position'}</div>
+              <KV k="Country" v={p.country} />
+              <KV k="From" v={p.from} />
+              <KV k="To" v={p.to} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Adverse media */}
+      <Section icon={FileText} title={`Adverse media (${adverseMedia.length})`} empty={adverseMedia.length === 0}>
+        <div className="space-y-2">
+          {adverseMedia.map((m, i) => (
+            <div key={i} className="border border-yellow-100 bg-yellow-50 rounded p-2.5 space-y-1">
+              <div className="font-medium text-slate-800 text-sm">{m.title || 'Untitled article'}</div>
+              {m.published ? <div className="text-xs text-slate-500">{m.published}</div> : null}
+              {m.snippet ? <div className="text-xs text-slate-700 leading-relaxed">{m.snippet}</div> : null}
+              {m.url ? (
+                <a
+                  href={m.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline break-all"
+                >
+                  {m.url}
+                </a>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Sources */}
+      <Section icon={Globe} title={`Sources (${sources.length})`} empty={sources.length === 0}>
+        <ul className="list-disc list-inside space-y-1 text-sm text-slate-700">
+          {sources.map((s, i) => (
+            <li key={i}>
+              {s.url ? (
+                <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  {s.name || s.url}
+                </a>
+              ) : (
+                <span>{s.name}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Section>
+    </>
+  );
+}
+
+function sectionsOf(p) {
+  return {
+    profile: p.profile || null,
+    aliases: asList(p.aliases),
+    sanctions: asList(p.sanctions),
+    pep: asList(p.pep),
+    adverseMedia: asList(p.adverse_media),
+    sources: asList(p.sources),
+  };
+}
+
+/** Остальные профили алерта: свёрнуты, у каждого своя оценка совпадения. */
+function OtherProfiles({ profiles }) {
+  if (!profiles.length) return null;
+  return (
+    <section className="space-y-2" data-testid="other-profiles">
+      <h3 className="text-sm font-semibold text-slate-700 border-b border-slate-200 pb-1.5">
+        Other profiles in this alert ({profiles.length})
+      </h3>
+      <p className="text-xs text-slate-500">
+        ComplyAdvantage grouped these profiles into the same alert. Each one is assessed against the screened name
+        separately.
+      </p>
+      {profiles.map((p, i) => {
+        const match = p.match || {};
+        return (
+          <details key={i} className="border border-slate-200 rounded">
+            <summary className="flex items-center gap-2 flex-wrap cursor-pointer px-3 py-2 text-sm text-slate-700">
+              <span className="font-medium">{p.matching_name || p.primary_name || 'Unnamed profile'}</span>
+              <Badge
+                className={`text-[10px] ${match.strong ? 'bg-slate-600 text-white' : 'bg-amber-100 text-amber-900'}`}
+              >
+                {match.strong ? 'Name match' : 'Weak match'}
+              </Badge>
+              {typeof match.score === 'number' && (
+                <span className="text-xs text-slate-500">{Math.round(match.score * 100)}%</span>
+              )}
+              <span className="text-xs text-slate-500">Sanctions: {asList(p.sanctions).length}</span>
+            </summary>
+            <div className="space-y-4 p-3 border-t border-slate-100">
+              {match.reason ? <div className="text-xs text-slate-600">{match.reason}</div> : null}
+              <ProfileSections {...sectionsOf(p)} />
+            </div>
+          </details>
+        );
+      })}
+    </section>
+  );
+}
+
 export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
@@ -74,15 +275,19 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
   }, [alertId, open]);
 
   const md = data?.match_details || {};
-  const profile = md.profile || null;
-  const sanctions = Array.isArray(md.sanctions) ? md.sanctions : [];
-  const pep = Array.isArray(md.pep) ? md.pep : [];
-  const adverseMedia = Array.isArray(md.adverse_media) ? md.adverse_media : [];
-  const sources = Array.isArray(md.sources) ? md.sources : [];
-  const aliases = Array.isArray(md.aliases) ? md.aliases : [];
-  const amlTypes = Array.isArray(md.aml_types) ? md.aml_types : [];
-  // Оценка силы совпадения. Отсутствует у алертов, сохранённых до её появления.
-  const matchQuality = md.match_quality || null;
+  // Профили по отдельности (новый формат). Первый — совпавший по имени: вердикт и
+  // данные в карточке относятся к нему, а не склеены из всех профилей алерта.
+  const profiles = asList(data?.profiles);
+  const top = profiles[0] || null;
+  const main = top
+    ? { ...sectionsOf(top), amlTypes: asList(top.aml_types), match: top.match || null, riskCount: profiles.length }
+    : {
+        ...sectionsOf(md),
+        amlTypes: asList(md.aml_types),
+        // Оценка силы совпадения. Отсутствует у алертов, сохранённых до её появления.
+        match: md.match_quality || null,
+        riskCount: md.match_quality?.risk_count || 0,
+      };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -109,150 +314,23 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
           <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded p-3">{error}</div>
         ) : !data ? null : (
           <div className="space-y-5 mt-4">
-            {/* AML type badges */}
-            {amlTypes.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {amlTypes.map((t) => (
-                  <Badge key={t} className={`text-xs ${amlTypeClass(t)}`}>
-                    {t}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            <AmlTypeBadges types={main.amlTypes} />
 
             {/* Качество совпадения: почему этот профиль вообще всплыл.
                 Слабое совпадение НЕ поднимает риск клиента автоматически —
                 оператор должен видеть это до разбора санкционных списков. */}
-            {matchQuality && (
-              <div
-                className={`rounded-lg border p-3 text-sm ${
-                  matchQuality.strong
-                    ? 'bg-slate-50 border-slate-200 text-slate-700'
-                    : 'bg-amber-50 border-amber-200 text-amber-900'
-                }`}
-                data-testid="match-quality-banner"
-              >
-                <div className="font-semibold mb-1">
-                  {matchQuality.strong ? 'Name match confirmed' : 'Weak name match — needs review'}
-                </div>
-                {matchQuality.reason ? <div className="leading-relaxed">{matchQuality.reason}</div> : null}
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
-                  {typeof matchQuality.score === 'number' && (
-                    <span>Name overlap: {Math.round(matchQuality.score * 100)}%</span>
-                  )}
-                  {matchQuality.ca_match_types?.length > 0 && (
-                    <span>ComplyAdvantage: {matchQuality.ca_match_types.join(', ')}</span>
-                  )}
-                  {matchQuality.risk_count > 1 && <span>Profiles in alert: {matchQuality.risk_count}</span>}
-                </div>
-                {!matchQuality.strong && (
-                  <div className="mt-2 text-xs leading-relaxed">
-                    The listings below belong to the matched profile, which may bundle unrelated entities as aliases.
-                    Verify against the registration number before acting.
-                  </div>
-                )}
-              </div>
-            )}
+            <MatchBanner match={main.match} riskCount={main.riskCount} />
 
-            {/* Profile */}
-            <Section icon={User} title="Profile" empty={!profile}>
-              {profile ? (
-                <div className="space-y-1 bg-slate-50 border border-slate-100 rounded p-3">
-                  <KV k="Matching name" v={profile.matching_name} />
-                  <KV k="Date of birth" v={profile.date_of_birth} />
-                  <KV k="Nationality" v={profile.nationality} />
-                  {aliases.length > 0 && (
-                    <div className="mt-2">
-                      <div className="text-xs text-slate-500 mb-1">Aliases</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {aliases.slice(0, 20).map((a, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {a.name}
-                            {a.type ? <span className="text-slate-400 ml-1">({a.type})</span> : null}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-            </Section>
+            <ProfileSections
+              profile={main.profile}
+              aliases={main.aliases}
+              sanctions={main.sanctions}
+              pep={main.pep}
+              adverseMedia={main.adverseMedia}
+              sources={main.sources}
+            />
 
-            {/* Sanctions */}
-            <Section icon={Shield} title={`Sanctions (${sanctions.length})`} empty={sanctions.length === 0}>
-              <div className="space-y-2">
-                {sanctions.map((s, i) => (
-                  <div key={i} className="border border-red-100 bg-red-50 rounded p-2.5 space-y-0.5">
-                    <div className="font-medium text-slate-800 text-sm">{s.name || 'Unknown sanctions list'}</div>
-                    <KV k="Regulator" v={s.regulator} />
-                    <KV k="Date added" v={s.date_added} />
-                    <KV k="Status" v={s.status} />
-                    {s.description ? (
-                      <div className="text-xs text-slate-600 mt-1 leading-relaxed">{s.description}</div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </Section>
-
-            {/* PEP */}
-            <Section icon={User} title={`PEP positions (${pep.length})`} empty={pep.length === 0}>
-              <div className="space-y-2">
-                {pep.map((p, i) => (
-                  <div key={i} className="border border-orange-100 bg-orange-50 rounded p-2.5 space-y-0.5">
-                    <div className="font-medium text-slate-800 text-sm">{p.position || 'Political position'}</div>
-                    <KV k="Country" v={p.country} />
-                    <KV k="From" v={p.from} />
-                    <KV k="To" v={p.to} />
-                  </div>
-                ))}
-              </div>
-            </Section>
-
-            {/* Adverse media */}
-            <Section icon={FileText} title={`Adverse media (${adverseMedia.length})`} empty={adverseMedia.length === 0}>
-              <div className="space-y-2">
-                {adverseMedia.map((m, i) => (
-                  <div key={i} className="border border-yellow-100 bg-yellow-50 rounded p-2.5 space-y-1">
-                    <div className="font-medium text-slate-800 text-sm">{m.title || 'Untitled article'}</div>
-                    {m.published ? <div className="text-xs text-slate-500">{m.published}</div> : null}
-                    {m.snippet ? <div className="text-xs text-slate-700 leading-relaxed">{m.snippet}</div> : null}
-                    {m.url ? (
-                      <a
-                        href={m.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:underline break-all"
-                      >
-                        {m.url}
-                      </a>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </Section>
-
-            {/* Sources */}
-            <Section icon={Globe} title={`Sources (${sources.length})`} empty={sources.length === 0}>
-              <ul className="list-disc list-inside space-y-1 text-sm text-slate-700">
-                {sources.map((s, i) => (
-                  <li key={i}>
-                    {s.url ? (
-                      <a
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {s.name || s.url}
-                      </a>
-                    ) : (
-                      <span>{s.name}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+            <OtherProfiles profiles={profiles.slice(1)} />
 
             {/* Raw risks toggle (staff-advanced view) */}
             {data.raw_risks ? (
