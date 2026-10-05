@@ -22,6 +22,10 @@ export default function ScreeningForm({ type, onResult }) {
   // latestAlertId — id последнего алерта созданного этим скринингом.
   // Используется для кнопки "View full details" открывающей HitDetailsDrawer.
   const [latestAlertId, setLatestAlertId] = useState(null);
+  // Локальные списки (PPATK, OFAC, UN, EU, UK, SECO, US CSL, FinCEN A7), по
+  // которым нашлось совпадение. CA их не видит: Result может быть NO_PROFILES
+  // при высоком риске.
+  const [localLists, setLocalLists] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -47,22 +51,27 @@ export default function ScreeningForm({ type, onResult }) {
     }
     setLoading(true);
     setLatestAlertId(null);
+    setLocalLists([]);
     try {
       const data = type === 'person' ? await apiClient.screenPerson(form) : await apiClient.screenCompany(form);
       toast.success(t('complyScreeningSubmitted'));
       setResult(data);
       onResult && onResult(data);
 
-      // Если скрининг нашёл профиль — подтянуть первый alert (свежий)
-      // и подготовить его для "View full details".
-      if (data?.id && data?.screening_result === 'HAS_PROFILES') {
+      // Подтянуть алерты: совпадения по локальным спискам показываем в карточке,
+      // а свежий алерт CA готовим для "View full details" (drawer показывает
+      // профили CA, локальные алерты он не рисует).
+      if (data?.id) {
         try {
           const alerts = await apiClient.getCustomerAlerts(data.id);
+          const list = Array.isArray(alerts) ? alerts : [];
+          const local = list.filter((a) => a.match_type === 'ppatk_local');
+          setLocalLists([...new Set(local.map((a) => a.match_details?.source_list).filter(Boolean))]);
           // getCustomerAlerts возвращает desc by created_at → первый = новейший.
-          const first = Array.isArray(alerts) && alerts.length > 0 ? alerts[0] : null;
-          if (first?.id) setLatestAlertId(first.id);
+          const firstCa = list.find((a) => a.match_type !== 'ppatk_local');
+          if (data.screening_result === 'HAS_PROFILES' && firstCa?.id) setLatestAlertId(firstCa.id);
         } catch {
-          // не фатально — кнопка просто не появится
+          // не фатально — кнопка и строка со списками просто не появятся
         }
       }
     } catch (err) {
@@ -186,6 +195,12 @@ export default function ScreeningForm({ type, onResult }) {
             {result.screening_result && (
               <div>
                 Result: <span className="font-semibold text-slate-800">{result.screening_result}</span>
+              </div>
+            )}
+            {localLists.length > 0 && (
+              <div className="flex items-center gap-1.5 text-amber-800" data-testid="local-list-matches">
+                <AlertTriangle className="w-4 h-4" />
+                Sanctions lists match: <span className="font-semibold">{localLists.join(', ')}</span>
               </div>
             )}
           </div>
