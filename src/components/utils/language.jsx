@@ -1219,9 +1219,10 @@ export const translations = {
     amlRefineNoChanges: 'Nothing changed — edit a field before re-screening',
     amlRefineDone: 'Details updated, re-screened; earlier matches marked outdated',
     complySelectRiskLevel: 'Select a risk level',
-    // Local sanctions screening (PPATK, OFAC, UN, EU, UK, SECO, US CSL).
+    // Local sanctions screening (PPATK, OFAC, UN, EU, UK, SECO, US CSL, FinCEN A7).
     amlPpatkRescreen: 'Re-screen sanctions lists',
-    amlPpatkRescreenTooltip: 'Re-check this client against the latest PPATK, OFAC, UN, EU, UK, SECO and US CSL lists',
+    amlPpatkRescreenTooltip:
+      'Re-check this client against the latest PPATK, OFAC, UN, EU, UK, SECO, US CSL and FinCEN A7 lists',
     amlPpatkNoClientLinked: 'No client linked — sanctions list rescreen is only available for KYC-approved clients',
     amlPpatkMatchFound: 'Sanctions list match',
     amlPpatkAlertsCount: 'Sanctions list alerts',
@@ -1229,7 +1230,7 @@ export const translations = {
     amlRedFlag: 'Sanctions Red Flag',
     amlPpatkPending: 'Sanctions check pending',
     amlPpatkError: 'Sanctions check error',
-    drPpatkSectionTitle: 'AML Pre-screen (PPATK / OFAC / UN / EU / UK / SECO / US CSL)',
+    drPpatkSectionTitle: 'AML Pre-screen (PPATK / OFAC / UN / EU / UK / SECO / US CSL / FinCEN A7)',
     drPpatkLoading: 'Loading pre-screen results...',
     drPpatkNotRun: 'Pre-screen has not been run yet for this profile.',
     drPpatkErrorStatus: 'Pre-screen failed during KYC submit. Full AML check will run on approve.',
@@ -2822,9 +2823,10 @@ export const translations = {
     amlRefineNoChanges: 'Tidak ada perubahan — ubah salah satu kolom sebelum memindai ulang',
     amlRefineDone: 'Data diperbarui, dipindai ulang; kecocokan sebelumnya ditandai usang',
     complySelectRiskLevel: 'Pilih tingkat risiko',
-    // Penyaringan sanksi lokal (PPATK, OFAC, UN, EU, UK, SECO, US CSL).
+    // Penyaringan sanksi lokal (PPATK, OFAC, UN, EU, UK, SECO, US CSL, FinCEN A7).
     amlPpatkRescreen: 'Periksa ulang daftar sanksi',
-    amlPpatkRescreenTooltip: 'Periksa ulang klien ini terhadap daftar PPATK, OFAC, UN, EU, UK, SECO dan US CSL terbaru',
+    amlPpatkRescreenTooltip:
+      'Periksa ulang klien ini terhadap daftar PPATK, OFAC, UN, EU, UK, SECO, US CSL dan FinCEN A7 terbaru',
     amlPpatkNoClientLinked:
       'Tidak ada klien terkait — periksa ulang daftar sanksi hanya tersedia untuk klien dengan KYC disetujui',
     amlPpatkMatchFound: 'Cocokan daftar sanksi',
@@ -2833,7 +2835,7 @@ export const translations = {
     amlRedFlag: 'Bendera Merah Sanksi',
     amlPpatkPending: 'Pemeriksaan sanksi menunggu',
     amlPpatkError: 'Kesalahan pemeriksaan sanksi',
-    drPpatkSectionTitle: 'Pra-pemeriksaan AML (PPATK / OFAC / UN / EU / UK / SECO / US CSL)',
+    drPpatkSectionTitle: 'Pra-pemeriksaan AML (PPATK / OFAC / UN / EU / UK / SECO / US CSL / FinCEN A7)',
     drPpatkLoading: 'Memuat hasil pra-pemeriksaan...',
     drPpatkNotRun: 'Pra-pemeriksaan belum dijalankan untuk profil ini.',
     drPpatkErrorStatus:
