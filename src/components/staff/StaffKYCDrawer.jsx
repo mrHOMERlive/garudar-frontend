@@ -288,7 +288,14 @@ export default function StaffKYCDrawer({ open, onClose, kycProfile, client, ubos
                                 {m.source_list}
                               </span>
                             </td>
-                            <td className="py-1 pr-2">{m.matched_name || m.full_name || '-'}</td>
+                            <td className="py-1 pr-2">
+                              {m.matched_name || m.full_name || '-'}
+                              {m.match_quality?.strong === false && (
+                                <span className="ml-1.5 px-1 py-0.5 bg-amber-50 text-amber-800 rounded text-[10px]">
+                                  weak
+                                </span>
+                              )}
+                            </td>
                             <td className="py-1 pr-2 font-mono">
                               {m.similarity != null ? Number(m.similarity).toFixed(2) : '-'}
                             </td>

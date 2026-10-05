@@ -10,6 +10,9 @@
  * первыми), вердикт о совпадении и данные показываются для одного и того же профиля,
  * а остальные профили — свёрнуто ниже. Иначе — старый склеенный `match_details`.
  *
+ * Совпадение по нашим спискам (match_type 'ppatk_local') профилей CA не имеет: вместо них
+ * показываем запись из списка (`list_entry`) и проверку имени по различающим словам.
+ *
  * Использование:
  *   const [alertId, setAlertId] = useState(null);
  *   <HitDetailsDrawer alertId={alertId} open={!!alertId} onOpenChange={(o) => !o && setAlertId(null)} />
@@ -92,6 +95,68 @@ function AmlTypeBadges({ types }) {
         </Badge>
       ))}
     </div>
+  );
+}
+
+/** Вердикт по имени для совпадения с нашим списком. */
+function ListMatchBanner({ match, similarity }) {
+  if (!match && similarity == null) return null;
+  const strong = match ? match.strong : true;
+  return (
+    <div
+      className={`rounded-lg border p-3 text-sm ${
+        strong ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-amber-50 border-amber-200 text-amber-900'
+      }`}
+      data-testid="list-match-banner"
+    >
+      <div className="font-semibold mb-1">{strong ? 'Name match confirmed' : 'Weak name match — needs review'}</div>
+      {match?.reason ? <div className="leading-relaxed">{match.reason}</div> : null}
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
+        {similarity != null && <span>Text similarity: {Number(similarity).toFixed(2)}</span>}
+        {match?.matched_tokens?.length > 0 && <span>Matched words: {match.matched_tokens.join(', ')}</span>}
+      </div>
+      {!strong && (
+        <div className="mt-2 text-xs leading-relaxed">
+          Only generic words (trading, llc, international…) coincide, so this is likely a different entity. Weak matches
+          do not raise the risk above medium. Compare the listed details below before confirming.
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Запись из нашего санкционного списка (вместо профиля ComplyAdvantage). */
+function ListEntrySection({ entry }) {
+  if (!entry.found) {
+    return (
+      <Section icon={Shield} title="List entry">
+        <div className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">
+          This entry is no longer on the current {entry.source_list || ''} list: it was removed at a later sync.
+        </div>
+        <KV k="Listed name" v={entry.full_name} />
+        <KV k="Reference" v={entry.source_ref} />
+      </Section>
+    );
+  }
+  return (
+    <Section icon={Shield} title="List entry">
+      <div data-testid="list-entry" className="space-y-1">
+        <KV k="Listed name" v={entry.full_name} />
+        <KV k="Type" v={entry.entry_type} />
+        <KV k="Aliases" v={asList(entry.aliases)} />
+        <KV k="Address" v={entry.address} />
+        <KV k="Nationality" v={entry.nationality} />
+        <KV k="Date of birth" v={entry.dob} />
+        <KV k="Place of birth" v={entry.pob} />
+        <KV k="Passport" v={entry.passport_no} />
+        <KV k="ID number" v={entry.identity_no} />
+        <KV k="Position" v={entry.job_title} />
+        <KV k="Info" v={entry.additional_info} />
+        <KV k="List" v={entry.source_list} />
+        <KV k="Reference" v={entry.list_label || entry.source_ref} />
+        <KV k="List loaded" v={entry.load_date} />
+      </div>
+    </Section>
   );
 }
 
@@ -275,6 +340,7 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
   }, [alertId, open]);
 
   const md = data?.match_details || {};
+  const listEntry = data?.match_type === 'ppatk_local' ? data?.list_entry : null;
   // Профили по отдельности (новый формат). Первый — совпавший по имени: вердикт и
   // данные в карточке относятся к нему, а не склеены из всех профилей алерта.
   const profiles = asList(data?.profiles);
@@ -312,7 +378,13 @@ export default function HitDetailsDrawer({ alertId, open, onOpenChange }) {
           </div>
         ) : error ? (
           <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded p-3">{error}</div>
-        ) : !data ? null : (
+        ) : !data ? null : listEntry ? (
+          <div className="space-y-5 mt-4">
+            <AmlTypeBadges types={asList(md.aml_types)} />
+            <ListMatchBanner match={listEntry.match} similarity={listEntry.similarity} />
+            <ListEntrySection entry={listEntry} />
+          </div>
+        ) : (
           <div className="space-y-5 mt-4">
             <AmlTypeBadges types={main.amlTypes} />
 

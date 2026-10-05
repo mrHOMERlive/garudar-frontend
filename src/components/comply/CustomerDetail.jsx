@@ -779,6 +779,14 @@ export default function CustomerDetail({ customer, onBack }) {
                               LIST{ppatkSource ? ` • ${ppatkSource}` : ''}
                             </Badge>
                           )}
+                          {isPpatk && a.match_details?.match_quality?.strong === false && (
+                            <Badge
+                              className="bg-amber-100 text-amber-900 border border-amber-300 text-xs"
+                              data-testid={`weak-match-badge-${a.id}`}
+                            >
+                              Weak name match
+                            </Badge>
+                          )}
                           {a.title || a.match_type || `Alert ${a.id}`}
                           <ChevronRight className="w-4 h-4 text-slate-400" />
                         </div>
