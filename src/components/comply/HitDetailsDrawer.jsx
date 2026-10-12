@@ -36,7 +36,7 @@ function Section({ icon: Icon, title, children, empty }) {
 }
 
 function KV({ k, v }) {
-  if (v === null || v === undefined || v === '') return null;
+  if (v === null || v === undefined || v === '' || (Array.isArray(v) && v.length === 0)) return null;
   return (
     <div className="text-xs flex gap-2">
       <span className="text-slate-500 min-w-[110px]">{k}:</span>

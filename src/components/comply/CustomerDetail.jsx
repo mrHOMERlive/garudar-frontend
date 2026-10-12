@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import RiskBadge from './RiskBadge';
 import HitDetailsDrawer from './HitDetailsDrawer';
+import HighRiskCountryNote from './HighRiskCountryNote';
 import CountrySelector from '@/components/kyc/CountrySelector';
 import {
   ArrowLeft,
@@ -500,7 +501,8 @@ export default function CustomerDetail({ customer, onBack }) {
                     <div data-testid="customer-identifiers">
                       Reg. number: <span className="font-mono text-slate-700">{data.registration_number || '—'}</span>
                       {'  ·  '}Country:{' '}
-                      <span className="font-mono text-slate-700">{data.incorporation_country || '—'}</span>
+                      <span className="font-mono text-slate-700">{data.incorporation_country || '—'}</span>{' '}
+                      <HighRiskCountryNote code={data.incorporation_country} compact />
                       {!data.registration_number && !data.incorporation_country && (
                         <span className="ml-2 text-amber-700">screened by name only</span>
                       )}

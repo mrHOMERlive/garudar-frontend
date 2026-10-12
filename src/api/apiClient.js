@@ -925,6 +925,14 @@ class ApiClient {
     return this.request('/aml/screen/company', { method: 'POST', body: JSON.stringify(data) });
   }
 
+  async screenVessel(data) {
+    return this.request('/aml/screen/vessel', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async getHighRiskCountries() {
+    return this.request('/aml/high-risk-countries');
+  }
+
   async searchAmlCustomers(params = {}) {
     const qs = new URLSearchParams(params).toString();
     return this.request(`/aml/customers${qs ? '?' + qs : ''}`);

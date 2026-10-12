@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   BarChart2,
   LogOut,
+  Ship,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,6 +28,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { t } from '@/components/utils/language';
 import RiskBadge from '@/components/comply/RiskBadge';
 import ScreeningForm from '@/components/comply/ScreeningForm';
+import VesselCheckForm from '@/components/comply/VesselCheckForm';
 import CustomerDetail from '@/components/comply/CustomerDetail';
 import MonitoringPanel from '@/components/comply/MonitoringPanel';
 import AlertsPanel from '@/components/comply/AlertsPanel';
@@ -240,6 +242,12 @@ export default function StaffComplyAdvantage() {
             >
               <Building2 className="w-4 h-4 mr-1.5" /> {t('caTabScreenCompany')}
             </TabsTrigger>
+            <TabsTrigger
+              value="screen_vessel"
+              className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white"
+            >
+              <Ship className="w-4 h-4 mr-1.5" /> {t('caTabScreenVessel')}
+            </TabsTrigger>
             <TabsTrigger value="monitoring" className="data-[state=active]:bg-[#1e3a5f] data-[state=active]:text-white">
               <Eye className="w-4 h-4 mr-1.5" /> {t('caTabMonitoring')}
             </TabsTrigger>
@@ -351,6 +359,18 @@ export default function StaffComplyAdvantage() {
               </CardHeader>
               <CardContent>
                 <ScreeningForm type="company" onResult={handleScreeningSuccess} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="screen_vessel">
+            <Card className="border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-[#1e3a5f] text-lg">{t('caScreenAVessel')}</CardTitle>
+                <p className="text-sm text-slate-500">{t('caScreenAVesselDesc')}</p>
+              </CardHeader>
+              <CardContent>
+                <VesselCheckForm />
               </CardContent>
             </Card>
           </TabsContent>

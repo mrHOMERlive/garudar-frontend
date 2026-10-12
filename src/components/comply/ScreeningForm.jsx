@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Shield, Loader2, CheckCircle, FileSearch, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import HitDetailsDrawer from './HitDetailsDrawer';
+import HighRiskCountryNote from './HighRiskCountryNote';
 import CountrySelector from '@/components/kyc/CountrySelector';
 import { t } from '@/components/utils/language';
 
@@ -130,6 +131,7 @@ export default function ScreeningForm({ type, onResult }) {
                 allowCustomCode
                 fullWidthPopover
               />
+              <HighRiskCountryNote code={form.nationality} />
             </div>
           </>
         )}
@@ -153,6 +155,7 @@ export default function ScreeningForm({ type, onResult }) {
                 allowCustomCode
                 fullWidthPopover
               />
+              <HighRiskCountryNote code={form.incorporation_country} />
             </div>
           </>
         )}
@@ -209,6 +212,7 @@ export default function ScreeningForm({ type, onResult }) {
                 Result: <span className="font-semibold text-slate-800">{result.screening_result}</span>
               </div>
             )}
+            <HighRiskCountryNote code={result.incorporation_country || (type === 'person' ? form.nationality : null)} />
             {localLists.length > 0 && (
               <div className="flex items-center gap-1.5 text-amber-800" data-testid="local-list-matches">
                 <AlertTriangle className="w-4 h-4" />
